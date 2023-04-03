@@ -30,6 +30,7 @@ class StandardTextFieldTest {
 
     @Test
     fun enterTooLongString_maxLengthNotExceeded() {
+        val expectedText = "12345"
         composeTestRule.activity.setContent {
             var text by remember {
                 mutableStateOf("")
@@ -39,14 +40,16 @@ class StandardTextFieldTest {
             }
         }
         composeTestRule.onNodeWithTag(Semantics.TestTags.STANDARD_TEXT_FIELD)
-            .performTextInput("123456")
-        val value = composeTestRule.onNodeWithTag(Semantics.TestTags.STANDARD_TEXT_FIELD)
-//        value.assertTextEquals("12345")
-        for ((key, value) in value.fetchSemanticsNode().config) {
-            if (key.name == "EditableText") {
-                assertEquals("12345", value.toString())
-            }
-        }
+            .performTextClearance()
+
+        composeTestRule.onNodeWithTag(Semantics.TestTags.STANDARD_TEXT_FIELD)
+            .performTextInput(expectedText)
+
+        composeTestRule.onNodeWithTag(Semantics.TestTags.STANDARD_TEXT_FIELD)
+            .performTextInput("a")
+
+        composeTestRule.onNodeWithTag(Semantics.TestTags.STANDARD_TEXT_FIELD)
+            .assertTextEquals(expectedText)
     }
 
     @Test

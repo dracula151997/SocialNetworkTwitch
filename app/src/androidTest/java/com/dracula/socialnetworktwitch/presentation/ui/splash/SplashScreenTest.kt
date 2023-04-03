@@ -1,5 +1,6 @@
 package com.dracula.socialnetworktwitch.presentation.ui.splash
 
+import androidx.activity.compose.setContent
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.navigation.NavController
@@ -12,8 +13,8 @@ import com.dracula.socialnetworktwitch.presentation.ui.utils.Screen
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.verify
-import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -27,24 +28,32 @@ class SplashScreenTest {
     @RelaxedMockK
     lateinit var navController: NavController
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     @Before
     fun setup() {
-        MockKAnnotations.init(this)
+        MockKAnnotations.init(this, relaxed = true)
     }
 
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun splashScreen_displaysAndDisappears() = runTest {
-        composeRule.setContent {
+    fun splashScreen_displaysAndDisappears() = testDispatcher.run {
+        composeRule.activity.setContent {
             SocialNetworkTwitchTheme {
-                SplashScreen(navController = navController)
+                SplashScreen(navController = navController, testDispatcher)
             }
         }
         composeRule.onNodeWithContentDescription(Semantics.ContentDescriptions.SPLASH_LOGO)
             .assertExists()
-        advanceTimeBy(Constants.SPLASH_SCREEN_TIME)
+        testDispatcher.scheduler.advanceTimeBy(Constants.SPLASH_SCREEN_DURATION)
         verify {
-            navController.navigate(Screen.LoginScreen.route)
+            navController.navigate(Screen.LoginScreen.route){
+                popUpTo(Screen.SplashScreen.route){
+                    inclusive = true
+                }
+            }
         }
     }
 
