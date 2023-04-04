@@ -2,7 +2,12 @@
     <string name="app_name">SocialNetworkTwitch</string>
     <string name="login">Login</string>
     <string name="password_hint">Password</string>
-    <string name="username_hint">Username/Email</string>
+    <string name="username_or_email_hint">Username/Email</string>
     <string name="dont_have_an_account_yet">Don\'t have an account yet?</string>
-    <string name="sign_up">Sign up</string>
+    <string name="sign_up">Sign up!</string>
+    <string name="email_hint">Email</string>
+    <string name="username_hint">Username</string>
+    <string name="sign_in">Sign in!</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="register">Register</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.dracula.socialnetworktwitch.presentation.ui.login
+package com.dracula.socialnetworktwitch.presentation.ui.register
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,12 +22,11 @@ import com.dracula.socialnetworktwitch.presentation.components.StandardTextField
 import com.dracula.socialnetworktwitch.presentation.ui.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.presentation.ui.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.presentation.ui.theme.SpaceMedium
-import com.dracula.socialnetworktwitch.presentation.ui.utils.Screens
 
 @Composable
-fun LoginScreen(
+fun RegisterScreen(
+    viewModel: RegisterViewModel = hiltViewModel(),
     navController: NavController,
-    viewModel: LoginViewModel = hiltViewModel()
 ) {
     Box(
         modifier = Modifier
@@ -45,46 +44,51 @@ fun LoginScreen(
                 .padding(horizontal = PaddingMedium),
         ) {
             Text(
-                text = stringResource(id = R.string.login),
+                text = stringResource(id = R.string.register),
                 style = MaterialTheme.typography.h1
+            )
+            Spacer(modifier = Modifier.height(SpaceMedium))
+            StandardTextField(
+                text = viewModel.emailText,
+                onValueChanged = viewModel::setEmail,
+                hint = stringResource(
+                    id = R.string.email_hint
+                )
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(
                 text = viewModel.usernameText,
                 onValueChanged = viewModel::setUsername,
                 hint = stringResource(
-                    id = R.string.username_or_email_hint
-                ),
-                error = viewModel.usernameError
+                    id = R.string.username_hint
+                )
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(
                 text = viewModel.passwordText,
                 onValueChanged = viewModel::setPassword,
                 keyboardType = KeyboardType.Password,
-                hint = stringResource(id = R.string.password_hint),
-                showPasswordToggle = viewModel.showPasswordToggle,
-                onPasswordToggleClicked = viewModel::showPasswordToggle,
-                error = viewModel.passwordError
+                hint = stringResource(id = R.string.password_hint)
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             Button(onClick = { /*TODO*/ }, modifier = Modifier.align(Alignment.End)) {
                 Text(
-                    text = stringResource(id = R.string.login),
+                    text = stringResource(id = R.string.register),
                     color = MaterialTheme.colors.onPrimary
                 )
             }
+
         }
         Text(
             text = buildAnnotatedString {
-                append(stringResource(id = R.string.dont_have_an_account_yet))
+                append(stringResource(id = R.string.already_have_an_account))
                 append(" ")
                 withStyle(
                     style = SpanStyle(
                         color = MaterialTheme.colors.primary
                     )
                 ) {
-                    append(stringResource(id = R.string.sign_up))
+                    append(stringResource(id = R.string.sign_in))
                 }
             },
             textAlign = TextAlign.Center,
@@ -92,7 +96,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .clickable { navController.navigate(Screens.RegisterScreen.route) }
+                .clickable { navController.popBackStack() }
         )
 
 

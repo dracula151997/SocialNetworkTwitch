@@ -17,7 +17,7 @@ import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.Constants
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.presentation.ui.Semantics
-import com.dracula.socialnetworktwitch.presentation.ui.utils.Screen
+import com.dracula.socialnetworktwitch.presentation.ui.utils.Screens
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -47,8 +47,8 @@ fun SplashScreen(
                 )
             )
             delay(Constants.SPLASH_SCREEN_DURATION)
-            navController.navigate(Screen.LoginScreen.route) {
-                popUpTo(route = Screen.SplashScreen.route) {
+            navController.navigate(Screens.LoginScreen.route) {
+                popUpTo(route = Screens.SplashScreen.route) {
                     inclusive = true
                 }
             }
