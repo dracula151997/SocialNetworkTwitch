@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.dracula.socialnetworktwitch.presentation.ui.login.LoginScreen
+import com.dracula.socialnetworktwitch.presentation.ui.mainfeed.MainFeedScreen
 import com.dracula.socialnetworktwitch.presentation.ui.register.RegisterScreen
 import com.dracula.socialnetworktwitch.presentation.ui.splash.SplashScreen
 
@@ -23,6 +24,10 @@ fun Navigation(
         }
         composable(route = Screens.RegisterScreen.route){
             RegisterScreen(navController = navController)
+        }
+
+        composable(route = Screens.MainFeedScreen.route){
+            MainFeedScreen(navController = navController)
         }
     }
 }

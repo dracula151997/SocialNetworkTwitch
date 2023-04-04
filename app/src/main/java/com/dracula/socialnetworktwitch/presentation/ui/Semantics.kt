@@ -4,7 +4,13 @@ object Semantics {
     object ContentDescriptions {
         const val SHOW_PASSWORD_ICON: String = "Show password icon"
         const val HIDE_PASSWORD_ICON = "Hide password icon"
-        const val SPLASH_LOGO = "logo"
+        const val SPLASH_LOGO = "Logo"
+        const val UNLIKE = "Unlike"
+        const val LIKE = "Like"
+        const val COMMENT = "Comment"
+        const val SHARE = "Share"
+        const val PROFILE_PICTURE = "Profile Picture"
+        const val POST_PHOTO = "Post Photo"
     }
 
     object TestTags {

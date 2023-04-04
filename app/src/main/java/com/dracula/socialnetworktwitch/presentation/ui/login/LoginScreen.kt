@@ -68,7 +68,10 @@ fun LoginScreen(
                 error = viewModel.passwordError
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
-            Button(onClick = { /*TODO*/ }, modifier = Modifier.align(Alignment.End)) {
+            Button(onClick = {
+                //TODO: Remove this
+                navController.navigate(Screens.MainFeedScreen.route)
+            }, modifier = Modifier.align(Alignment.End)) {
                 Text(
                     text = stringResource(id = R.string.login),
                     color = MaterialTheme.colors.onPrimary
