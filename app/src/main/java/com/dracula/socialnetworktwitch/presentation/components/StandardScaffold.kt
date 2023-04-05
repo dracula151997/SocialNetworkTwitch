@@ -65,13 +65,16 @@ fun StandardScaffold(
                         for (navItem in bottomNavItems) {
                             StandardBottomNavItem(
                                 icon = navItem.icon,
-                                selected = navItem.route == navController.currentDestination?.route,
+                                selected = isNavItemSelected(
+                                    currentRoute = navController.currentDestination?.route.orEmpty(),
+                                    navRoute = navItem.route
+                                ),
                                 contentDescription = navItem.contentDescription,
                                 alertCount = navItem.alertCount,
                                 enabled = navItem.enabled
                             ) {
-                                if (shouldNavigate(navController.currentDestination?.route.orEmpty(), navItem.route)) {
-                                    navController.navigate(navItem.route)
+                                navController.navigate(navItem.route) {
+                                    launchSingleTop = true
                                 }
                             }
                         }
@@ -101,3 +104,5 @@ fun StandardScaffold(
 fun shouldNavigate(currentRoute: String, navRoute: String): Boolean {
     return currentRoute != navRoute
 }
+
+private fun isNavItemSelected(currentRoute: String, navRoute: String) = currentRoute == navRoute
