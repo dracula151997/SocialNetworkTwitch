@@ -1,11 +1,14 @@
 package com.dracula.socialnetworktwitch.presentation.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -20,7 +23,7 @@ import com.dracula.socialnetworktwitch.presentation.ui.theme.PaddingSmall
 
 @Composable
 fun RowScope.StandardBottomNavItem(
-    icon: ImageVector,
+    icon: ImageVector?,
     selected: Boolean,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
@@ -35,29 +38,38 @@ fun RowScope.StandardBottomNavItem(
             "Alert count cannot to be negative"
         }
     }
-    BottomNavigationItem(
-        selected = selected,
+    val lineWidth by animateFloatAsState(
+        targetValue = if (selected) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 200,
+        )
+    )
+
+    BottomNavigationItem(selected = selected,
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
         selectedContentColor = selectedColor,
         unselectedContentColor = unselectedColor,
         icon = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(PaddingSmall)
-                    .drawBehind {
-                        if (selected)
-                            drawLine(
-                                color = selectedColor,
-                                start = Offset(x = size.width / 2 - 15.dp.toPx(), y = size.height),
-                                end = Offset(x = size.width / 2 + 15.dp.toPx(), y = size.height),
-                                strokeWidth = 2.dp.toPx(),
-                                cap = StrokeCap.Round,
-                            )
-                    }
-            ) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(PaddingSmall)
+                .drawBehind {
+                    if (selected) drawLine(
+                        color = selectedColor,
+                        start = Offset(
+                            x = size.width / 2 - lineWidth * 15.dp.toPx(),
+                            y = size.height
+                        ),
+                        end = Offset(
+                            x = size.width / 2 + lineWidth * 15.dp.toPx(),
+                            y = size.height
+                        ),
+                        strokeWidth = 2.dp.toPx(),
+                        cap = StrokeCap.Round,
+                    )
+                }) {
                 BadgedBox(
                     modifier = Modifier.align(Alignment.Center),
                     badge = {
@@ -77,7 +89,7 @@ fun RowScope.StandardBottomNavItem(
                         }
                     },
                 ) {
-                    Icon(
+                    if (icon != null) Icon(
                         imageVector = icon,
                         contentDescription = contentDescription,
                         modifier = Modifier.align(
@@ -87,7 +99,6 @@ fun RowScope.StandardBottomNavItem(
 
                 }
             }
-        }
-    )
+        })
 
 }

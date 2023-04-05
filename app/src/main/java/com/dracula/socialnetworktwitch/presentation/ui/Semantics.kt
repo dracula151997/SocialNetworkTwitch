@@ -15,6 +15,7 @@ object Semantics {
         const val CHAT = "Chat"
         const val ACTIVITY = "Activity"
         const val PROFILE = "Profile"
+        const val MAKE_POST = "Make Post"
     }
 
     object TestTags {

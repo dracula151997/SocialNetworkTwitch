@@ -2,18 +2,15 @@ package com.dracula.socialnetworktwitch.presentation.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.BottomAppBar
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.domain.model.BottomNavItem
 import com.dracula.socialnetworktwitch.presentation.ui.Semantics
@@ -37,6 +34,9 @@ fun StandardScaffold(
             contentDescription = Semantics.ContentDescriptions.CHAT,
         ),
         BottomNavItem(
+            route = ""
+        ),
+        BottomNavItem(
             route = Screens.NotificationsScreen.route,
             icon = Icons.Outlined.Notifications,
             contentDescription = Semantics.ContentDescriptions.ACTIVITY,
@@ -47,8 +47,8 @@ fun StandardScaffold(
             contentDescription = Semantics.ContentDescriptions.PROFILE,
         )
     ),
-    viewModel: StandardScaffoldViewModel = hiltViewModel(),
     showBottomBar: Boolean = true,
+    onFabClicked: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     Scaffold(
@@ -58,27 +58,46 @@ fun StandardScaffold(
                 BottomAppBar(
                     backgroundColor = MaterialTheme.colors.surface,
                     cutoutShape = CircleShape,
-
-                    ) {
+                ) {
                     BottomNavigation(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        for ((index, navItem) in bottomNavItems.withIndex()) {
+                        for (navItem in bottomNavItems) {
                             StandardBottomNavItem(
                                 icon = navItem.icon,
                                 selected = navItem.route == navController.currentDestination?.route,
                                 contentDescription = navItem.contentDescription,
                                 alertCount = navItem.alertCount,
-
-                                ) {
-                                navController.navigate(navItem.route)
+                                enabled = navItem.enabled
+                            ) {
+                                if (shouldNavigate(navController.currentDestination?.route.orEmpty(), navItem.route)) {
+                                    navController.navigate(navItem.route)
+                                }
                             }
                         }
                     }
                 }
-        }
+        },
+        floatingActionButton = {
+            if (showBottomBar)
+                FloatingActionButton(
+                    onClick = onFabClicked,
+                    backgroundColor = MaterialTheme.colors.primary
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = Semantics.ContentDescriptions.MAKE_POST
+                    )
+                }
+        },
+        isFloatingActionButtonDocked = true,
+        floatingActionButtonPosition = FabPosition.Center,
     ) { paddingValues ->
         content()
     }
 
+}
+
+fun shouldNavigate(currentRoute: String, navRoute: String): Boolean {
+    return currentRoute != navRoute
 }

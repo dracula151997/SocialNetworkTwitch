@@ -33,14 +33,17 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     StandardScaffold(
-                        modifier = Modifier.fillMaxSize(),
                         navController = navController,
+                        modifier = Modifier.fillMaxSize(),
                         showBottomBar = navBackStackEntry?.destination?.route in listOf(
                             Screens.ProfileScreen.route,
                             Screens.MainFeedScreen.route,
                             Screens.NotificationsScreen.route,
                             Screens.ChatScreen.route
-                        )
+                        ),
+                        onFabClicked = {
+                            navController.navigate(Screens.CreatePostScreen.route)
+                        }
                     ) {
                         Navigation(navController = navController)
                     }

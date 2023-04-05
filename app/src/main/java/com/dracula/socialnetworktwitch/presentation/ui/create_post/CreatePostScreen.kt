@@ -1,4 +1,4 @@
-package com.dracula.socialnetworktwitch.presentation.ui.chat
+package com.dracula.socialnetworktwitch.presentation.ui.create_post
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,8 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 
 @Composable
-fun ChatScreen(navController: NavController) {
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-        Text(text = "Chat Screen")
+fun CreatePostScreen(navController: NavController) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "Create Post Screen")
     }
 }
