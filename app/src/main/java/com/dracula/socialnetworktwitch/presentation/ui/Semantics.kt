@@ -11,6 +11,10 @@ object Semantics {
         const val SHARE = "Share"
         const val PROFILE_PICTURE = "Profile Picture"
         const val POST_PHOTO = "Post Photo"
+        const val HOME = "Home"
+        const val CHAT = "Chat"
+        const val ACTIVITY = "Activity"
+        const val PROFILE = "Profile"
     }
 
     object TestTags {

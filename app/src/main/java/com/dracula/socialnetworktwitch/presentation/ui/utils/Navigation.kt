@@ -1,19 +1,23 @@
 package com.dracula.socialnetworktwitch.presentation.ui.utils
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import com.dracula.socialnetworktwitch.presentation.ui.chat.ChatScreen
 import com.dracula.socialnetworktwitch.presentation.ui.login.LoginScreen
-import com.dracula.socialnetworktwitch.presentation.ui.mainfeed.MainFeedScreen
+import com.dracula.socialnetworktwitch.presentation.ui.main_feed.MainFeedScreen
 import com.dracula.socialnetworktwitch.presentation.ui.register.RegisterScreen
 import com.dracula.socialnetworktwitch.presentation.ui.splash.SplashScreen
 
 @Composable
 fun Navigation(
+    navController: NavHostController
 ) {
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screens.SplashScreen.route) {
+    NavHost(
+        navController = navController,
+        startDestination = Screens.SplashScreen.route
+    ) {
         composable(route = Screens.SplashScreen.route) {
             SplashScreen(navController)
         }
@@ -22,12 +26,22 @@ fun Navigation(
         ) {
             LoginScreen(navController = navController)
         }
-        composable(route = Screens.RegisterScreen.route){
+        composable(route = Screens.RegisterScreen.route) {
             RegisterScreen(navController = navController)
         }
 
-        composable(route = Screens.MainFeedScreen.route){
+        composable(route = Screens.MainFeedScreen.route) {
             MainFeedScreen(navController = navController)
+        }
+        composable(route = Screens.ChatScreen.route) {
+            ChatScreen(navController = navController)
+        }
+
+        composable(route = Screens.NotificationsScreen.route) {
+
+        }
+        composable(route = Screens.ProfileScreen.route) {
+
         }
     }
 }

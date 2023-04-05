@@ -39,7 +39,7 @@ fun PostListItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(PaddingMedium)
-            .clickable { onPostClicked(post) }
+
     ) {
         Column(
             modifier = Modifier
@@ -48,6 +48,7 @@ fun PostListItem(
                 .clip(MaterialTheme.shapes.medium)
                 .shadow(elevation = 5.dp)
                 .background(MediumGray)
+                .clickable { onPostClicked(post) }
         ) {
             Image(
                 painter = painterResource(id = R.drawable.kermit),
