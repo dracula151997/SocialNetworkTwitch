@@ -6,13 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.presentation.components.StandardScaffold
 import com.dracula.socialnetworktwitch.presentation.ui.theme.SocialNetworkTwitchTheme
 import com.dracula.socialnetworktwitch.presentation.ui.utils.Navigation
@@ -32,15 +32,11 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val route = navBackStackEntry?.destination?.route.orEmpty()
                     StandardScaffold(
                         navController = navController,
                         modifier = Modifier.fillMaxSize(),
-                        showBottomBar = navBackStackEntry?.destination?.route in listOf(
-                            Screens.ProfileScreen.route,
-                            Screens.MainFeedScreen.route,
-                            Screens.NotificationsScreen.route,
-                            Screens.ChatScreen.route
-                        ),
+                        showBottomBar = showBottomBar(route = route),
                         onFabClicked = {
                             navController.navigate(Screens.CreatePostScreen.route)
                         }
@@ -53,15 +49,36 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+private fun showBottomBar(route: String): Boolean {
+    return route in listOf(
+        Screens.ProfileScreen.route,
+        Screens.MainFeedScreen.route,
+        Screens.NotificationsScreen.route,
+        Screens.MessagesScreen.route
+    )
 }
 
-@Preview(showBackground = true)
+private fun showToolbar(route: String): Boolean {
+    return route in listOf(
+        Screens.MainFeedScreen.route
+    )
+}
+
+private fun showBackArrow(route: String): Boolean {
+    return route in listOf(
+        Screens.PostDetailsScreen.route,
+        Screens.MessagesScreen.route,
+        Screens.EditProfileScreen.route,
+        Screens.SearchScreen.route,
+        Screens.CreatePostScreen.route,
+        Screens.PersonListScreen.route
+    )
+}
+
 @Composable
-fun DefaultPreview() {
-    SocialNetworkTwitchTheme {
-        Greeting("Android")
+private fun getScreenTitle(route: String): String {
+    return when (route) {
+        Screens.MainFeedScreen.route, Screens.PostDetailsScreen.route -> stringResource(id = R.string.your_feed)
+        else -> ""
     }
 }

@@ -13,13 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dracula.socialnetworktwitch.Constants
@@ -30,9 +30,8 @@ import com.dracula.socialnetworktwitch.presentation.ui.Semantics
 import com.dracula.socialnetworktwitch.presentation.ui.theme.*
 
 @Composable
-fun PostListItem(
+fun PostItem(
     post: Post,
-    profilePictureSize: Dp = 70.dp,
     onPostClicked: (Post) -> Unit,
 ) {
     Box(
@@ -44,7 +43,7 @@ fun PostListItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(y = profilePictureSize / 2)
+                .offset(y = ProfilePictureSize / 2)
                 .clip(MaterialTheme.shapes.medium)
                 .shadow(elevation = 5.dp)
                 .background(MediumGray)
@@ -104,15 +103,19 @@ fun PostListItem(
                             fontSize = 16.sp,
                         )
                     )
-
-                    Text(
-                        text = stringResource(id = R.string.x_comments, post.commentCount),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.h2.copy(
+                    if (post.commentCount > 0)
+                        Text(
+                            text = pluralStringResource(
+                                id = R.plurals.x_comments,
+                                count = post.commentCount,
+                                post.commentCount
+                            ),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
+                            style = MaterialTheme.typography.h2.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
                         )
-                    )
 
                 }
             }
@@ -123,7 +126,7 @@ fun PostListItem(
             contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
             modifier = Modifier
                 .clip(CircleShape)
-                .size(profilePictureSize)
+                .size(ProfilePictureSize)
                 .align(Alignment.TopCenter)
         )
     }

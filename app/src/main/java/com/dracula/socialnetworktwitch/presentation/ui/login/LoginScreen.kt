@@ -55,7 +55,8 @@ fun LoginScreen(
                 hint = stringResource(
                     id = R.string.username_or_email_hint
                 ),
-                error = viewModel.usernameError
+                error = viewModel.usernameError,
+                keyboardType = KeyboardType.Email
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(

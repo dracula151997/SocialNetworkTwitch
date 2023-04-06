@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.KeyboardType
@@ -28,15 +29,11 @@ fun StandardTextField(
     maxLength: Int = 5,
     keyboardType: KeyboardType = KeyboardType.Text,
     showPasswordToggle: Boolean = false,
+    isPasswordToggleDisplayed: Boolean = keyboardType == KeyboardType.Password,
     onPasswordToggleClicked: (Boolean) -> Unit = {},
     onValueChanged: (newValue: String) -> Unit
 ) {
-    val isPasswordToggleDisplayed by remember {
-        mutableStateOf(
-            keyboardType == KeyboardType.Password
-                    || keyboardType == KeyboardType.NumberPassword
-        )
-    }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         TextField(
             value = text,
@@ -67,7 +64,8 @@ fun StandardTextField(
                             contentDescription = if (showPasswordToggle)
                                 Semantics.ContentDescriptions.HIDE_PASSWORD_ICON
                             else
-                                Semantics.ContentDescriptions.SHOW_PASSWORD_ICON
+                                Semantics.ContentDescriptions.SHOW_PASSWORD_ICON,
+                            tint = Color.White
                         )
                     }
             },

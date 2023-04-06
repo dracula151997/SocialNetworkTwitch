@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.dracula.socialnetworktwitch.domain.model.Post
+import com.dracula.socialnetworktwitch.presentation.ui.post_details.PostDetailsScreen
 import com.dracula.socialnetworktwitch.presentation.ui.chat.ChatScreen
 import com.dracula.socialnetworktwitch.presentation.ui.create_post.CreatePostScreen
 import com.dracula.socialnetworktwitch.presentation.ui.login.LoginScreen
@@ -36,7 +38,7 @@ fun Navigation(
         composable(route = Screens.MainFeedScreen.route) {
             MainFeedScreen(navController = navController)
         }
-        composable(route = Screens.ChatScreen.route) {
+        composable(route = Screens.MessagesScreen.route) {
             ChatScreen(navController = navController)
         }
 
@@ -48,6 +50,10 @@ fun Navigation(
         }
         composable(route = Screens.CreatePostScreen.route) {
             CreatePostScreen(navController = navController)
+        }
+
+        composable(route = Screens.PostDetailsScreen.route){
+            PostDetailsScreen(navController = navController, post = Post.dummy())
         }
     }
 }

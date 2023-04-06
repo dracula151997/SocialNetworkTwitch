@@ -16,6 +16,8 @@ object Semantics {
         const val ACTIVITY = "Activity"
         const val PROFILE = "Profile"
         const val MAKE_POST = "Make Post"
+        const val BACK = "Back"
+        const val FAVORITE = "Favorite"
     }
 
     object TestTags {

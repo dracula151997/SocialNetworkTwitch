@@ -29,7 +29,7 @@ fun StandardScaffold(
             alertCount = 5
         ),
         BottomNavItem(
-            route = Screens.ChatScreen.route,
+            route = Screens.MessagesScreen.route,
             icon = Icons.Outlined.Chat,
             contentDescription = Semantics.ContentDescriptions.CHAT,
         ),

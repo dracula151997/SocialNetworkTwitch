@@ -53,7 +53,8 @@ fun RegisterScreen(
                 onValueChanged = viewModel::setEmail,
                 hint = stringResource(
                     id = R.string.email_hint
-                )
+                ),
+                keyboardType = KeyboardType.Email
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(
