@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.domain.model.Comment
 import com.dracula.socialnetworktwitch.domain.model.Post
+import com.dracula.socialnetworktwitch.presentation.components.BackIcon
 import com.dracula.socialnetworktwitch.presentation.components.PostActionRow
 import com.dracula.socialnetworktwitch.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.presentation.ui.Semantics
@@ -33,8 +34,11 @@ fun PostDetailsScreen(navController: NavController, post: Post) {
     ) {
         StandardTopBar(
             title = stringResource(id = R.string.your_feed),
-            showBackButton = true,
-            onBackClicked = { navController.popBackStack() }
+            navigationIcon = {
+                BackIcon {
+                    navController.popBackStack()
+                }
+            }
         )
         LazyColumn(
             modifier = Modifier

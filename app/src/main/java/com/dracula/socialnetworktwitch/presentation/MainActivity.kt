@@ -3,7 +3,9 @@ package com.dracula.socialnetworktwitch.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -27,21 +29,26 @@ class MainActivity : ComponentActivity() {
             SocialNetworkTwitchTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background
                 ) {
                     val navController = rememberNavController()
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val route = navBackStackEntry?.destination?.route.orEmpty()
-                    StandardScaffold(
-                        navController = navController,
+                    StandardScaffold(navController = navController,
                         modifier = Modifier.fillMaxSize(),
                         showBottomBar = showBottomBar(route = route),
                         onFabClicked = {
                             navController.navigate(Screens.CreatePostScreen.route)
+                        }) { innerPadding ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)
+                        ) {
+                            Navigation(
+                                navController = navController,
+                            )
                         }
-                    ) {
-                        Navigation(navController = navController)
                     }
                 }
             }

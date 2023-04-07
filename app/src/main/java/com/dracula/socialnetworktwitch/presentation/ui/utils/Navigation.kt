@@ -1,6 +1,7 @@
 package com.dracula.socialnetworktwitch.presentation.ui.utils
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -10,14 +11,15 @@ import com.dracula.socialnetworktwitch.presentation.ui.chat.ChatScreen
 import com.dracula.socialnetworktwitch.presentation.ui.create_post.CreatePostScreen
 import com.dracula.socialnetworktwitch.presentation.ui.login.LoginScreen
 import com.dracula.socialnetworktwitch.presentation.ui.main_feed.MainFeedScreen
-import com.dracula.socialnetworktwitch.presentation.ui.notifications.NotificationsScreen
+import com.dracula.socialnetworktwitch.presentation.ui.activity.ActivityScreen
 import com.dracula.socialnetworktwitch.presentation.ui.profile.ProfileScreen
 import com.dracula.socialnetworktwitch.presentation.ui.register.RegisterScreen
 import com.dracula.socialnetworktwitch.presentation.ui.splash.SplashScreen
 
 @Composable
 fun Navigation(
-    navController: NavHostController
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
 ) {
     NavHost(
         navController = navController,
@@ -43,7 +45,7 @@ fun Navigation(
         }
 
         composable(route = Screens.NotificationsScreen.route) {
-            NotificationsScreen(navController = navController)
+            ActivityScreen(navController = navController)
         }
         composable(route = Screens.ProfileScreen.route) {
             ProfileScreen(navController = navController)

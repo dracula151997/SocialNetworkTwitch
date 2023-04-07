@@ -1,5 +1,6 @@
 package com.dracula.socialnetworktwitch.presentation.components
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -49,7 +50,7 @@ fun StandardScaffold(
     ),
     showBottomBar: Boolean = true,
     onFabClicked: () -> Unit = {},
-    content: @Composable () -> Unit
+    content: @Composable (contentPadding: PaddingValues) -> Unit
 ) {
     Scaffold(
         modifier = modifier,
@@ -96,7 +97,7 @@ fun StandardScaffold(
         isFloatingActionButtonDocked = true,
         floatingActionButtonPosition = FabPosition.Center,
     ) { paddingValues ->
-        content()
+        content(paddingValues)
     }
 
 }

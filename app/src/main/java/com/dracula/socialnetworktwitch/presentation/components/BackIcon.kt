@@ -15,7 +15,7 @@ fun BackIcon(
     modifier: Modifier = Modifier,
     icon: ImageVector = Icons.Outlined.ArrowBack,
     contentDescription: String? = null,
-    tint: Color = MaterialTheme.colors.onSurface,
+    tint: Color = MaterialTheme.colors.onBackground,
     onBackClicked: () -> Unit,
 ) {
     IconButton(onClick = onBackClicked, modifier = modifier) {

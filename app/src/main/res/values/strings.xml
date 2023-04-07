@@ -12,6 +12,9 @@
     <string name="register">Register</string>
     <string name="read_more">Read more</string>
     <string name="liked_by_x_people">Liked by %d people</string>
-<!--    <string name="x_comments">%d comments</string>-->
     <string name="your_feed">Your Feed</string>
+    <string name="your_activity">Your Activity</string>
+    <string name="commented_on">commented on</string>
+    <string name="liked">liked</string>
+    <string name="on_your_post">on your post</string>
 </resources>
