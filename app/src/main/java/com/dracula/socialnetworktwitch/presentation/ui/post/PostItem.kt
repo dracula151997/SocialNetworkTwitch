@@ -32,10 +32,12 @@ import com.dracula.socialnetworktwitch.presentation.ui.theme.*
 @Composable
 fun PostItem(
     post: Post,
+    modifier: Modifier = Modifier,
+    showProfileImage: Boolean = true,
     onPostClicked: (Post) -> Unit,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(PaddingMedium)
 
@@ -43,7 +45,7 @@ fun PostItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(y = ProfilePictureSize / 2)
+                .offset(y = if (showProfileImage) ProfilePictureSizeMedium / 2 else 0.dp)
                 .clip(MaterialTheme.shapes.medium)
                 .shadow(elevation = 5.dp)
                 .background(MediumGray)
@@ -121,13 +123,14 @@ fun PostItem(
             }
         }
 
-        Image(
-            painter = painterResource(id = R.drawable.philipp),
-            contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
-            modifier = Modifier
-                .clip(CircleShape)
-                .size(ProfilePictureSize)
-                .align(Alignment.TopCenter)
-        )
+        if (showProfileImage)
+            Image(
+                painter = painterResource(id = R.drawable.philipp),
+                contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(ProfilePictureSizeMedium)
+                    .align(Alignment.TopCenter)
+            )
     }
 }

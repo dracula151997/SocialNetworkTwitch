@@ -8,4 +8,14 @@
         <item quantity="one">Liked by %d person</item>
         <item quantity="other">Liked by %d people</item>
     </plurals>
+    <plurals name="x_post">
+        <item quantity="one">Post</item>
+        <item quantity="other">Posts</item>
+    </plurals>
+
+    <plurals name="x_follower">
+        <item quantity="one">Follower</item>
+        <item quantity="other">Followers</item>
+    </plurals>
+
 </resources>

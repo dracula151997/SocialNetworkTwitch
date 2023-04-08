@@ -56,7 +56,7 @@ fun PostDetailsScreen(navController: NavController, post: Post) {
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .offset(y = ProfilePictureSize / 2)
+                                .offset(y = ProfilePictureSizeMedium / 2)
                                 .background(MediumGray)
 
                         ) {
@@ -108,7 +108,7 @@ fun PostDetailsScreen(navController: NavController, post: Post) {
                             contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .size(ProfilePictureSize)
+                                .size(ProfilePictureSizeMedium)
                                 .align(Alignment.TopCenter)
                         )
 

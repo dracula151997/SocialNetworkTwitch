@@ -18,6 +18,12 @@ object Semantics {
         const val MAKE_POST = "Make Post"
         const val BACK = "Back"
         const val FAVORITE = "Favorite"
+        const val MORE = "More"
+        const val CHANNEL_ART = "Channel art"
+        const val JAVASCRIPT = "Java Script"
+        const val CSHARP = "C#"
+        const val KOTLIN = "Kotlin"
+        const val EDIT_PROFILE_ICON = "Edit Profile"
     }
 
     object TestTags {

@@ -17,4 +17,9 @@
     <string name="commented_on">commented on</string>
     <string name="liked">liked</string>
     <string name="on_your_post">on your post</string>
+    <string name="your_profile">Your Profile</string>
+    <string name="following">Following</string>
+    <string name="followers">Follower</string>
+    <string name="follow">Follow</string>
+    <string name="unfollow">Unfollow</string>
 </resources>
