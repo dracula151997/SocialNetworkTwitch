@@ -25,6 +25,7 @@ fun MainFeedScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         StandardTopBar(
             title = stringResource(id = R.string.your_feed),
+            navController = navController
         ) {
             IconButton(onClick = { navController.navigate(Screens.SearchScreen.route) }) {
                 Icon(

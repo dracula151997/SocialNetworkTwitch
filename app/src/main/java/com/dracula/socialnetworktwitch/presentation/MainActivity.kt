@@ -65,27 +65,3 @@ private fun showBottomBar(route: String): Boolean {
     )
 }
 
-private fun showToolbar(route: String): Boolean {
-    return route in listOf(
-        Screens.MainFeedScreen.route
-    )
-}
-
-private fun showBackArrow(route: String): Boolean {
-    return route in listOf(
-        Screens.PostDetailsScreen.route,
-        Screens.MessagesScreen.route,
-        Screens.EditProfileScreen.route,
-        Screens.SearchScreen.route,
-        Screens.CreatePostScreen.route,
-        Screens.PersonListScreen.route
-    )
-}
-
-@Composable
-private fun getScreenTitle(route: String): String {
-    return when (route) {
-        Screens.MainFeedScreen.route, Screens.PostDetailsScreen.route -> stringResource(id = R.string.your_feed)
-        else -> ""
-    }
-}

@@ -6,8 +6,10 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.More
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
@@ -33,11 +35,13 @@ fun ProfileScreen(navController: NavController) {
                     },
                 ) {
                     Icon(
-                        imageVector = Icons.Default.More,
+                        imageVector = Icons.Default.MoreVert,
                         contentDescription = Semantics.ContentDescriptions.MORE,
+                        tint = Color.White
                     )
                 }
             },
+            navController = navController
         )
         LazyColumn(
             Modifier.fillMaxSize()

@@ -6,14 +6,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.dracula.socialnetworktwitch.domain.model.Post
-import com.dracula.socialnetworktwitch.presentation.ui.post_details.PostDetailsScreen
+import com.dracula.socialnetworktwitch.presentation.ui.activity.ActivityScreen
 import com.dracula.socialnetworktwitch.presentation.ui.chat.ChatScreen
 import com.dracula.socialnetworktwitch.presentation.ui.create_post.CreatePostScreen
+import com.dracula.socialnetworktwitch.presentation.ui.edit_profile.EditProfileScreen
 import com.dracula.socialnetworktwitch.presentation.ui.login.LoginScreen
 import com.dracula.socialnetworktwitch.presentation.ui.main_feed.MainFeedScreen
-import com.dracula.socialnetworktwitch.presentation.ui.activity.ActivityScreen
+import com.dracula.socialnetworktwitch.presentation.ui.post_details.PostDetailsScreen
 import com.dracula.socialnetworktwitch.presentation.ui.profile.ProfileScreen
 import com.dracula.socialnetworktwitch.presentation.ui.register.RegisterScreen
+import com.dracula.socialnetworktwitch.presentation.ui.search.SearchScreen
 import com.dracula.socialnetworktwitch.presentation.ui.splash.SplashScreen
 
 @Composable
@@ -23,7 +25,8 @@ fun Navigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screens.SplashScreen.route
+        startDestination = Screens.SplashScreen.route,
+        modifier = modifier
     ) {
         composable(route = Screens.SplashScreen.route) {
             SplashScreen(navController)
@@ -54,8 +57,16 @@ fun Navigation(
             CreatePostScreen(navController = navController)
         }
 
-        composable(route = Screens.PostDetailsScreen.route){
+        composable(route = Screens.PostDetailsScreen.route) {
             PostDetailsScreen(navController = navController, post = Post.dummy())
+        }
+
+        composable(route = Screens.EditProfileScreen.route) {
+            EditProfileScreen(navController = navController)
+        }
+
+        composable(route = Screens.SearchScreen.route) {
+            SearchScreen(navController = navController)
         }
     }
 }

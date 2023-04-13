@@ -2,17 +2,16 @@ package com.dracula.socialnetworktwitch.presentation.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.KeyboardType
@@ -20,6 +19,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import com.dracula.socialnetworktwitch.presentation.ui.Semantics
+import com.dracula.socialnetworktwitch.presentation.ui.theme.IconSizeMedium
 
 @Composable
 fun StandardTextField(
@@ -27,20 +27,23 @@ fun StandardTextField(
     hint: String = "",
     error: String = "",
     maxLength: Int = 5,
+    maxLines: Int = Int.MAX_VALUE,
+    singleLine: Boolean = true,
     keyboardType: KeyboardType = KeyboardType.Text,
     showPasswordToggle: Boolean = false,
+    leadingIcon: ImageVector? = null,
     isPasswordToggleDisplayed: Boolean = keyboardType == KeyboardType.Password,
     onPasswordToggleClicked: (Boolean) -> Unit = {},
     onValueChanged: (newValue: String) -> Unit
 ) {
-
     Column(modifier = Modifier.fillMaxWidth()) {
         TextField(
             value = text,
             onValueChange = {
                 onValueChanged(it.take(maxLength))
             },
-            singleLine = true,
+            singleLine = singleLine,
+            maxLines = maxLines,
             visualTransformation =
             if (isPasswordToggleDisplayed && !showPasswordToggle)
                 PasswordVisualTransformation()
@@ -75,6 +78,17 @@ fun StandardTextField(
                     style = MaterialTheme.typography.body1
                 )
             },
+            leadingIcon = if (leadingIcon != null) {
+                val icon: @Composable () -> Unit = {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colors.onBackground,
+                        modifier = Modifier.size(IconSizeMedium)
+                    )
+                }
+                icon
+            } else null,
             isError = error.isNotEmpty(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyboardType

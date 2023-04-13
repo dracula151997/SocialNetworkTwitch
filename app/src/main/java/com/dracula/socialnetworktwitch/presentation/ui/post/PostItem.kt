@@ -39,7 +39,7 @@ fun PostItem(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(PaddingMedium)
+            .padding(horizontal = PaddingMedium, vertical = PaddingSmall)
 
     ) {
         Column(

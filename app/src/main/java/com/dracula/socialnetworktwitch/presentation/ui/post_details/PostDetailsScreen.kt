@@ -34,11 +34,8 @@ fun PostDetailsScreen(navController: NavController, post: Post) {
     ) {
         StandardTopBar(
             title = stringResource(id = R.string.your_feed),
-            navigationIcon = {
-                BackIcon {
-                    navController.popBackStack()
-                }
-            }
+            showBackButton = true,
+            navController = navController
         )
         LazyColumn(
             modifier = Modifier

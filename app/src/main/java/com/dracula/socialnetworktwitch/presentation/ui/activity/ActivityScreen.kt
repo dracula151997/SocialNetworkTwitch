@@ -29,7 +29,10 @@ fun ActivityScreen(
     viewModel: ActivityViewModel = hiltViewModel(),
 ) {
     Column(modifier = Modifier) {
-        StandardTopBar(title = stringResource(id = R.string.your_activity))
+        StandardTopBar(
+            title = stringResource(id = R.string.your_activity),
+            navController = navController
+        )
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = PaddingMedium, vertical = PaddingMedium),

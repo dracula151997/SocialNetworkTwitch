@@ -13,3 +13,6 @@ val ProfilePictureSizeMedium = 70.dp
 val ProfilePictureSizeSmall = 35.dp
 val StandardElevation = 5.dp
 val BannerIconSize = 30.dp
+val IconSizeSmall = 15.dp
+val IconSizeMedium = 25.dp
+val IconSizeLarge = 35.dp

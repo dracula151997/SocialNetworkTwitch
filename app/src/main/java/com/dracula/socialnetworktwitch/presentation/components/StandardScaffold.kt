@@ -27,7 +27,6 @@ fun StandardScaffold(
             route = Screens.MainFeedScreen.route,
             icon = Icons.Outlined.Home,
             contentDescription = Semantics.ContentDescriptions.HOME,
-            alertCount = 5
         ),
         BottomNavItem(
             route = Screens.MessagesScreen.route,
