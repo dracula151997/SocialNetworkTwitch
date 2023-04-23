@@ -1,7 +1,8 @@
 package com.dracula.socialnetworktwitch.feature_profile.edit_profile
 
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,38 +13,38 @@ class EditProfileViewModel @Inject constructor(
 
 ) : ViewModel() {
 
-    private val _usernameState = mutableStateOf(StandardTextFieldState())
-    val usernameState: State<StandardTextFieldState> = _usernameState
+    var usernameState by mutableStateOf(StandardTextFieldState())
+        private set
 
-    private val _githubTextFieldState = mutableStateOf(StandardTextFieldState())
-    val githubTextFieldState: State<StandardTextFieldState> = _githubTextFieldState
+    var githubTextFieldState by mutableStateOf(StandardTextFieldState())
+        private set
 
-    private val _instagramTextFieldState = mutableStateOf(StandardTextFieldState())
-    val instagramTextFieldState: State<StandardTextFieldState> = _instagramTextFieldState
+    var instagramTextFieldState by mutableStateOf(StandardTextFieldState())
+        private set
 
-    private val _linkedInTextFieldState = mutableStateOf(StandardTextFieldState())
-    val linkedInTextFieldState: State<StandardTextFieldState> = _linkedInTextFieldState
+    var linkedInTextFieldState by mutableStateOf(StandardTextFieldState())
+        private set
 
-    private val _bioState = mutableStateOf(StandardTextFieldState())
-    val bioState: State<StandardTextFieldState> = _bioState
+    var bioState by mutableStateOf(StandardTextFieldState())
+        private set
 
-    fun setBioState(state: StandardTextFieldState) {
-        _bioState.value = state
+    fun setBio(state: StandardTextFieldState) {
+        bioState = state
     }
 
-    fun setLinkedInTextFieldState(state: StandardTextFieldState) {
-        _linkedInTextFieldState.value = state
+    fun setLinkedIn(state: StandardTextFieldState) {
+        linkedInTextFieldState = state
     }
 
-    fun setInstagramTextFieldState(state: StandardTextFieldState) {
-        _instagramTextFieldState.value = state
+    fun setInstagram(state: StandardTextFieldState) {
+        instagramTextFieldState = state
     }
 
-    fun setGithubTextFieldState(state: StandardTextFieldState) {
-        _githubTextFieldState.value = state
+    fun setGithub(state: StandardTextFieldState) {
+       githubTextFieldState = state
     }
 
-    fun setUsernameState(state: StandardTextFieldState) {
-        _usernameState.value = state
+    fun setUsername(state: StandardTextFieldState) {
+        usernameState = state
     }
 }

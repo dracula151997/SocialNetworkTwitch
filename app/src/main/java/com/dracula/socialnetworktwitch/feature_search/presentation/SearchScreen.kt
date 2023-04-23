@@ -1,6 +1,11 @@
 package com.dracula.socialnetworktwitch.feature_search.presentation
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -13,7 +18,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
-import com.dracula.socialnetworktwitch.feature_profile.domain.User
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTextField
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.components.UserProfileItem
@@ -22,6 +26,8 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
+import com.dracula.socialnetworktwitch.feature_profile.domain.User
+import com.dracula.socialnetworktwitch.feature_search.utils.SearchError
 
 @Composable
 fun SearchScreen(
@@ -42,12 +48,15 @@ fun SearchScreen(
                 .padding(PaddingLarge)
         ) {
             StandardTextField(
-                text = viewModel.searchState.value.text,
+                text = viewModel.searchState.text,
                 hint = stringResource(id = R.string.search),
-                error = viewModel.searchState.value.error,
+                error = when (viewModel.searchState.error) {
+                    SearchError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                    else -> ""
+                },
                 leadingIcon = Icons.Default.Search,
                 onValueChanged = {
-                    viewModel.setSearchState(
+                    viewModel.setSearch(
                         StandardTextFieldState(text = it)
                     )
                 }

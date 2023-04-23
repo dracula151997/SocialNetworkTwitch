@@ -2,7 +2,14 @@ package com.dracula.socialnetworktwitch.feature_profile.edit_profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -38,9 +45,9 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
-import com.dracula.socialnetworktwitch.feature_profile.edit_profile.components.Chip
-import com.dracula.socialnetworktwitch.presentation.ui.theme.*
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
+import com.dracula.socialnetworktwitch.feature_profile.edit_profile.components.Chip
+import com.dracula.socialnetworktwitch.feature_profile.utils.EditProfileError
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import kotlin.random.Random
@@ -85,12 +92,15 @@ fun EditProfileScreen(
             ) {
                 Spacer(modifier = Modifier.height(PaddingMedium))
                 StandardTextField(
-                    text = viewModel.usernameState.value.text,
+                    text = viewModel.usernameState.text,
                     hint = stringResource(id = R.string.username),
-                    error = viewModel.usernameState.value.error,
+                    error = when (viewModel.usernameState.error) {
+                        EditProfileError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                        else -> ""
+                    },
                     leadingIcon = Icons.Default.Person,
                     onValueChanged = {
-                        viewModel.setUsernameState(
+                        viewModel.setUsername(
                             StandardTextFieldState(
                                 text = it
                             )
@@ -100,50 +110,74 @@ fun EditProfileScreen(
                     )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    text = viewModel.githubTextFieldState.value.text,
+                    text = viewModel.githubTextFieldState.text,
                     hint = stringResource(id = R.string.github_profile_url),
-                    error = viewModel.githubTextFieldState.value.error,
+                    error = when (viewModel.githubTextFieldState.error) {
+                        EditProfileError.FieldEmpty -> stringResource(
+                            id = R.string.error_this_field_cannot_be_empty
+                        )
+
+                        else -> ""
+                    },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_github_icon_1),
                     onValueChanged = {
-                        viewModel.setGithubTextFieldState(
+                        viewModel.setGithub(
                             StandardTextFieldState(text = it)
                         )
                     },
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    text = viewModel.instagramTextFieldState.value.text,
+                    text = viewModel.instagramTextFieldState.text,
                     hint = stringResource(id = R.string.instagram_profile_url),
-                    error = viewModel.instagramTextFieldState.value.error,
+                    error = when (viewModel.instagramTextFieldState.error) {
+                        EditProfileError.FieldEmpty -> stringResource(
+                            id = R.string.error_this_field_cannot_be_empty
+                        )
+
+                        else -> ""
+                    },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_instagram_glyph_1),
                     onValueChanged = {
-                        viewModel.setInstagramTextFieldState(
+                        viewModel.setInstagram(
                             StandardTextFieldState(text = it)
                         )
                     },
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    text = viewModel.linkedInTextFieldState.value.text,
+                    text = viewModel.linkedInTextFieldState.text,
                     hint = stringResource(id = R.string.linked_in_profile_url),
-                    error = viewModel.linkedInTextFieldState.value.error,
+                    error = when (viewModel.linkedInTextFieldState.error) {
+                        EditProfileError.FieldEmpty -> stringResource(
+                            id = R.string.error_this_field_cannot_be_empty
+
+                        )
+
+                        else -> ""
+                    },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_linkedin_icon_1),
                     onValueChanged = {
-                        viewModel.setLinkedInTextFieldState(
+                        viewModel.setLinkedIn(
                             StandardTextFieldState(text = it)
                         )
                     },
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    text = viewModel.bioState.value.text,
+                    text = viewModel.bioState.text,
                     hint = stringResource(id = R.string.your_bio),
-                    error = viewModel.bioState.value.error,
+                    error = when (viewModel.bioState.error) {
+                        EditProfileError.FieldEmpty -> stringResource(
+                            id = R.string.error_this_field_cannot_be_empty
+                        )
+                        else -> ""
+                    },
                     singleLine = false,
                     maxLines = 3,
                     leadingIcon = Icons.Default.Description,
                     onValueChanged = {
-                        viewModel.setBioState(
+                        viewModel.setBio(
                             StandardTextFieldState(text = it)
                         )
                     },

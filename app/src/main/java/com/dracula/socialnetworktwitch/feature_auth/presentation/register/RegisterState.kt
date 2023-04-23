@@ -1,5 +1,7 @@
 package com.dracula.socialnetworktwitch.feature_auth.presentation.register
 
+import com.dracula.socialnetworktwitch.core.utils.Error
+
 data class RegisterState(
     val usernameText: String = "",
     val usernameError: UsernameError? = null,

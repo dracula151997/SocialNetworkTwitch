@@ -5,7 +5,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.PasswordTextFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
 import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.feature_auth.domain.AuthError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
 import javax.inject.Inject
@@ -13,34 +16,37 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterViewModel @Inject constructor() : ViewModel() {
 
-    var state by mutableStateOf(RegisterState())
+    var usernameState by mutableStateOf(StandardTextFieldState())
         private set
+    var emailState by mutableStateOf(StandardTextFieldState())
+        private set
+    var passwordState by mutableStateOf(PasswordTextFieldState())
+        private set
+
 
     fun onEvent(event: RegisterEvent) {
         Timber.d("current event: $event")
         when (event) {
-            is RegisterEvent.OnEmailEntered -> state = state.copy(
-                emailText = event.value,
-                emailError = null
+            is RegisterEvent.OnEmailEntered -> emailState = emailState.copy(
+                text = event.value,
             )
 
-            is RegisterEvent.OnPasswordEntered -> state = state.copy(
-                passwordText = event.value,
-                passwordError = null
+            is RegisterEvent.OnPasswordEntered -> passwordState = passwordState.copy(
+                text = event.value,
             )
 
-            is RegisterEvent.OnUserNameEntered -> state = state.copy(
-                usernameText = event.value,
-                usernameError = null
+            is RegisterEvent.OnUserNameEntered -> usernameState = usernameState.copy(
+                text = event.value
             )
 
-            RegisterEvent.TogglePasswordVisibility -> state = state.copy(
-                isPasswordToggleVisible = !state.isPasswordToggleVisible
+            RegisterEvent.TogglePasswordVisibility -> passwordState = passwordState.copy(
+                isPasswordToggleVisible = !passwordState.isPasswordToggleVisible
             )
+
             RegisterEvent.Register -> {
-                validateUsername(state.usernameText)
-                validateEmail(state.emailText)
-                validatePassword(state.passwordText)
+                validateUsername(usernameState.text)
+                validateEmail(emailState.text)
+                validatePassword(passwordState.text)
             }
 
         }
@@ -49,14 +55,14 @@ class RegisterViewModel @Inject constructor() : ViewModel() {
     private fun validateUsername(username: String) {
         val trimmedUsername = username.trim()
         if (trimmedUsername.isBlank()) {
-            state = state.copy(
-                usernameError = RegisterState.UsernameError.FieldEmpty
+            usernameState = usernameState.copy(
+                error = AuthError.FieldEmpty
             )
             return
         }
         if (trimmedUsername.length < Constants.MIN_USERNAME_LENGTH) {
-            state = state.copy(
-                usernameError = RegisterState.UsernameError.InputTooShort
+            usernameState = usernameState.copy(
+                error = AuthError.InputTooShort
             )
             return
         }
@@ -66,14 +72,14 @@ class RegisterViewModel @Inject constructor() : ViewModel() {
     private fun validateEmail(email: String) {
         val trimmedEmail = email.trim()
         if (trimmedEmail.isBlank()) {
-            state = state.copy(
-                emailError = RegisterState.EmailError.FieldEmpty
+            emailState = emailState.copy(
+                error = AuthError.FieldEmpty
             )
             return
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            state = state.copy(
-                emailError = RegisterState.EmailError.InvalidEmail
+            emailState = emailState.copy(
+                error = AuthError.InvalidEmail
             )
             return
         }
@@ -82,22 +88,22 @@ class RegisterViewModel @Inject constructor() : ViewModel() {
 
     private fun validatePassword(password: String) {
         if (password.isBlank()) {
-            state = state.copy(
-                passwordError = RegisterState.PasswordError.FieldEmpty
+            passwordState = passwordState.copy(
+                error = AuthError.FieldEmpty
             )
             return
         }
         if (password.length < Constants.MIN_USERNAME_LENGTH) {
-            state = state.copy(
-                passwordError = RegisterState.PasswordError.InputTooShort
+            passwordState = passwordState.copy(
+                error = AuthError.InputTooShort
             )
             return
         }
         val capitalLetterInPassword = password.any { it.isUpperCase() }
         val numberInPassword = password.any { it.isDigit() }
         if (!capitalLetterInPassword || !numberInPassword) {
-            state = state.copy(
-                passwordError = RegisterState.PasswordError.InvalidPassword
+            passwordState = passwordState.copy(
+                error = AuthError.InvalidPassword
             )
             return
         }

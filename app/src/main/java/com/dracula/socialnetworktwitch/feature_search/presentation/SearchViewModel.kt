@@ -1,7 +1,8 @@
 package com.dracula.socialnetworktwitch.feature_search.presentation
 
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,10 +13,10 @@ class SearchViewModel @Inject constructor(
 
 ) : ViewModel() {
 
-    private val _searchState = mutableStateOf(StandardTextFieldState())
-    val searchState: State<StandardTextFieldState> = _searchState
+    var searchState by mutableStateOf(StandardTextFieldState())
+        private set
 
-    fun setSearchState(state: StandardTextFieldState) {
-        _searchState.value = state
+    fun setSearch(state: StandardTextFieldState) {
+        searchState = state
     }
 }
