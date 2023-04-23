@@ -4,10 +4,11 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.navigation.NavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.dracula.socialnetworktwitch.Constants
-import com.dracula.socialnetworktwitch.presentation.ui.Semantics
-import com.dracula.socialnetworktwitch.presentation.ui.theme.SocialNetworkTwitchTheme
-import com.dracula.socialnetworktwitch.presentation.ui.utils.Screens
+import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashScreen
+import com.dracula.socialnetworktwitch.core.presentation.Semantics
+import com.dracula.socialnetworktwitch.core.presentation.theme.SocialNetworkTwitchTheme
+import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.verify

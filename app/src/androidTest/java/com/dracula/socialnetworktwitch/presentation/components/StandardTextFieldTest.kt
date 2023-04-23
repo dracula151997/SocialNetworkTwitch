@@ -10,8 +10,9 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.dracula.socialnetworktwitch.presentation.MainActivity
-import com.dracula.socialnetworktwitch.presentation.ui.Semantics
+import com.dracula.socialnetworktwitch.core.presentation.components.StandardTextField
+import com.dracula.socialnetworktwitch.core.presentation.MainActivity
+import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
