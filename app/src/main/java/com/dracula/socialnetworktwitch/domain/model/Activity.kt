@@ -10,6 +10,10 @@ data class Activity(
     val actionType: ActivityAction,
     val timestamp: String,
 ) {
+
+    val isFollowedYouActionType
+        get() = actionType == ActivityAction.FollowedYou
+
     companion object {
         fun dummy(): Activity {
             return Activity(

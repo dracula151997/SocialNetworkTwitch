@@ -1,6 +1,11 @@
 package com.dracula.socialnetworktwitch.presentation.ui.activity
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
@@ -69,9 +74,12 @@ fun ActivityItem(
                 ActivityAction.CommentOnPost -> stringResource(
                     id = R.string.commented_on
                 )
+
                 ActivityAction.LikedPost -> stringResource(
                     id = R.string.liked,
                 )
+
+                ActivityAction.FollowedYou -> stringResource(id = R.string.followed_you)
             }
             Text(
                 text = buildAnnotatedString {
@@ -84,9 +92,10 @@ fun ActivityItem(
                     append(" $activityText ")
                     withStyle(boldStyle) {
                         append(
-                            stringResource(
-                                id = R.string.on_your_post,
-                            ),
+                            if (!activity.isFollowedYouActionType)
+                                stringResource(
+                                    id = R.string.on_your_post,
+                                ) else "",
                         )
                     }
                 },

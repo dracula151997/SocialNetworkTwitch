@@ -1,32 +1,107 @@
 package com.dracula.socialnetworktwitch.presentation.ui.register
 
+import android.util.Patterns
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.dracula.socialnetworktwitch.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor() : ViewModel() {
-    var emailText by mutableStateOf("")
+
+    var state by mutableStateOf(RegisterState())
         private set
 
-    var usernameText by mutableStateOf("")
-        private set
+    fun onEvent(event: RegisterEvent) {
+        Timber.d("current event: $event")
+        when (event) {
+            is RegisterEvent.OnEmailEntered -> state = state.copy(
+                emailText = event.value,
+                emailError = null
+            )
 
-    var passwordText by mutableStateOf("")
-        private set
+            is RegisterEvent.OnPasswordEntered -> state = state.copy(
+                passwordText = event.value,
+                passwordError = null
+            )
 
-    fun setEmail(email: String){
-        emailText = email
+            is RegisterEvent.OnUserNameEntered -> state = state.copy(
+                usernameText = event.value,
+                usernameError = null
+            )
+
+            RegisterEvent.TogglePasswordVisibility -> state = state.copy(
+                isPasswordToggleVisible = !state.isPasswordToggleVisible
+            )
+            RegisterEvent.Register -> {
+                validateUsername(state.usernameText)
+                validateEmail(state.emailText)
+                validatePassword(state.passwordText)
+            }
+
+        }
     }
 
-    fun setUsername(username: String) {
-        usernameText = username
+    private fun validateUsername(username: String) {
+        val trimmedUsername = username.trim()
+        if (trimmedUsername.isBlank()) {
+            state = state.copy(
+                usernameError = RegisterState.UsernameError.FieldEmpty
+            )
+            return
+        }
+        if (trimmedUsername.length < Constants.MIN_USERNAME_LENGTH) {
+            state = state.copy(
+                usernameError = RegisterState.UsernameError.InputTooShort
+            )
+            return
+        }
+
     }
 
-    fun setPassword(password: String) {
-        passwordText = password
+    private fun validateEmail(email: String) {
+        val trimmedEmail = email.trim()
+        if (trimmedEmail.isBlank()) {
+            state = state.copy(
+                emailError = RegisterState.EmailError.FieldEmpty
+            )
+            return
+        }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            state = state.copy(
+                emailError = RegisterState.EmailError.InvalidEmail
+            )
+            return
+        }
+
+    }
+
+    private fun validatePassword(password: String) {
+        if (password.isBlank()) {
+            state = state.copy(
+                passwordError = RegisterState.PasswordError.FieldEmpty
+            )
+            return
+        }
+        if (password.length < Constants.MIN_USERNAME_LENGTH) {
+            state = state.copy(
+                passwordError = RegisterState.PasswordError.InputTooShort
+            )
+            return
+        }
+        val capitalLetterInPassword = password.any { it.isUpperCase() }
+        val numberInPassword = password.any { it.isDigit() }
+        if (!capitalLetterInPassword || !numberInPassword) {
+            state = state.copy(
+                passwordError = RegisterState.PasswordError.InvalidPassword
+            )
+            return
+        }
+
+
     }
 }

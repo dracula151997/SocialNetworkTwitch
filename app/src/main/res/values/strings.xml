@@ -32,4 +32,9 @@
     <string name="select_top_3_skills">Select top 3 skills</string>
     <string name="search_for_users">Search for users</string>
     <string name="search">Search</string>
+    <string name="followed_you">Followed you</string>
+    <string name="error_this_field_cannot_be_empty">Thie field cannot be empty</string>
+    <string name="error_not_a_valid_email">This is not a valid email</string>
+    <string name="input_to_short">The minimum length is %d</string>
+    <string name="error_invalid_password">The password needs to contain at least one uppercase and one number</string>
 </resources>
