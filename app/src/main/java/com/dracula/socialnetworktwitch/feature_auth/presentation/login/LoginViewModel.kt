@@ -9,6 +9,7 @@ import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.PasswordTextFieldState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
+import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.isNotNull
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
@@ -71,7 +72,7 @@ class LoginViewModel @Inject constructor(
                 is ApiResult.Error -> {
                     state = LoginState.error(result.uiText.orUnknownError())
                     _eventFlow.emit(
-                        UiEvent.SnackbarEvent(message = result.uiText.orUnknownError())
+                        UiEvent.SnackbarEvent(result.uiText.orUnknownError())
                     )
                 }
 
@@ -85,10 +86,5 @@ class LoginViewModel @Inject constructor(
     private fun clearTextFieldErrorStates() {
         emailState = emailState.copy(error = null)
         passwordState = passwordState.copy(error = null)
-    }
-
-    sealed interface UiEvent {
-        data class SnackbarEvent(val message: UiText) : UiEvent
-        data class Navigate(val route: String) : UiEvent
     }
 }

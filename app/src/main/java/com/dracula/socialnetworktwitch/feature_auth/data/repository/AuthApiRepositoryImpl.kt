@@ -5,8 +5,8 @@ import androidx.core.content.edit
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
-import com.dracula.socialnetworktwitch.core.utils.SimpleApiResult
 import com.dracula.socialnetworktwitch.core.utils.UiText
+import com.dracula.socialnetworktwitch.core.utils.UnitResult
 import com.dracula.socialnetworktwitch.feature_auth.data.dto.request.CreateAccountRequest
 import com.dracula.socialnetworktwitch.feature_auth.data.dto.request.LoginRequest
 import com.dracula.socialnetworktwitch.feature_auth.data.remote.AuthApi
@@ -22,7 +22,7 @@ class AuthApiRepositoryImpl(
         email: String,
         username: String,
         password: String
-    ): SimpleApiResult {
+    ): UnitResult {
         val request = CreateAccountRequest(email, username, password)
         return try {
             val response = api.register(request)
@@ -43,7 +43,7 @@ class AuthApiRepositoryImpl(
         }
     }
 
-    override suspend fun login(email: String, password: String): SimpleApiResult {
+    override suspend fun login(email: String, password: String): UnitResult {
         val request = LoginRequest(email, password)
         return try {
             val response = api.login(request)
@@ -66,6 +66,22 @@ class AuthApiRepositoryImpl(
             )
 
         } catch (e: HttpException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
+        }
+    }
+
+    override suspend fun authenticate(): UnitResult {
+        return try {
+            api.authenticate()
+            ApiResult.Success(Unit)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            ApiResult.Error(
+                UiText.StringResource(R.string.error_couldnot_reach_server)
+            )
+
+        } catch (e: HttpException) {
+            e.printStackTrace()
             ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
         }
     }

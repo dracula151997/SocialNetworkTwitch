@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import com.dracula.socialnetworktwitch.feature_auth.data.remote.AuthApi
 import com.dracula.socialnetworktwitch.feature_auth.data.repository.AuthApiRepositoryImpl
 import com.dracula.socialnetworktwitch.feature_auth.domain.repository.AuthRepository
+import com.dracula.socialnetworktwitch.feature_auth.domain.use_case.AuthenticateUseCase
 import com.dracula.socialnetworktwitch.feature_auth.domain.use_case.LoginUseCase
 import com.dracula.socialnetworktwitch.feature_auth.domain.use_case.RegisterUseCase
 import dagger.Module
@@ -44,6 +45,12 @@ object AuthModule {
     @Singleton
     fun provideRegisterUseCase(repository: AuthRepository): RegisterUseCase {
         return RegisterUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthenticateUseCase(repository: AuthRepository): AuthenticateUseCase {
+        return AuthenticateUseCase(repository)
     }
 
     @Provides

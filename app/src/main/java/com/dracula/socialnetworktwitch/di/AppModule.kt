@@ -3,6 +3,7 @@ package com.dracula.socialnetworktwitch.di
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import com.dracula.socialnetworktwitch.core.data.remote.interceptors.HeadersInterceptor
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import dagger.Module
 import dagger.Provides
@@ -19,8 +20,18 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideHeadersInterceptor(token: String): HeadersInterceptor {
+        return HeadersInterceptor(token)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+        headersInterceptor: HeadersInterceptor
+    ): OkHttpClient {
         return OkHttpClient.Builder()
+            .addInterceptor(headersInterceptor)
             .addInterceptor(loggingInterceptor)
             .build()
     }
@@ -37,6 +48,12 @@ object AppModule {
     @Singleton
     fun provideSharedPreference(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCE_NAME, MODE_PRIVATE)
+    }
+
+    @Provides
+    @Singleton
+    fun provideJwtToken(sharedPreferences: SharedPreferences): String {
+        return sharedPreferences.getString(Constants.SharedPrefKeys.KEY_TOKEN, "").orEmpty()
     }
 
 }

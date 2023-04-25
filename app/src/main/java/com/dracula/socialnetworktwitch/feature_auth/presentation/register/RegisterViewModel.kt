@@ -9,6 +9,7 @@ import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.PasswordTextFieldState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
+import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_auth.domain.use_case.RegisterUseCase
@@ -112,9 +113,5 @@ class RegisterViewModel @Inject constructor(
         usernameState = usernameState.copy(error = null)
         emailState = emailState.copy(error = null)
         passwordState = passwordState.copy(error = null)
-    }
-
-    sealed interface UiEvent {
-        data class SnackbarEvent(val uiText: UiText) : UiEvent
     }
 }

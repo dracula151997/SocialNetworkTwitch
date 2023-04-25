@@ -1,6 +1,6 @@
 package com.dracula.socialnetworktwitch.core.utils
 
-typealias SimpleApiResult = ApiResult<Unit>
+typealias UnitResult = ApiResult<Unit>
 
 sealed class ApiResult<T>(val data: T? = null, val uiText: UiText? = null) {
     class Success<T>(data: T?) : ApiResult<T>(data)

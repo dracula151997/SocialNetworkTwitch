@@ -13,20 +13,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
+import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 @Composable
 fun SplashScreen(
     navController: NavController,
-    dispatcher: CoroutineDispatcher = Dispatchers.Main
+    dispatcher: CoroutineDispatcher = Dispatchers.Main,
+    viewModel: SplashViewModel = hiltViewModel()
 ) {
     val scaleAnimation = remember {
         Animatable(0f)
@@ -46,14 +51,25 @@ fun SplashScreen(
                     }
                 )
             )
-            delay(Constants.SPLASH_SCREEN_DURATION)
-            navController.navigate(Screens.LoginScreen.route) {
-                popUpTo(route = Screens.SplashScreen.route) {
-                    inclusive = true
-                }
-            }
         }
 
+    }
+
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            Timber.d("eventFlow: $event")
+            when (event) {
+                is UiEvent.Navigate -> {
+                    navController.navigate(event.route) {
+                        popUpTo(route = Screens.SplashScreen.route) {
+                            inclusive = true
+                        }
+                    }
+                }
+
+                is UiEvent.SnackbarEvent -> Unit
+            }
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

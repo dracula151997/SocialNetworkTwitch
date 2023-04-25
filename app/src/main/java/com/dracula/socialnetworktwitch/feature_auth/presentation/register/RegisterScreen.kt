@@ -35,6 +35,7 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.feature_auth.domain.utils.AuthError
 import kotlinx.coroutines.flow.collectLatest
 
@@ -53,10 +54,12 @@ fun RegisterScreen(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is RegisterViewModel.UiEvent.SnackbarEvent ->
+                is UiEvent.SnackbarEvent ->
                     scaffoldState.snackbarHostState.showSnackbar(
                         message = event.uiText.asString(context)
                     )
+
+                else -> {}
             }
 
         }

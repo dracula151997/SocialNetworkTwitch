@@ -37,6 +37,7 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
+import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.feature_auth.domain.utils.AuthError
 import kotlinx.coroutines.flow.collectLatest
 
@@ -55,9 +56,9 @@ fun LoginScreen(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is LoginViewModel.UiEvent.Navigate -> navController.navigate(event.route)
-                is LoginViewModel.UiEvent.SnackbarEvent -> scaffoldState.snackbarHostState.showSnackbar(
-                    event.message.asString(context),
+                is UiEvent.Navigate -> navController.navigate(event.route)
+                is UiEvent.SnackbarEvent -> scaffoldState.snackbarHostState.showSnackbar(
+                    event.uiText.asString(context),
                     duration = SnackbarDuration.Long
                 )
             }
