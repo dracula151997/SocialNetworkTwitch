@@ -6,18 +6,18 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.dracula.socialnetworktwitch.feature_post.domain.Post
 import com.dracula.socialnetworktwitch.feature_activity.presentation.ActivityScreen
-import com.dracula.socialnetworktwitch.presentation.ui.chat.ChatScreen
-import com.dracula.socialnetworktwitch.feature_post.presentation.create_post.CreatePostScreen
-import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileScreen
 import com.dracula.socialnetworktwitch.feature_auth.presentation.login.LoginScreen
-import com.dracula.socialnetworktwitch.presentation.ui.main_feed.MainFeedScreen
-import com.dracula.socialnetworktwitch.feature_post.presentation.post_details.PostDetailsScreen
-import com.dracula.socialnetworktwitch.presentation.ui.profile.ProfileScreen
 import com.dracula.socialnetworktwitch.feature_auth.presentation.register.RegisterScreen
+import com.dracula.socialnetworktwitch.feature_post.domain.Post
+import com.dracula.socialnetworktwitch.feature_post.presentation.create_post.CreatePostScreen
+import com.dracula.socialnetworktwitch.feature_post.presentation.post_details.PostDetailsScreen
+import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileScreen
 import com.dracula.socialnetworktwitch.feature_search.presentation.SearchScreen
 import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashScreen
+import com.dracula.socialnetworktwitch.presentation.ui.chat.ChatScreen
+import com.dracula.socialnetworktwitch.presentation.ui.main_feed.MainFeedScreen
+import com.dracula.socialnetworktwitch.presentation.ui.profile.ProfileScreen
 
 @Composable
 fun Navigation(
@@ -36,7 +36,7 @@ fun Navigation(
         composable(
             route = Screens.LoginScreen.route
         ) {
-            LoginScreen(navController = navController)
+            LoginScreen(navController = navController, scaffoldState = scaffoldState)
         }
         composable(route = Screens.RegisterScreen.route) {
             RegisterScreen(navController = navController, scaffoldState = scaffoldState)

@@ -92,7 +92,7 @@ class RegisterViewModel @Inject constructor(
 
                 is ApiResult.Error -> {
                     _eventFlow.emit(UiEvent.SnackbarEvent(result.uiText.orUnknownError()))
-                    registerState = RegisterState.error(result.uiText)
+                    registerState = RegisterState.error(result.uiText.orUnknownError())
                 }
 
                 else -> {
@@ -108,7 +108,7 @@ class RegisterViewModel @Inject constructor(
         passwordState = PasswordTextFieldState()
     }
 
-    private fun clearTextFieldErrorState(){
+    private fun clearTextFieldErrorState() {
         usernameState = usernameState.copy(error = null)
         emailState = emailState.copy(error = null)
         passwordState = passwordState.copy(error = null)

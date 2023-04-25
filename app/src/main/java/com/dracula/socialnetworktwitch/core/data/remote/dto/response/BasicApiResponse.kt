@@ -1,7 +1,8 @@
 package com.dracula.socialnetworktwitch.core.data.remote.dto.response
 
-data class BasicApiResponse(
+typealias UnitApiResponse = BasicApiResponse<Unit>
+data class BasicApiResponse<T>(
     val successful: Boolean,
     val message: String? = null,
-//    val data: T? = null
+    val data: T? = null
 )

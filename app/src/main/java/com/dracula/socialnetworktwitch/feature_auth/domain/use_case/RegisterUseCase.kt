@@ -18,12 +18,18 @@ class RegisterUseCase @Inject constructor(
         val usernameError = ValidationUtil.validateUsername(trimmedUsername)
         val passwordError = ValidationUtil.validatePassword(password)
 
-//        if (emailError.isNotNull() || usernameError.isNotNull() || passwordError.isNotNull())
+        if (emailError.isNotNull() || usernameError.isNotNull() || passwordError.isNotNull()) {
+            return RegisterResult(
+                emailError = emailError,
+                usernameError = usernameError,
+                passwordError = passwordError
+            )
+        }
 
         val result = repository.register(email.trim(), username.trim(), password.trim())
 
         return RegisterResult(
-            emailError, usernameError, passwordError, result
+            result = result
         )
     }
 }
