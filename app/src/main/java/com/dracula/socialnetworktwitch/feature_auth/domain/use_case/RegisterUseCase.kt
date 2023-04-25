@@ -1,6 +1,8 @@
 package com.dracula.socialnetworktwitch.feature_auth.domain.use_case
 
-import com.dracula.socialnetworktwitch.core.utils.SimpleResource
+import com.dracula.socialnetworktwitch.core.domain.utils.ValidationUtil
+import com.dracula.socialnetworktwitch.core.utils.isNotNull
+import com.dracula.socialnetworktwitch.feature_auth.domain.model.RegisterResult
 import com.dracula.socialnetworktwitch.feature_auth.domain.repository.AuthRepository
 import javax.inject.Inject
 
@@ -9,7 +11,19 @@ class RegisterUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         email: String, username: String, password: String
-    ): SimpleResource {
-        return repository.register(email.trim(), username.trim(), password.trim())
+    ): RegisterResult {
+        val trimmedEmail = email.trim()
+        val trimmedUsername = username.trim()
+        val emailError = ValidationUtil.validateEmail(trimmedEmail)
+        val usernameError = ValidationUtil.validateUsername(trimmedUsername)
+        val passwordError = ValidationUtil.validatePassword(password)
+
+//        if (emailError.isNotNull() || usernameError.isNotNull() || passwordError.isNotNull())
+
+        val result = repository.register(email.trim(), username.trim(), password.trim())
+
+        return RegisterResult(
+            emailError, usernameError, passwordError, result
+        )
     }
 }

@@ -19,5 +19,9 @@ data class RegisterState(
         fun error(message: UiText?) : RegisterState{
             return RegisterState(message = message)
         }
+
+        fun idle(): RegisterState{
+            return RegisterState()
+        }
     }
 }
