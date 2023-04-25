@@ -3,7 +3,14 @@ package com.dracula.socialnetworktwitch.core.presentation.components
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material.BottomAppBar
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.FabPosition
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Chat
@@ -21,6 +28,7 @@ import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 @Composable
 fun StandardScaffold(
     navController: NavController,
+    state: ScaffoldState,
     modifier: Modifier = Modifier,
     bottomNavItems: List<BottomNavItem> = listOf(
         BottomNavItem(
@@ -53,6 +61,7 @@ fun StandardScaffold(
 ) {
     Scaffold(
         modifier = modifier,
+        scaffoldState = state,
         bottomBar = {
             if (showBottomBar)
                 BottomAppBar(

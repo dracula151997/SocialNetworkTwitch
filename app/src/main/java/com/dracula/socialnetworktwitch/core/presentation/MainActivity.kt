@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -31,7 +32,10 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val route = navBackStackEntry?.destination?.route.orEmpty()
-                    StandardScaffold(navController = navController,
+                    val scaffoldState = rememberScaffoldState()
+                    StandardScaffold(
+                        state = scaffoldState,
+                        navController = navController,
                         modifier = Modifier.fillMaxSize(),
                         showBottomBar = showBottomBar(route = route),
                         onFabClicked = {
@@ -44,6 +48,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Navigation(
                                 navController = navController,
+                                scaffoldState = scaffoldState
                             )
                         }
                     }

@@ -1,29 +1,23 @@
 package com.dracula.socialnetworktwitch.feature_auth.presentation.register
 
-import com.dracula.socialnetworktwitch.core.utils.Error
+import com.dracula.socialnetworktwitch.core.utils.UiText
 
 data class RegisterState(
-    val usernameText: String = "",
-    val usernameError: UsernameError? = null,
-    val emailText: String = "",
-    val emailError: EmailError? = null,
-    val passwordText: String = "",
-    val passwordError: PasswordError? = null,
-    val isPasswordToggleVisible: Boolean = false,
-) {
-    sealed interface UsernameError {
-        object FieldEmpty : UsernameError
-        object InputTooShort : UsernameError
-    }
+    val isLoading: Boolean = false,
+    val successful: Boolean? = null,
+    val message: UiText? = null
+){
+    companion object{
+        fun loading(): RegisterState {
+            return RegisterState(isLoading = true)
+        }
 
-    sealed interface EmailError {
-        object FieldEmpty : EmailError
-        object InvalidEmail : EmailError
-    }
+        fun success(): RegisterState{
+            return RegisterState(successful = true)
+        }
 
-    sealed interface PasswordError {
-        object FieldEmpty : PasswordError
-        object InputTooShort : PasswordError
-        object InvalidPassword : PasswordError
+        fun error(message: UiText?) : RegisterState{
+            return RegisterState(message = message)
+        }
     }
 }

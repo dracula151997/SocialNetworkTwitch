@@ -5,16 +5,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.PasswordTextFieldState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
+import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
-import com.dracula.socialnetworktwitch.feature_auth.domain.AuthError
+import com.dracula.socialnetworktwitch.core.utils.UiText
+import com.dracula.socialnetworktwitch.core.utils.orUnknownError
+import com.dracula.socialnetworktwitch.feature_auth.domain.use_case.RegisterUseCase
+import com.dracula.socialnetworktwitch.feature_auth.domain.utils.AuthError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import timber.log.Timber
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class RegisterViewModel @Inject constructor() : ViewModel() {
+class RegisterViewModel @Inject constructor(
+    private val registerUseCase: RegisterUseCase
+) : ViewModel() {
 
     var usernameState by mutableStateOf(StandardTextFieldState())
         private set
@@ -23,9 +33,14 @@ class RegisterViewModel @Inject constructor() : ViewModel() {
     var passwordState by mutableStateOf(PasswordTextFieldState())
         private set
 
+    var registerState by mutableStateOf(RegisterState())
+        private set
+
+    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
+
 
     fun onEvent(event: RegisterEvent) {
-        Timber.d("current event: $event")
         when (event) {
             is RegisterEvent.OnEmailEntered -> emailState = emailState.copy(
                 text = event.value,
@@ -47,6 +62,7 @@ class RegisterViewModel @Inject constructor() : ViewModel() {
                 validateUsername(usernameState.text)
                 validateEmail(emailState.text)
                 validatePassword(passwordState.text)
+                registerIfNoErrors()
             }
 
         }
@@ -66,6 +82,9 @@ class RegisterViewModel @Inject constructor() : ViewModel() {
             )
             return
         }
+        usernameState = usernameState.copy(
+            error = null
+        )
 
     }
 
@@ -83,6 +102,10 @@ class RegisterViewModel @Inject constructor() : ViewModel() {
             )
             return
         }
+
+        emailState = emailState.copy(
+            error = null
+        )
 
     }
 
@@ -108,6 +131,39 @@ class RegisterViewModel @Inject constructor() : ViewModel() {
             return
         }
 
+        passwordState = passwordState.copy(
+            error = null
+        )
 
+
+    }
+
+    private fun registerIfNoErrors() {
+        if (emailState.error != null && usernameState.error != null && passwordState.error != null)
+            return
+
+        viewModelScope.launch {
+            registerState = RegisterState.loading()
+            val result = registerUseCase(
+                email = emailState.text,
+                username = usernameState.text,
+                password = passwordState.text
+            )
+            registerState = when (result) {
+                is ApiResult.Success -> {
+                    _eventFlow.emit(UiEvent.SnackbarEvent(UiText.StringResource(R.string.success_registeration)))
+                    RegisterState.success()
+                }
+
+                is ApiResult.Error -> {
+                    _eventFlow.emit(UiEvent.SnackbarEvent(result.uiText.orUnknownError()))
+                    RegisterState.error(result.uiText)
+                }
+            }
+        }
+    }
+
+    sealed interface UiEvent {
+        data class SnackbarEvent(val uiText: UiText) : UiEvent
     }
 }

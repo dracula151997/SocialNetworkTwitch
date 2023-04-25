@@ -1,4 +1,4 @@
-package com.dracula.socialnetworktwitch.feature_auth.domain
+package com.dracula.socialnetworktwitch.feature_auth.domain.utils
 
 import com.dracula.socialnetworktwitch.core.utils.Error
 

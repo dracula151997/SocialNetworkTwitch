@@ -37,4 +37,8 @@
     <string name="error_not_a_valid_email">This is not a valid email</string>
     <string name="input_to_short">The minimum length is %d</string>
     <string name="error_invalid_password">The password needs to contain at least one uppercase and one number</string>
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_couldnot_reach_server">Oops! Could\'t reach server. Check your internet connection.</string>
+    <string name="error_something_went_wrong">Oops! Something went wrong. Please try again</string>
+    <string name="success_registeration">Successfilly registerd an account. You can login now.</string>
 </resources>

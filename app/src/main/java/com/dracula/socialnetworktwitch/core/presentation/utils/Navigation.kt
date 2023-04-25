@@ -1,5 +1,6 @@
 package com.dracula.socialnetworktwitch.core.presentation.utils
 
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -21,6 +22,7 @@ import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashScreen
 @Composable
 fun Navigation(
     navController: NavHostController,
+    scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -37,7 +39,7 @@ fun Navigation(
             LoginScreen(navController = navController)
         }
         composable(route = Screens.RegisterScreen.route) {
-            RegisterScreen(navController = navController)
+            RegisterScreen(navController = navController, scaffoldState = scaffoldState)
         }
 
         composable(route = Screens.MainFeedScreen.route) {
