@@ -16,7 +16,7 @@ import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileS
 import com.dracula.socialnetworktwitch.feature_search.presentation.SearchScreen
 import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashScreen
 import com.dracula.socialnetworktwitch.presentation.ui.chat.ChatScreen
-import com.dracula.socialnetworktwitch.presentation.ui.main_feed.MainFeedScreen
+import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedScreen
 import com.dracula.socialnetworktwitch.presentation.ui.profile.ProfileScreen
 
 @Composable
@@ -43,7 +43,7 @@ fun Navigation(
         }
 
         composable(route = Screens.MainFeedScreen.route) {
-            MainFeedScreen(navController = navController)
+            MainFeedScreen(navController = navController, scaffoldState = scaffoldState)
         }
         composable(route = Screens.MessagesScreen.route) {
             ChatScreen(navController = navController)

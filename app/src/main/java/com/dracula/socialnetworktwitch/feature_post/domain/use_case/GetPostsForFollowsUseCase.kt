@@ -1,16 +1,14 @@
 package com.dracula.socialnetworktwitch.feature_post.domain.use_case
 
-import com.dracula.socialnetworktwitch.core.utils.ApiResult
+import androidx.paging.PagingData
 import com.dracula.socialnetworktwitch.feature_post.domain.Post
 import com.dracula.socialnetworktwitch.feature_post.domain.repository.PostRepository
+import kotlinx.coroutines.flow.Flow
 
 class GetPostsForFollowsUseCase(
     private val repository: PostRepository
 ) {
-    suspend operator fun invoke(
-        page: Int,
-        pageSize: Int
-    ): ApiResult<List<Post>> {
-        return repository.getPostsForFollows(page, pageSize)
+    operator fun invoke(): Flow<PagingData<Post>> {
+        return repository.posts
     }
 }

@@ -1,12 +1,9 @@
 package com.dracula.socialnetworktwitch.feature_post.domain.repository
 
-import com.dracula.socialnetworktwitch.core.utils.ApiResult
-import com.dracula.socialnetworktwitch.core.utils.Constants
+import androidx.paging.PagingData
 import com.dracula.socialnetworktwitch.feature_post.domain.Post
+import kotlinx.coroutines.flow.Flow
 
 interface PostRepository {
-    suspend fun getPostsForFollows(
-        page: Int = Constants.DEFAULT_PAGE,
-        pageSize: Int = Constants.PAGE_SIZE_POSTS
-    ): ApiResult<List<Post>>
+    val posts: Flow<PagingData<Post>>
 }
