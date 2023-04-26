@@ -3,7 +3,6 @@ package com.dracula.socialnetworktwitch.feature_main_feed
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
@@ -11,6 +10,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
@@ -54,39 +54,54 @@ fun MainFeedScreen(
                 )
             }
         }
-        Box(modifier = Modifier.fillMaxWidth()) {
-            if (isLoadingFirstTime) CircularProgressIndicator(modifier = Modifier.align(Center))
-            LazyColumn {
-                items(posts) { post ->
-                    post?.let {
-                        PostItem(
-                            post = post,
-                            onPostClicked = { navController.navigate(Screens.PostDetailsScreen.route) })
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (posts.itemCount == 0) {
+                Text(
+                    text = stringResource(id = R.string.msg_no_posts_to_display),
+                    modifier = Modifier.align(Center),
+                    style = MaterialTheme.typography.h2
+                )
+            } else {
+                if (isLoadingFirstTime) CircularProgressIndicator(modifier = Modifier.align(Center))
+                LazyColumn {
+                    items(posts) { post ->
+                        post?.let {
+                            PostItem(
+                                post = post,
+                                onPostClicked = { navController.navigate(Screens.PostDetailsScreen.route) })
+                        }
+
+                    }
+                    item {
+                        if (isLoadingNewPost) CircularProgressIndicator(
+                            modifier = Modifier.align(
+                                BottomCenter
+                            )
+                        )
                     }
 
-                }
-                item {
-                    if (isLoadingNewPost) CircularProgressIndicator(
-                        modifier = Modifier.align(
-                            BottomCenter
-                        )
-                    )
-                }
-
-                posts.apply {
-                    when {
-                        loadState.refresh is LoadState.Loading -> viewModel.onEvent(MainFeedEvent.LoadedPage)
-                        loadState.append is LoadState.Loading -> viewModel.onEvent(MainFeedEvent.LoadMorePosts)
-                        loadState.append is LoadState.NotLoading -> viewModel.onEvent(MainFeedEvent.LoadedPage)
-                        loadState.append is LoadState.Error -> scope.launch {
-                            scaffoldState.snackbarHostState.showSnackbar(
-                                message = "Error",
-                                duration = SnackbarDuration.Long
+                    posts.apply {
+                        when {
+                            loadState.refresh is LoadState.Loading -> viewModel.onEvent(
+                                MainFeedEvent.LoadedPage
                             )
+
+                            loadState.append is LoadState.Loading -> viewModel.onEvent(MainFeedEvent.LoadMorePosts)
+                            loadState.append is LoadState.NotLoading -> viewModel.onEvent(
+                                MainFeedEvent.LoadedPage
+                            )
+
+                            loadState.append is LoadState.Error -> scope.launch {
+                                scaffoldState.snackbarHostState.showSnackbar(
+                                    message = "Error",
+                                    duration = SnackbarDuration.Long
+                                )
+                            }
                         }
                     }
-                }
 
+
+                }
 
             }
         }

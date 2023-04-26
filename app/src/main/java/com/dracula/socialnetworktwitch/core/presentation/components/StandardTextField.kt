@@ -30,6 +30,7 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.IconSizeMedium
 @Composable
 fun StandardTextField(
     text: String,
+    modifier: Modifier = Modifier,
     hint: String = "",
     error: String = "",
     maxLength: Int = Int.MAX_VALUE,
@@ -44,7 +45,7 @@ fun StandardTextField(
     onPasswordToggleClicked: (Boolean) -> Unit = {},
     onValueChanged: (newValue: String) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         TextField(
             value = text,
             onValueChange = {

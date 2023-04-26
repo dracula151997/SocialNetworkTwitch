@@ -6,10 +6,10 @@ import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiText
-import com.dracula.socialnetworktwitch.core.utils.UnitResult
-import com.dracula.socialnetworktwitch.feature_auth.data.dto.request.CreateAccountRequest
-import com.dracula.socialnetworktwitch.feature_auth.data.dto.request.LoginRequest
-import com.dracula.socialnetworktwitch.feature_auth.data.remote.AuthApi
+import com.dracula.socialnetworktwitch.core.utils.UnitApiResult
+import com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote.dto.request.CreateAccountRequest
+import com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote.dto.request.LoginRequest
+import com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote.AuthApi
 import com.dracula.socialnetworktwitch.feature_auth.domain.repository.AuthRepository
 import okio.IOException
 import retrofit2.HttpException
@@ -22,7 +22,7 @@ class AuthApiRepositoryImpl(
         email: String,
         username: String,
         password: String
-    ): UnitResult {
+    ): UnitApiResult {
         val request = CreateAccountRequest(email, username, password)
         return try {
             val response = api.register(request)
@@ -43,7 +43,7 @@ class AuthApiRepositoryImpl(
         }
     }
 
-    override suspend fun login(email: String, password: String): UnitResult {
+    override suspend fun login(email: String, password: String): UnitApiResult {
         val request = LoginRequest(email, password)
         return try {
             val response = api.login(request)
@@ -70,7 +70,7 @@ class AuthApiRepositoryImpl(
         }
     }
 
-    override suspend fun authenticate(): UnitResult {
+    override suspend fun authenticate(): UnitApiResult {
         return try {
             api.authenticate()
             ApiResult.Success(Unit)

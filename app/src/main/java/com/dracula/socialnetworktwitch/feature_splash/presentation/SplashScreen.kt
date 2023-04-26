@@ -57,7 +57,6 @@ fun SplashScreen(
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
-            Timber.d("eventFlow: $event")
             when (event) {
                 is UiEvent.Navigate -> {
                     navController.navigate(event.route) {

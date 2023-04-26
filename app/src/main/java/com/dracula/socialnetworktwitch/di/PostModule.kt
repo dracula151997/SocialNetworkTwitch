@@ -1,12 +1,16 @@
 package com.dracula.socialnetworktwitch.di
 
+import android.content.Context
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.PostApi
 import com.dracula.socialnetworktwitch.feature_post.data.repository.PostRepositoryImpl
 import com.dracula.socialnetworktwitch.feature_post.domain.repository.PostRepository
+import com.dracula.socialnetworktwitch.feature_post.domain.use_case.CreatePostUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.GetPostsForFollowsUseCase
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -30,13 +34,23 @@ object PostModule {
 
     @Provides
     @Singleton
-    fun providePostRepository(api: PostApi): PostRepository {
-        return PostRepositoryImpl(api)
+    fun providePostRepository(
+        api: PostApi,
+        gson: Gson,
+        @ApplicationContext context: Context
+    ): PostRepository {
+        return PostRepositoryImpl(api, gson, context)
     }
 
     @Provides
     @Singleton
     fun providePostUseCase(repository: PostRepository): GetPostsForFollowsUseCase {
         return GetPostsForFollowsUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCreatePostUseCase(repository: PostRepository): CreatePostUseCase {
+        return CreatePostUseCase(repository)
     }
 }

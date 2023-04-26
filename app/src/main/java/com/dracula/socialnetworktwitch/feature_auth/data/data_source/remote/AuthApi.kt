@@ -1,10 +1,10 @@
-package com.dracula.socialnetworktwitch.feature_auth.data.remote
+package com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote
 
 import com.dracula.socialnetworktwitch.core.data.remote.dto.response.BasicApiResponse
 import com.dracula.socialnetworktwitch.core.data.remote.dto.response.UnitApiResponse
-import com.dracula.socialnetworktwitch.feature_auth.data.dto.request.CreateAccountRequest
-import com.dracula.socialnetworktwitch.feature_auth.data.dto.request.LoginRequest
-import com.dracula.socialnetworktwitch.feature_auth.data.dto.response.AuthResponse
+import com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote.dto.request.CreateAccountRequest
+import com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote.dto.request.LoginRequest
+import com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote.dto.response.AuthResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST

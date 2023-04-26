@@ -1,12 +1,12 @@
 package com.dracula.socialnetworktwitch.feature_auth.domain.repository
 
-import com.dracula.socialnetworktwitch.core.utils.UnitResult
+import com.dracula.socialnetworktwitch.core.utils.UnitApiResult
 
 interface AuthRepository {
-    suspend fun register(email: String, username: String, password: String): UnitResult
+    suspend fun register(email: String, username: String, password: String): UnitApiResult
 
-    suspend fun login(email: String, password: String): UnitResult
+    suspend fun login(email: String, password: String): UnitApiResult
 
-    suspend fun authenticate() : UnitResult
+    suspend fun authenticate() : UnitApiResult
 
 }

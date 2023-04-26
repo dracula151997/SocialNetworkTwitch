@@ -5,6 +5,7 @@ import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.dracula.socialnetworktwitch.core.data.remote.interceptors.HeadersInterceptor
 import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,6 +23,12 @@ object AppModule {
     @Singleton
     fun provideHeadersInterceptor(token: String): HeadersInterceptor {
         return HeadersInterceptor(token)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGson(): Gson {
+        return Gson()
     }
 
     @Provides

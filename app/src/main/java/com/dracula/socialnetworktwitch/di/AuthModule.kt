@@ -1,7 +1,7 @@
 package com.dracula.socialnetworktwitch.di
 
 import android.content.SharedPreferences
-import com.dracula.socialnetworktwitch.feature_auth.data.remote.AuthApi
+import com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote.AuthApi
 import com.dracula.socialnetworktwitch.feature_auth.data.repository.AuthApiRepositoryImpl
 import com.dracula.socialnetworktwitch.feature_auth.domain.repository.AuthRepository
 import com.dracula.socialnetworktwitch.feature_auth.domain.use_case.AuthenticateUseCase
