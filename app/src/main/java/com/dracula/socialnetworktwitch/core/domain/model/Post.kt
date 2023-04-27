@@ -1,4 +1,4 @@
-package com.dracula.socialnetworktwitch.feature_post.domain
+package com.dracula.socialnetworktwitch.core.domain.model
 
 data class Post(
     val username: String,

@@ -15,18 +15,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -41,13 +47,21 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
 import com.dracula.socialnetworktwitch.core.utils.CropActivityResultContract
+import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.feature_post.domain.util.CreatePostError
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun CreatePostScreen(
     navController: NavController,
+    scaffoldState: ScaffoldState,
     viewModel: CreatePostViewModel = hiltViewModel()
 ) {
     val imageUri = viewModel.chosenImageUri
+    val descriptionState = viewModel.description
+    val state = viewModel.state
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
 
     val cropActivityLauncher = rememberLauncherForActivityResult(
         contract = CropActivityResultContract(16f, 9f),
@@ -58,6 +72,21 @@ fun CreatePostScreen(
         contract = ActivityResultContracts.PickVisualMedia(),
     ) {
         cropActivityLauncher.launch(it)
+    }
+
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is UiEvent.SnackbarEvent -> scaffoldState.snackbarHostState.showSnackbar(
+                    message = event.uiText.asString(
+                        context
+                    )
+                )
+
+                UiEvent.NavigateUp -> navController.navigateUp()
+                else -> Unit
+            }
+        }
     }
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -116,15 +145,30 @@ fun CreatePostScreen(
                     text = viewModel.description.text,
                     hint = stringResource(id = R.string.description),
                     singleLine = false,
+                    error = when (descriptionState.error) {
+                        is CreatePostError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                        else -> ""
+                    },
                     maxLines = 5,
                     onValueChanged = {
                         viewModel.onEvent(CreatePostEvent.DescriptionEntered(it))
-                    }
+                    },
+                    imeAction = ImeAction.Done,
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            viewModel.onEvent(CreatePostEvent.CreatePost)
+                            focusManager.clearFocus()
+                        }
+                    )
                 )
                 Spacer(modifier = Modifier.height(SpaceLarge))
                 Button(
-                    onClick = { viewModel.onEvent(CreatePostEvent.CreatePost) },
-                    modifier = Modifier.align(Alignment.End)
+                    onClick = {
+                        viewModel.onEvent(CreatePostEvent.CreatePost)
+                        focusManager.clearFocus()
+                    },
+                    modifier = Modifier.align(Alignment.End),
+                    enabled = !state.isLoading
                 ) {
                     Text(
                         text = stringResource(id = R.string.post),
@@ -133,6 +177,8 @@ fun CreatePostScreen(
                     Spacer(modifier = Modifier.width(SpaceSmall))
                     Icon(imageVector = Icons.Default.Send, contentDescription = null)
                 }
+                if (state.isLoading)
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         }
     }

@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import com.dracula.socialnetworktwitch.feature_activity.presentation.ActivityScreen
 import com.dracula.socialnetworktwitch.feature_auth.presentation.login.LoginScreen
 import com.dracula.socialnetworktwitch.feature_auth.presentation.register.RegisterScreen
-import com.dracula.socialnetworktwitch.feature_post.domain.Post
+import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.feature_post.presentation.create_post.CreatePostScreen
 import com.dracula.socialnetworktwitch.feature_post.presentation.post_details.PostDetailsScreen
 import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileScreen
@@ -56,7 +56,7 @@ fun Navigation(
             ProfileScreen(navController = navController)
         }
         composable(route = Screens.CreatePostScreen.route) {
-            CreatePostScreen(navController = navController)
+            CreatePostScreen(navController = navController, scaffoldState = scaffoldState)
         }
 
         composable(route = Screens.PostDetailsScreen.route) {

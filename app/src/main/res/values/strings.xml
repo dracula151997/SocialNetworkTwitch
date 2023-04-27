@@ -47,4 +47,6 @@
     <string name="post">Post</string>
     <string name="description">Description</string>
     <string name="error_file_not_found">Oops! The file couldn\'t be found</string>
+    <string name="post_created">The post has been created</string>
+    <string name="error_no_image_picked">No image picked</string>
 </resources>

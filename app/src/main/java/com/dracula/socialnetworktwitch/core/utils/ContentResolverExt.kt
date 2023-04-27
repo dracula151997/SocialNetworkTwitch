@@ -26,7 +26,7 @@ suspend fun Uri.asFile(context: Context): File? {
     withContext(Dispatchers.IO) {
         context.contentResolver.openFileDescriptor(uri, "r")?.let { fd ->
             val inputStream = FileInputStream(fd.fileDescriptor)
-            val f = File(context.cacheDir, context.contentResolver.getFileName(uri))
+            val f = File(context.cacheDir.absolutePath, context.contentResolver.getFileName(uri))
             val outputStream = FileOutputStream(f)
             inputStream.copyTo(outputStream)
             file = f

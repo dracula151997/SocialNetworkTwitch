@@ -20,7 +20,7 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.dracula.socialnetworktwitch.core.domain.BottomNavItem
+import com.dracula.socialnetworktwitch.core.domain.model.BottomNavItem
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 

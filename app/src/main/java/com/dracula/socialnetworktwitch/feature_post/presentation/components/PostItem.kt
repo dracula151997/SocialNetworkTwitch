@@ -40,7 +40,7 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingSmall
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
-import com.dracula.socialnetworktwitch.feature_post.domain.Post
+import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 
 @Composable

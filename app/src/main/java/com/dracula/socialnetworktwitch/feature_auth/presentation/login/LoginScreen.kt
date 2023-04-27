@@ -61,6 +61,8 @@ fun LoginScreen(
                     event.uiText.asString(context),
                     duration = SnackbarDuration.Long
                 )
+
+                is UiEvent.NavigateUp -> navController.navigateUp()
             }
         }
     }

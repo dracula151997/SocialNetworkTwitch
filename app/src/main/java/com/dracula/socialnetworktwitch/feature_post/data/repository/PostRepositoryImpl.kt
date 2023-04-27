@@ -2,6 +2,7 @@ package com.dracula.socialnetworktwitch.feature_post.data.repository
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toFile
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -14,7 +15,7 @@ import com.dracula.socialnetworktwitch.core.utils.asFile
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.paging.PostSource
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.PostApi
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.request.CreatePostRequest
-import com.dracula.socialnetworktwitch.feature_post.domain.Post
+import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.feature_post.domain.repository.PostRepository
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
@@ -40,8 +41,8 @@ class PostRepositoryImpl(
 
     override suspend fun createPost(description: String, imageUri: Uri): UnitApiResult {
         val request = CreatePostRequest(description)
-        val file = imageUri.asFile(context)
-            ?: return ApiResult.Error(message = UiText.StringResource(R.string.error_file_not_found))
+        val file = imageUri.toFile()
+
 
         return try {
             val response = api.createPost(

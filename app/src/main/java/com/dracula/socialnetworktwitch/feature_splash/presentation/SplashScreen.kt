@@ -18,14 +18,11 @@ import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
-import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 @Composable
 fun SplashScreen(
@@ -66,7 +63,7 @@ fun SplashScreen(
                     }
                 }
 
-                is UiEvent.SnackbarEvent -> Unit
+                else -> Unit
             }
         }
     }

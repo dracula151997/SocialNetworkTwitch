@@ -16,8 +16,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
-import com.dracula.socialnetworktwitch.feature_post.domain.Comment
-import com.dracula.socialnetworktwitch.feature_post.domain.Post
+import com.dracula.socialnetworktwitch.core.domain.model.Comment
+import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.core.presentation.components.PostActionRow
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.MediumGray

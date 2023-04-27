@@ -6,9 +6,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
+import com.dracula.socialnetworktwitch.core.utils.ApiResult
+import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.core.utils.UiText
+import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.CreatePostUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,6 +28,12 @@ class CreatePostViewModel @Inject constructor(
 
     var chosenImageUri: Uri? by mutableStateOf(null)
         private set
+
+    var state by mutableStateOf(CreatePostState())
+        private set
+
+    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
 
     fun onEvent(event: CreatePostEvent) {
         when (event) {
@@ -35,14 +48,51 @@ class CreatePostViewModel @Inject constructor(
     }
 
     private fun createPost() {
-        chosenImageUri?.let { uri ->
-            viewModelScope.launch {
-                createPostUseCase(
-                    description = description.text,
-                    imageUri = uri
-                )
+
+        viewModelScope.launch {
+            clearAllFieldErrorState()
+            state = CreatePostState.loading()
+            val apiResult = createPostUseCase(
+                description = description.text,
+                imageUri = chosenImageUri
+            )
+            if (apiResult.hasDescriptionError)
+                description =
+                    description.copy(error = apiResult.descriptionError)
+
+            if (apiResult.hasImageError)
+                _eventFlow.emit(UiEvent.SnackbarEvent(UiText.StringResource(R.string.error_no_image_picked)))
+
+            when (val result = apiResult.result) {
+                is ApiResult.Success -> {
+                    clearAllFieldState()
+                    state = CreatePostState.success()
+                    _eventFlow.emit(UiEvent.SnackbarEvent(UiText.StringResource(R.string.post_created)))
+                    _eventFlow.emit(UiEvent.NavigateUp)
+                }
+
+                is ApiResult.Error -> {
+                    state = CreatePostState.error()
+                    _eventFlow.emit(
+                        UiEvent.SnackbarEvent(
+                            uiText = result.uiText.orUnknownError()
+                        )
+                    )
+                }
+
+                else -> state = CreatePostState.idle()
             }
         }
+    }
+
+    private fun clearAllFieldState() {
+        description = description.defaultState()
+    }
+
+    private fun clearAllFieldErrorState() {
+        description = description.copy(
+            error = null
+        )
     }
 
 

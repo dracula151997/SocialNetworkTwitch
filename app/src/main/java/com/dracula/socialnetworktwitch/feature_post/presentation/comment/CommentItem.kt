@@ -14,7 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.dracula.socialnetworktwitch.R
-import com.dracula.socialnetworktwitch.feature_post.domain.Comment
+import com.dracula.socialnetworktwitch.core.domain.model.Comment
 import com.dracula.socialnetworktwitch.core.presentation.components.LikeButton
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeSmall

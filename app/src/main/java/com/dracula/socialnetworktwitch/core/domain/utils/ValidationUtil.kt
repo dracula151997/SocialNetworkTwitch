@@ -38,4 +38,8 @@ object ValidationUtil {
 
         return null
     }
+
+    fun validateIsNullOrEmpty(value: String?): Boolean {
+        return value.isNullOrEmpty()
+    }
 }

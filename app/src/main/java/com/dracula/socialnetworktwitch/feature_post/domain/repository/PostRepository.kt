@@ -3,7 +3,7 @@ package com.dracula.socialnetworktwitch.feature_post.domain.repository
 import android.net.Uri
 import androidx.paging.PagingData
 import com.dracula.socialnetworktwitch.core.utils.UnitApiResult
-import com.dracula.socialnetworktwitch.feature_post.domain.Post
+import com.dracula.socialnetworktwitch.core.domain.model.Post
 import kotlinx.coroutines.flow.Flow
 
 interface PostRepository {

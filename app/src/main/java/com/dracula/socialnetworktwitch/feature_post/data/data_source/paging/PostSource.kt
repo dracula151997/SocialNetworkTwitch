@@ -3,7 +3,7 @@ package com.dracula.socialnetworktwitch.feature_post.data.data_source.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.PostApi
-import com.dracula.socialnetworktwitch.feature_post.domain.Post
+import com.dracula.socialnetworktwitch.core.domain.model.Post
 import okio.IOException
 import retrofit2.HttpException
 import javax.inject.Inject

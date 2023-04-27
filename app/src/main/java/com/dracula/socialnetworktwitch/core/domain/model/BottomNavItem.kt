@@ -1,4 +1,4 @@
-package com.dracula.socialnetworktwitch.core.domain
+package com.dracula.socialnetworktwitch.core.domain.model
 
 import androidx.compose.ui.graphics.vector.ImageVector
 
