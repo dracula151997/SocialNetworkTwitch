@@ -30,6 +30,7 @@ class CreatePostViewModel @Inject constructor(
 
             is CreatePostEvent.PickImage -> chosenImageUri = event.uri
             CreatePostEvent.CreatePost -> createPost()
+            is CreatePostEvent.CropImage -> chosenImageUri = event.uri
         }
     }
 
