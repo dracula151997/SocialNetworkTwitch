@@ -135,5 +135,7 @@ dependencies {
 
     implementation "com.github.yalantis:ucrop:2.2.6"
 
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.1"
+
 
 }

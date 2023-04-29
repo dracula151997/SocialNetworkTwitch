@@ -1,7 +1,10 @@
 package com.dracula.socialnetworktwitch.feature_profile.edit_profile
 
-import androidx.compose.foundation.Image
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,20 +19,21 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
+import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTextField
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
@@ -45,19 +50,60 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
+import com.dracula.socialnetworktwitch.core.utils.CropActivityResultContract
+import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
 import com.dracula.socialnetworktwitch.feature_profile.edit_profile.components.Chip
 import com.dracula.socialnetworktwitch.feature_profile.utils.EditProfileError
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
+import kotlinx.coroutines.flow.collectLatest
 import kotlin.random.Random
 
 @Composable
 fun EditProfileScreen(
     navController: NavController,
+    scaffoldState: ScaffoldState,
+    userId: String? = null,
     viewModel: EditProfileViewModel = hiltViewModel(),
     profilePictureSize: Dp = ProfilePictureSizeLarge
 ) {
+    val context = LocalContext.current
+    val state = viewModel.state
+    val profile = state.profile ?: Profile.empty()
+
+    val cropProfileImageLauncher =
+        rememberLauncherForActivityResult(CropActivityResultContract(16f, 9f)) {
+            viewModel.onEvent(EditProfileEvent.CropProfileImage(it))
+        }
+    val cropBannerImageLauncher =
+        rememberLauncherForActivityResult(CropActivityResultContract(16f, 9f)) {
+            viewModel.onEvent(EditProfileEvent.CropBannerImage(it))
+        }
+
+    val pickProfileImageLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
+            cropProfileImageLauncher.launch(it)
+        }
+    val pickBannerImageLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
+            cropBannerImageLauncher.launch(it)
+        }
+
+    LaunchedEffect(key1 = true) {
+        viewModel.onEvent(EditProfileEvent.GetProfile(userId))
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is UiEvent.SnackbarEvent -> scaffoldState.snackbarHostState.showSnackbar(
+                    message = event.uiText.asString(
+                        context
+                    )
+                )
+
+                else -> Unit
+            }
+        }
+    }
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -81,9 +127,15 @@ fun EditProfileScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             BannerEditSection(
-                bannerImage = painterResource(id = R.drawable.channelart),
-                profileImage = painterResource(id = R.drawable.philipp),
-                profilePictureSize = profilePictureSize
+                bannerImageUrl = if (viewModel.bannerImageUri == null) profile.bannerUrl else viewModel.bannerImageUri,
+                profileImageUrl = if (viewModel.profileImageUri == null) profile.profilePictureUrl else viewModel.profileImageUri,
+                profilePictureSize = profilePictureSize,
+                onBannerClick = {
+                    pickBannerImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+                onProfileImageClick = {
+                    pickProfileImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                }
             )
             Column(
                 modifier = Modifier
@@ -100,11 +152,7 @@ fun EditProfileScreen(
                     },
                     leadingIcon = Icons.Default.Person,
                     onValueChanged = {
-                        viewModel.setUsername(
-                            StandardTextFieldState(
-                                text = it
-                            )
-                        )
+                        viewModel.onEvent(EditProfileEvent.UsernameEntered(it))
                     },
 
                     )
@@ -121,9 +169,7 @@ fun EditProfileScreen(
                     },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_github_icon_1),
                     onValueChanged = {
-                        viewModel.setGithub(
-                            StandardTextFieldState(text = it)
-                        )
+                        viewModel.onEvent(EditProfileEvent.GithubUrlEntered(it))
                     },
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
@@ -139,9 +185,8 @@ fun EditProfileScreen(
                     },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_instagram_glyph_1),
                     onValueChanged = {
-                        viewModel.setInstagram(
-                            StandardTextFieldState(text = it)
-                        )
+                        viewModel.onEvent(EditProfileEvent.InstagramUrlEntered(it))
+
                     },
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
@@ -158,9 +203,8 @@ fun EditProfileScreen(
                     },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_linkedin_icon_1),
                     onValueChanged = {
-                        viewModel.setLinkedIn(
-                            StandardTextFieldState(text = it)
-                        )
+                        viewModel.onEvent(EditProfileEvent.LinkedinUrlEntered(it))
+
                     },
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
@@ -171,15 +215,15 @@ fun EditProfileScreen(
                         EditProfileError.FieldEmpty -> stringResource(
                             id = R.string.error_this_field_cannot_be_empty
                         )
+
                         else -> ""
                     },
                     singleLine = false,
                     maxLines = 3,
                     leadingIcon = Icons.Default.Description,
                     onValueChanged = {
-                        viewModel.setBio(
-                            StandardTextFieldState(text = it)
-                        )
+                        viewModel.onEvent(EditProfileEvent.BioEntered(it))
+
                     },
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
@@ -223,8 +267,8 @@ fun EditProfileScreen(
 
 @Composable
 fun BannerEditSection(
-    bannerImage: Painter,
-    profileImage: Painter,
+    bannerImageUrl: Any?,
+    profileImageUrl: Any?,
     profilePictureSize: Dp = ProfilePictureSizeLarge,
     onBannerClick: () -> Unit = {},
     onProfileImageClick: () -> Unit = {}
@@ -236,15 +280,16 @@ fun BannerEditSection(
             .fillMaxWidth()
             .height(bannerHeight + profilePictureSize / 2f)
     ) {
-        Image(
-            painter = bannerImage,
+        StandardAsyncImage(
+            url = bannerImageUrl,
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(bannerHeight)
+                .clickable { onBannerClick() },
         )
-        Image(
-            painter = profileImage,
+        StandardAsyncImage(
+            url = profileImageUrl,
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -255,6 +300,7 @@ fun BannerEditSection(
                     color = MaterialTheme.colors.onSurface,
                     shape = CircleShape
                 )
+                .clickable { onProfileImageClick() }
 
         )
     }

@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dracula.socialnetworktwitch.R
-import com.dracula.socialnetworktwitch.feature_profile.domain.User
+import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.theme.IconSizeMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeSmall
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
@@ -65,7 +65,7 @@ fun UserProfileItem(
                 )
                 Spacer(modifier = Modifier.height(SpaceSmall))
                 Text(
-                    text = user.description,
+                    text = user.bio,
                     style = MaterialTheme.typography.body2,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 2

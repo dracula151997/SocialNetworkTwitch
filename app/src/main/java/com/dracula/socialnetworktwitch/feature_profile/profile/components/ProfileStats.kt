@@ -1,4 +1,4 @@
-package com.dracula.socialnetworktwitch.feature_profile.presentation.components
+package com.dracula.socialnetworktwitch.feature_profile.profile.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.dracula.socialnetworktwitch.R
-import com.dracula.socialnetworktwitch.feature_profile.domain.User
+import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 
 @Composable
@@ -50,7 +50,7 @@ fun ProfileStats(
             )
         )
         Spacer(modifier = Modifier.width(SpaceMedium))
-        if (isOwnProfile)
+        if (!isOwnProfile)
             Button(
                 onClick = onFollowClick,
                 colors = ButtonDefaults.buttonColors(

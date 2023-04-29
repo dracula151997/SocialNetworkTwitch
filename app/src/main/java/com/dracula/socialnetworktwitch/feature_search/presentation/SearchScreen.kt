@@ -26,7 +26,8 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
-import com.dracula.socialnetworktwitch.feature_profile.domain.User
+import com.dracula.socialnetworktwitch.core.domain.model.User
+import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.feature_search.utils.SearchError
 
 @Composable
@@ -68,9 +69,10 @@ fun SearchScreen(
                 items(10) {
                     UserProfileItem(
                         user = User(
+                            userId = "6447491868ca6478aaf6bb17",
                             profilePictureUrl = "",
                             username = "Philipp Lackner",
-                            description = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed\n" +
+                            bio = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed\n" +
                                     "diam nonumy eirmod tempor invidunt ut labore et dolore \n" +
                                     "magna aliquyam erat, sed diam voluptua",
                             followerCount = 234,
@@ -84,6 +86,9 @@ fun SearchScreen(
                                 tint = MaterialTheme.colors.onBackground,
                                 modifier = Modifier.size(IconSizeMedium)
                             )
+                        },
+                        onItemClick = {
+                            navController.navigate(Screens.ProfileScreen.createRoute(userId = "6447491868ca6478aaf6bb17"))
                         }
                     )
                     Spacer(modifier = Modifier.height(SpaceMedium))

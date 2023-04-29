@@ -1,9 +1,16 @@
-package com.dracula.socialnetworktwitch.feature_profile.presentation.components
+package com.dracula.socialnetworktwitch.feature_profile.profile.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -14,13 +21,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.dracula.socialnetworktwitch.R
-import com.dracula.socialnetworktwitch.feature_profile.domain.User
+import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.theme.LightGray
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeLarge
@@ -33,6 +44,7 @@ fun ProfileHeaderSection(
     modifier: Modifier = Modifier,
     profilePictureSize: Dp = ProfilePictureSizeLarge,
     isOwnProfile: Boolean = true,
+    isFollowing: Boolean = false,
     onEditClick: () -> Unit,
 ) {
     Column(
@@ -41,8 +53,14 @@ fun ProfileHeaderSection(
             .offset(y = -profilePictureSize / 2),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.philipp),
+        SubcomposeAsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(user.profilePictureUrl)
+                .crossfade(true)
+                .build(),
+            loading = {
+                CircularProgressIndicator()
+            },
             contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
             modifier = Modifier
                 .size(profilePictureSize)
@@ -51,8 +69,7 @@ fun ProfileHeaderSection(
                     width = 1.dp,
                     color = LightGray,
                     shape = CircleShape
-                )
-
+                ),
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -75,12 +92,12 @@ fun ProfileHeaderSection(
                 }
         }
         Text(
-            text = user.description,
+            text = user.bio,
             style = MaterialTheme.typography.body1,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(SpaceMedium))
-        ProfileStats(user = user, isFollowing = false, isOwnProfile = isOwnProfile) {
+        ProfileStats(user = user, isFollowing = isFollowing, isOwnProfile = isOwnProfile) {
 
         }
     }

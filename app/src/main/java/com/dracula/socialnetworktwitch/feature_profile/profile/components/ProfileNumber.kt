@@ -1,4 +1,4 @@
-package com.dracula.socialnetworktwitch.feature_profile.presentation.components
+package com.dracula.socialnetworktwitch.feature_profile.profile.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

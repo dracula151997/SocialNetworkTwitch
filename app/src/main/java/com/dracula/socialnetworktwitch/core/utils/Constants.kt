@@ -12,4 +12,8 @@ object Constants {
     object SharedPrefKeys{
         const val KEY_TOKEN = "token"
     }
+
+    object NavArguments {
+        const val NAV_USER_ID = "user_id"
+    }
 }

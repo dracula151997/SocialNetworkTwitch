@@ -49,4 +49,5 @@
     <string name="error_file_not_found">Oops! The file couldn\'t be found</string>
     <string name="post_created">The post has been created</string>
     <string name="error_no_image_picked">No image picked</string>
+    <string name="error_could_not_load_profile">Oops! Couldn\'t load your profile.</string>
 </resources>
