@@ -7,15 +7,14 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.dracula.socialnetworktwitch.R
+import com.dracula.socialnetworktwitch.core.data.remote.PostApi
+import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.UnitApiResult
-import com.dracula.socialnetworktwitch.core.utils.asFile
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.paging.PostSource
-import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.PostApi
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.request.CreatePostRequest
-import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.feature_post.domain.repository.PostRepository
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
@@ -36,7 +35,7 @@ class PostRepositoryImpl(
                 pageSize = Constants.PAGE_SIZE_POSTS
             )
         ) {
-            PostSource(api)
+            PostSource(api, source = PostSource.Source.Follows)
         }.flow
 
     override suspend fun createPost(description: String, imageUri: Uri): UnitApiResult {

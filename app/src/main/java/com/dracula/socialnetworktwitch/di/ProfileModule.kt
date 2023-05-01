@@ -1,10 +1,12 @@
 package com.dracula.socialnetworktwitch.di
 
+import com.dracula.socialnetworktwitch.core.data.remote.PostApi
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.ProfileApi
 import com.dracula.socialnetworktwitch.feature_profile.data.repository.ProfileRepositoryImpl
 import com.dracula.socialnetworktwitch.feature_profile.domain.repository.GetSkillsUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.repository.ProfileRepository
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetProfileUseCase
+import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetUserPostsUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.SetSkillSelectedUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.UpdateProfileUseCase
 import com.google.gson.Gson
@@ -37,9 +39,10 @@ object ProfileModule {
     @Singleton
     fun provideProfileRepository(
         api: ProfileApi,
+        postApi: PostApi,
         gson: Gson
     ): ProfileRepository {
-        return ProfileRepositoryImpl(api, gson)
+        return ProfileRepositoryImpl(api, postApi, gson)
     }
 
     @Provides
@@ -64,5 +67,11 @@ object ProfileModule {
     @Singleton
     fun provideSetSkillsSelectedUseCase(): SetSkillSelectedUseCase {
         return SetSkillSelectedUseCase()
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetUserPostsUseCase(repository: ProfileRepository): GetUserPostsUseCase {
+        return GetUserPostsUseCase(repository)
     }
 }

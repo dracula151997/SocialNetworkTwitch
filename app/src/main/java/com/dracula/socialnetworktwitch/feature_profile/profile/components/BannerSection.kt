@@ -50,9 +50,9 @@ fun BannerSection(
     BoxWithConstraints(modifier = modifier) {
         StandardAsyncImage(
             url = bannerUrl,
-            contentDescription = Semantics.ContentDescriptions.CHANNEL_ART,
+            modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            contentDescription = Semantics.ContentDescriptions.CHANNEL_ART
 
         )
         Box(
@@ -106,11 +106,11 @@ fun SkillsIcons(
         topSkillUrls.forEach { skillUrl ->
             StandardAsyncImage(
                 url = skillUrl,
-                contentDescription = null,
                 modifier = Modifier
                     .size(iconSize)
                     .aspectRatio(1f),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                contentDescription = null
             )
             Spacer(modifier = Modifier.width(SpaceMedium))
 

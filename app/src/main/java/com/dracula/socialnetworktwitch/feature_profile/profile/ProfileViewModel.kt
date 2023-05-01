@@ -3,11 +3,13 @@ package com.dracula.socialnetworktwitch.feature_profile.profile
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
+import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
-import com.dracula.socialnetworktwitch.core.utils.orDefault
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetProfileUseCase
+import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetUserPostsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,13 +21,10 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val getProfileUseCase: GetProfileUseCase,
+    private val getUserPostsUseCase: GetUserPostsUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    /*   init {
-           savedStateHandle.get<String>(Constants.NavArguments.NAV_USER_ID)?.let { userId ->
-               getProfile(userId)
-           }
-       }*/
+
 
     private val _state = MutableStateFlow(ProfileState())
     val state = _state.asStateFlow()
@@ -33,11 +32,14 @@ class ProfileViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+    val userPosts = getUserPostsUseCase(
+        savedStateHandle.get<String>(Constants.NavArguments.NAV_USER_ID).orEmpty()
+    ).cachedIn(viewModelScope)
 
     fun onEvent(event: ProfileEvent) {
         when (event) {
             is ProfileEvent.GetProfile -> {
-                getProfile(event.userId.orDefault("123"))
+                getProfile(event.userId.orEmpty())
             }
         }
     }

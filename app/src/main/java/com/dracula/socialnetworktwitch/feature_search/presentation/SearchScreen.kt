@@ -69,7 +69,7 @@ fun SearchScreen(
                 items(10) {
                     UserProfileItem(
                         user = User(
-                            userId = "6447491868ca6478aaf6bb17",
+                            userId = "645012f3c2f7a23b6a6feb63",
                             profilePictureUrl = "",
                             username = "Philipp Lackner",
                             bio = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed\n" +

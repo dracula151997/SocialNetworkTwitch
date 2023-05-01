@@ -23,8 +23,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import com.dracula.socialnetworktwitch.R
-import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
@@ -46,9 +47,9 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val (userId1, username, bio, followerCount, followingCount,
-        postCount, profilePictureUrl, bannerUrl, topSkills, gitHubUrl, instagramUrl,
-        linkedinUrl, isOwnProfile, isFollowing) = state.data ?: Profile.empty()
+    val userPosts = viewModel.userPosts.collectAsLazyPagingItems()
+    val (userId1, username, bio, followerCount, followingCount, postCount, profilePictureUrl, bannerUrl, topSkills, gitHubUrl, instagramUrl, linkedinUrl, isOwnProfile, isFollowing) = state.data
+        ?: Profile.empty()
     val context = LocalContext.current
 
     LaunchedEffect(key1 = true) {
@@ -68,11 +69,9 @@ fun ProfileScreen(
     }
     Column(modifier = Modifier.fillMaxSize()) {
         StandardTopBar(
-            title = stringResource(id = R.string.your_profile),
-            navActions = {
+            title = stringResource(id = R.string.your_profile), navActions = {
                 IconButton(
-                    onClick = {
-                    },
+                    onClick = {},
                 ) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
@@ -80,14 +79,11 @@ fun ProfileScreen(
                         tint = Color.White
                     )
                 }
-            },
-            navController = navController
+            }, navController = navController
         )
-        if (state.isLoading)
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-
+        if (state.isLoading) CircularProgressIndicator(
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
         LazyColumn(
             Modifier.fillMaxSize()
         ) {
@@ -101,16 +97,15 @@ fun ProfileScreen(
                     bannerUrl = bannerUrl
 
                 )
-                ProfileHeaderSection(
-                    user = User(
-                        userId = userId1,
-                        profilePictureUrl = profilePictureUrl,
-                        username = username,
-                        bio = bio,
-                        followingCount = followingCount,
-                        followerCount = followerCount,
-                        postCount = postCount,
-                    ),
+                ProfileHeaderSection(user = User(
+                    userId = userId1,
+                    profilePictureUrl = profilePictureUrl,
+                    username = username,
+                    bio = bio,
+                    followingCount = followingCount,
+                    followerCount = followerCount,
+                    postCount = postCount,
+                ),
                     isOwnProfile = isOwnProfile,
                     isFollowing = isFollowing,
                     modifier = Modifier.padding(SpaceMedium),
@@ -119,18 +114,22 @@ fun ProfileScreen(
                     })
             }
 
-
-            items(5) {
-                PostItem(
-                    post = Post.dummy(),
-                    onPostClicked = {
-                        navController.navigate(Screens.PostDetailsScreen.route)
-                    },
-                    showProfileImage = false,
-                    modifier = Modifier.offset(y = -ProfilePictureSizeLarge / 2f)
-                )
+            items(userPosts) { post ->
+                post?.let {
+                    PostItem(
+                        post = it,
+                        onPostClicked = {
+                            navController.navigate(Screens.PostDetailsScreen.route)
+                        },
+                        showProfileImage = false,
+                        modifier = Modifier.offset(y = -ProfilePictureSizeLarge / 2f)
+                    )
+                }
             }
+
+
         }
+
     }
 
 }

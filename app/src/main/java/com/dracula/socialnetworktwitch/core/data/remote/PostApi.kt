@@ -1,4 +1,4 @@
-package com.dracula.socialnetworktwitch.feature_post.data.data_source.remote
+package com.dracula.socialnetworktwitch.core.data.remote
 
 import com.dracula.socialnetworktwitch.core.data.remote.dto.response.BasicApiResponse
 import com.dracula.socialnetworktwitch.core.domain.model.Post
@@ -22,6 +22,13 @@ interface PostApi {
         @Part postData: MultipartBody.Part,
         @Part postImage: MultipartBody.Part
     ): BasicApiResponse<Unit>
+
+    @GET("/api/user/posts")
+    suspend fun getUserPosts(
+        @Query("page") page: Int,
+        @Query("pageSize") pageSize: Int,
+        @Query("userId") userId: String,
+    ): List<Post>
 
     companion object {
         const val BASE_URL = "http://10.0.2.2:8080"

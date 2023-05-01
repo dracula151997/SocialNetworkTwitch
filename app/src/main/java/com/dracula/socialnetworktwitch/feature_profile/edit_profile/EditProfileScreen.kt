@@ -326,15 +326,14 @@ fun BannerEditSection(
     ) {
         StandardAsyncImage(
             url = bannerImageUrl,
-            contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(bannerHeight)
                 .clickable { onBannerClick() },
+            contentDescription = null,
         )
         StandardAsyncImage(
             url = profileImageUrl,
-            contentDescription = null,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .size(profilePictureSize)
@@ -342,7 +341,8 @@ fun BannerEditSection(
                 .border(
                     width = 1.dp, color = MaterialTheme.colors.onSurface, shape = CircleShape
                 )
-                .clickable { onProfileImageClick() }
+                .clickable { onProfileImageClick() },
+            contentDescription = null
 
         )
     }

@@ -1,7 +1,7 @@
 package com.dracula.socialnetworktwitch.di
 
 import android.content.Context
-import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.PostApi
+import com.dracula.socialnetworktwitch.core.data.remote.PostApi
 import com.dracula.socialnetworktwitch.feature_post.data.repository.PostRepositoryImpl
 import com.dracula.socialnetworktwitch.feature_post.domain.repository.PostRepository
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.CreatePostUseCase

@@ -31,7 +31,7 @@ class EditProfileViewModel @Inject constructor(
     private val getProfileUseCase: GetProfileUseCase,
     private val getSkillsUseCase: GetSkillsUseCase,
     private val updateProfileUseCase: UpdateProfileUseCase,
-    private val setSkillSelectedUseCase: SetSkillSelectedUseCase
+    private val setSkillSelectedUseCase: SetSkillSelectedUseCase,
 ) : ViewModel() {
 
     var state by mutableStateOf(EditProfileState())
