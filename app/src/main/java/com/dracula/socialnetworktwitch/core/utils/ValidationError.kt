@@ -1,3 +1,3 @@
 package com.dracula.socialnetworktwitch.core.utils
 
-abstract class Error
+abstract class ValidationError

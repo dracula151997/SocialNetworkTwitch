@@ -6,16 +6,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -40,6 +35,7 @@ fun StandardTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     showPasswordToggle: Boolean = false,
     leadingIcon: ImageVector? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
     imeAction: ImeAction = ImeAction.Next,
     isPasswordToggleDisplayed: Boolean = keyboardType == KeyboardType.Password,
     onPasswordToggleClicked: (Boolean) -> Unit = {},
@@ -58,29 +54,18 @@ fun StandardTextField(
                 PasswordVisualTransformation()
             else
                 VisualTransformation.None,
-            trailingIcon = {
-                if (isPasswordToggleDisplayed)
-                    IconButton(
-                        onClick = {
+            trailingIcon = if (isPasswordToggleDisplayed) {
+                val passwordToggleButton: @Composable () -> Unit = {
+                    TogglePasswordButton(
+                        showPasswordToggle = showPasswordToggle,
+                        onPasswordToggleClicked = {
                             onPasswordToggleClicked(!showPasswordToggle)
-                        },
-                        modifier = Modifier.semantics {
-                            testTag = Semantics.TestTags.PASSWORD_TOGGLE
-                        },
-                    ) {
-                        Icon(
-                            imageVector = if (showPasswordToggle)
-                                Icons.Filled.VisibilityOff
-                            else
-                                Icons.Filled.Visibility,
-                            contentDescription = if (showPasswordToggle)
-                                Semantics.ContentDescriptions.HIDE_PASSWORD_ICON
-                            else
-                                Semantics.ContentDescriptions.SHOW_PASSWORD_ICON,
-                            tint = Color.White
-                        )
-                    }
-            },
+                        }
+                    )
+
+                }
+                passwordToggleButton
+            } else trailingIcon,
             placeholder = {
                 Text(
                     text = hint,

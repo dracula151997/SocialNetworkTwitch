@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
+import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTextField
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.components.UserProfileItem
@@ -25,10 +26,9 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.IconSizeMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
-import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
-import com.dracula.socialnetworktwitch.feature_search.utils.SearchError
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
+import com.dracula.socialnetworktwitch.feature_search.utils.SearchValidationError
 
 @Composable
 fun SearchScreen(
@@ -52,7 +52,7 @@ fun SearchScreen(
                 text = viewModel.searchState.text,
                 hint = stringResource(id = R.string.search),
                 error = when (viewModel.searchState.error) {
-                    SearchError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                    SearchValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
                     else -> ""
                 },
                 leadingIcon = Icons.Default.Search,

@@ -19,11 +19,13 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    @Provides
+/*    @Provides
     @Singleton
-    fun provideHeadersInterceptor(token: String): HeadersInterceptor {
-        return HeadersInterceptor(token)
-    }
+    fun provideHeadersInterceptor(
+        sharedPreferences: SharedPreferences
+    ): HeadersInterceptor {
+        return HeadersInterceptor(sharedPreferences)
+    }*/
 
     @Provides
     @Singleton

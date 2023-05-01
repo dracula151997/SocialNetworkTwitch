@@ -38,7 +38,7 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
-import com.dracula.socialnetworktwitch.feature_auth.domain.utils.AuthError
+import com.dracula.socialnetworktwitch.feature_auth.domain.utils.AuthValidationError
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -95,7 +95,7 @@ fun LoginScreen(
                     id = R.string.username_or_email_hint
                 ),
                 error = when (emailState.error) {
-                    is AuthError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                    is AuthValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
                     else -> ""
                 },
                 keyboardType = KeyboardType.Email
@@ -113,7 +113,7 @@ fun LoginScreen(
                     viewModel.onEvent(LoginEvent.TogglePasswordVisibility)
                 },
                 error = when (passwordState.error) {
-                    is AuthError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                    is AuthValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
                     else -> ""
                 },
                 imeAction = ImeAction.Done,

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -21,18 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.compose.SubcomposeAsyncImage
-import coil.request.ImageRequest
-import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
+import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
 import com.dracula.socialnetworktwitch.core.presentation.theme.LightGray
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
@@ -53,15 +47,8 @@ fun ProfileHeaderSection(
             .offset(y = -profilePictureSize / 2),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        SubcomposeAsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(user.profilePictureUrl)
-                .crossfade(true)
-                .build(),
-            loading = {
-                CircularProgressIndicator()
-            },
-            contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
+        StandardAsyncImage(
+            url = user.profilePictureUrl,
             modifier = Modifier
                 .size(profilePictureSize)
                 .clip(CircleShape)
@@ -70,6 +57,7 @@ fun ProfileHeaderSection(
                     color = LightGray,
                     shape = CircleShape
                 ),
+            contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -93,7 +81,7 @@ fun ProfileHeaderSection(
         }
         Text(
             text = user.bio,
-            style = MaterialTheme.typography.body1,
+            style = MaterialTheme.typography.body2,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(SpaceMedium))

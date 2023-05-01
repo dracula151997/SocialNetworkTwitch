@@ -36,7 +36,7 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
-import com.dracula.socialnetworktwitch.feature_auth.domain.utils.AuthError
+import com.dracula.socialnetworktwitch.feature_auth.domain.utils.AuthValidationError
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -93,8 +93,8 @@ fun RegisterScreen(
                 ),
                 keyboardType = KeyboardType.Email,
                 error = when (emailState.error) {
-                    AuthError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
-                    AuthError.InvalidEmail -> stringResource(id = R.string.error_not_a_valid_email)
+                    AuthValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                    AuthValidationError.InvalidEmail -> stringResource(id = R.string.error_not_a_valid_email)
                     else -> ""
                 },
             )
@@ -106,8 +106,8 @@ fun RegisterScreen(
                     id = R.string.username_hint
                 ),
                 error = when (usernameState.error) {
-                    AuthError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
-                    AuthError.InputTooShort -> stringResource(
+                    AuthValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                    AuthValidationError.InputTooShort -> stringResource(
                         id = R.string.input_to_short,
                         Constants.MIN_USERNAME_LENGTH
                     )
@@ -122,13 +122,13 @@ fun RegisterScreen(
                 keyboardType = KeyboardType.Password,
                 hint = stringResource(id = R.string.password_hint),
                 error = when (passwordState.error) {
-                    AuthError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
-                    AuthError.InputTooShort -> stringResource(
+                    AuthValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                    AuthValidationError.InputTooShort -> stringResource(
                         id = R.string.input_to_short,
                         Constants.MIN_PASSWORD_LENGTH,
                     )
 
-                    AuthError.InvalidPassword -> stringResource(id = R.string.error_invalid_password)
+                    AuthValidationError.InvalidPassword -> stringResource(id = R.string.error_invalid_password)
                     else -> ""
                 },
                 showPasswordToggle = passwordState.isPasswordToggleVisible,

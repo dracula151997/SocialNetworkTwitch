@@ -2,8 +2,12 @@ package com.dracula.socialnetworktwitch.di
 
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.ProfileApi
 import com.dracula.socialnetworktwitch.feature_profile.data.repository.ProfileRepositoryImpl
+import com.dracula.socialnetworktwitch.feature_profile.domain.repository.GetSkillsUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.repository.ProfileRepository
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetProfileUseCase
+import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.SetSkillSelectedUseCase
+import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.UpdateProfileUseCase
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,13 +35,34 @@ object ProfileModule {
 
     @Provides
     @Singleton
-    fun provideProfileRepository(api: ProfileApi): ProfileRepository {
-        return ProfileRepositoryImpl(api)
+    fun provideProfileRepository(
+        api: ProfileApi,
+        gson: Gson
+    ): ProfileRepository {
+        return ProfileRepositoryImpl(api, gson)
     }
 
     @Provides
     @Singleton
     fun provideGetProfileUseCase(repository: ProfileRepository): GetProfileUseCase {
         return GetProfileUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetSkillsUseCase(repository: ProfileRepository): GetSkillsUseCase {
+        return GetSkillsUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUpdateProfileUseCase(repository: ProfileRepository): UpdateProfileUseCase {
+        return UpdateProfileUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSetSkillsSelectedUseCase(): SetSkillSelectedUseCase {
+        return SetSkillSelectedUseCase()
     }
 }

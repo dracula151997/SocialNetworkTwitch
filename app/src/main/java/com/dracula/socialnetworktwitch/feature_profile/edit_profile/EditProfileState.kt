@@ -20,5 +20,9 @@ data class EditProfileState(
         fun error(): EditProfileState {
             return EditProfileState(isLoading = false)
         }
+
+        fun idle(): EditProfileState {
+            return EditProfileState()
+        }
     }
 }

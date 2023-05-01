@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,26 +20,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
+import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
 import com.dracula.socialnetworktwitch.core.presentation.theme.BannerIconSize
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingSmall
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.utils.toPx
+import com.dracula.socialnetworktwitch.feature_profile.domain.model.Skill
 
 @Composable
 @Preview
 fun BannerSection(
     modifier: Modifier = Modifier,
     iconSize: Dp = BannerIconSize,
-    topSkillUrls: List<String> = emptyList(),
+    topSkillUrls: List<Skill> = emptyList(),
     githubUrl: String? = null,
     instagramUrl: String? = null,
     linkedinUrl: String? = null,
@@ -48,12 +48,8 @@ fun BannerSection(
     onLinkedinClick: () -> Unit = {},
 ) {
     BoxWithConstraints(modifier = modifier) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(bannerUrl)
-                .crossfade(true)
-                .build(),
-
+        StandardAsyncImage(
+            url = bannerUrl,
             contentDescription = Semantics.ContentDescriptions.CHANNEL_ART,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -79,7 +75,7 @@ fun BannerSection(
                 .height(iconSize)
                 .align(Alignment.BottomStart)
                 .padding(PaddingSmall),
-            topSkillUrls = topSkillUrls,
+            topSkillUrls = topSkillUrls.map { it.imageUrl },
         )
 
         SocialMediaIcons(
@@ -108,12 +104,16 @@ fun SkillsIcons(
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         topSkillUrls.forEach { skillUrl ->
-            Spacer(modifier = Modifier.width(SpaceMedium))
-            AsyncImage(
-                skillUrl,
+            StandardAsyncImage(
+                url = skillUrl,
                 contentDescription = null,
-                modifier = Modifier.height(iconSize)
+                modifier = Modifier
+                    .size(iconSize)
+                    .aspectRatio(1f),
+                contentScale = ContentScale.Crop
             )
+            Spacer(modifier = Modifier.width(SpaceMedium))
+
         }
 
     }
@@ -133,7 +133,7 @@ fun SocialMediaIcons(
     Row(
         modifier = modifier
     ) {
-        instagramUrl?.let {
+        if (!instagramUrl.isNullOrEmpty()) {
             IconButton(
                 onClick = onInstagramClick,
                 modifier = Modifier.size(iconSize)
@@ -144,9 +144,10 @@ fun SocialMediaIcons(
                     modifier = Modifier.size(15.dp)
                 )
             }
+
         }
 
-        githubUrl?.let {
+        if (!githubUrl.isNullOrEmpty())
             IconButton(
                 onClick = onGithubClick,
                 modifier = Modifier.size(iconSize)
@@ -158,9 +159,8 @@ fun SocialMediaIcons(
                 )
             }
 
-        }
 
-        linkedinUrl?.let {
+        if (!linkedinUrl.isNullOrEmpty())
             IconButton(
                 onClick = onLinkedinClick,
                 modifier = Modifier.size(iconSize)
@@ -170,9 +170,8 @@ fun SocialMediaIcons(
                     contentDescription = Semantics.ContentDescriptions.KOTLIN,
                     modifier = Modifier.size(15.dp)
                 )
-            }
 
-        }
+            }
 
     }
 }

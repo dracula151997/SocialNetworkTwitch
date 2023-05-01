@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
+import com.dracula.socialnetworktwitch.core.presentation.components.ClearButton
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTextField
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
@@ -53,12 +54,13 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.utils.CropActivityResultContract
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
+import com.dracula.socialnetworktwitch.feature_profile.domain.model.Skill
+import com.dracula.socialnetworktwitch.feature_profile.domain.utils.EditProfileValidationError
 import com.dracula.socialnetworktwitch.feature_profile.edit_profile.components.Chip
-import com.dracula.socialnetworktwitch.feature_profile.utils.EditProfileError
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import kotlinx.coroutines.flow.collectLatest
-import kotlin.random.Random
+import timber.log.Timber
 
 @Composable
 fun EditProfileScreen(
@@ -71,9 +73,10 @@ fun EditProfileScreen(
     val context = LocalContext.current
     val state = viewModel.state
     val profile = state.profile ?: Profile.empty()
+    val skillsState = viewModel.skillsState
 
     val cropProfileImageLauncher =
-        rememberLauncherForActivityResult(CropActivityResultContract(16f, 9f)) {
+        rememberLauncherForActivityResult(CropActivityResultContract(2f, 3f)) {
             viewModel.onEvent(EditProfileEvent.CropProfileImage(it))
         }
     val cropBannerImageLauncher =
@@ -92,6 +95,7 @@ fun EditProfileScreen(
 
     LaunchedEffect(key1 = true) {
         viewModel.onEvent(EditProfileEvent.GetProfile(userId))
+        viewModel.onEvent(EditProfileEvent.GetSkills)
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.SnackbarEvent -> scaffoldState.snackbarHostState.showSnackbar(
@@ -99,6 +103,8 @@ fun EditProfileScreen(
                         context
                     )
                 )
+
+                is UiEvent.NavigateUp -> navController.navigateUp()
 
                 else -> Unit
             }
@@ -108,26 +114,22 @@ fun EditProfileScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         StandardTopBar(
-            title = stringResource(id = R.string.edit_your_profile),
-            navActions = {
-                IconButton(onClick = {}) {
+            title = stringResource(id = R.string.edit_your_profile), navActions = {
+                IconButton(onClick = { viewModel.onEvent(EditProfileEvent.UpdateProfile) }) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = stringResource(id = R.string.save_changes),
                         tint = MaterialTheme.colors.onBackground
                     )
                 }
-            },
-            showBackButton = true,
-            navController = navController
+            }, showBackButton = true, navController = navController
         )
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            BannerEditSection(
-                bannerImageUrl = if (viewModel.bannerImageUri == null) profile.bannerUrl else viewModel.bannerImageUri,
+            BannerEditSection(bannerImageUrl = if (viewModel.bannerImageUri == null) profile.bannerUrl else viewModel.bannerImageUri,
                 profileImageUrl = if (viewModel.profileImageUri == null) profile.profilePictureUrl else viewModel.profileImageUri,
                 profilePictureSize = profilePictureSize,
                 onBannerClick = {
@@ -135,8 +137,7 @@ fun EditProfileScreen(
                 },
                 onProfileImageClick = {
                     pickProfileImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                }
-            )
+                })
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -147,7 +148,7 @@ fun EditProfileScreen(
                     text = viewModel.usernameState.text,
                     hint = stringResource(id = R.string.username),
                     error = when (viewModel.usernameState.error) {
-                        EditProfileError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                        EditProfileValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
                         else -> ""
                     },
                     leadingIcon = Icons.Default.Person,
@@ -161,23 +162,26 @@ fun EditProfileScreen(
                     text = viewModel.githubTextFieldState.text,
                     hint = stringResource(id = R.string.github_profile_url),
                     error = when (viewModel.githubTextFieldState.error) {
-                        EditProfileError.FieldEmpty -> stringResource(
-                            id = R.string.error_this_field_cannot_be_empty
-                        )
-
+                        EditProfileValidationError.InvalidLink -> stringResource(id = R.string.invalid_github_link)
                         else -> ""
                     },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_github_icon_1),
                     onValueChanged = {
+                        Timber.d("onValueChanged: GITHUB = $it")
                         viewModel.onEvent(EditProfileEvent.GithubUrlEntered(it))
                     },
+                    trailingIcon = {
+                        ClearButton {
+                            viewModel.onEvent(EditProfileEvent.ClearGithubUrlText)
+                        }
+                    }
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
                     text = viewModel.instagramTextFieldState.text,
                     hint = stringResource(id = R.string.instagram_profile_url),
                     error = when (viewModel.instagramTextFieldState.error) {
-                        EditProfileError.FieldEmpty -> stringResource(
+                        EditProfileValidationError.FieldEmpty -> stringResource(
                             id = R.string.error_this_field_cannot_be_empty
                         )
 
@@ -188,13 +192,18 @@ fun EditProfileScreen(
                         viewModel.onEvent(EditProfileEvent.InstagramUrlEntered(it))
 
                     },
+                    trailingIcon = {
+                        ClearButton {
+                            viewModel.onEvent(EditProfileEvent.ClearInstagramUrlText)
+                        }
+                    }
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
                     text = viewModel.linkedInTextFieldState.text,
                     hint = stringResource(id = R.string.linked_in_profile_url),
                     error = when (viewModel.linkedInTextFieldState.error) {
-                        EditProfileError.FieldEmpty -> stringResource(
+                        EditProfileValidationError.FieldEmpty -> stringResource(
                             id = R.string.error_this_field_cannot_be_empty
 
                         )
@@ -206,13 +215,19 @@ fun EditProfileScreen(
                         viewModel.onEvent(EditProfileEvent.LinkedinUrlEntered(it))
 
                     },
+                    trailingIcon = {
+                        if (viewModel.linkedInTextFieldState.text.isNotEmpty())
+                            ClearButton {
+                                viewModel.onEvent(EditProfileEvent.ClearLinkedinUrlText)
+                            }
+                    }
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
                     text = viewModel.bioState.text,
                     hint = stringResource(id = R.string.your_bio),
                     error = when (viewModel.bioState.error) {
-                        EditProfileError.FieldEmpty -> stringResource(
+                        EditProfileValidationError.FieldEmpty -> stringResource(
                             id = R.string.error_this_field_cannot_be_empty
                         )
 
@@ -225,6 +240,11 @@ fun EditProfileScreen(
                         viewModel.onEvent(EditProfileEvent.BioEntered(it))
 
                     },
+                    trailingIcon = {
+                        ClearButton {
+                            viewModel.onEvent(EditProfileEvent.ClearBio)
+                        }
+                    }
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 Text(
@@ -234,33 +254,29 @@ fun EditProfileScreen(
                     modifier = Modifier.align(CenterHorizontally)
                 )
                 Spacer(modifier = Modifier.height(SpaceLarge))
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    mainAxisAlignment = MainAxisAlignment.Center,
-                    mainAxisSpacing = SpaceMedium,
-                    crossAxisSpacing = SpaceMedium
-                ) {
-                    listOf(
-                        "Kotlin",
-                        "JavaScript",
-                        "Assembly",
-                        "C++",
-                        "C",
-                        "C#",
-                        "Dart",
-                        "TypeScript",
-                        "Python",
-                    ).forEach {
-                        Chip(
-                            text = it,
-                            selected = Random.nextInt(2) == 0
-                        ) {
-
-                        }
-                    }
+                SkillsFlowRow(skillsState, modifier = Modifier.fillMaxWidth()) {
+                    viewModel.onEvent(EditProfileEvent.SkillSelected(skill = it))
                 }
             }
 
+        }
+    }
+}
+
+@Composable
+private fun SkillsFlowRow(
+    skillsState: SkillsState, modifier: Modifier = Modifier, onSkillClicked: (skill: Skill) -> Unit
+) {
+    FlowRow(
+        modifier = modifier,
+        mainAxisAlignment = MainAxisAlignment.Center,
+        mainAxisSpacing = SpaceMedium,
+        crossAxisSpacing = SpaceMedium
+    ) {
+        skillsState.skills.forEach { skill ->
+            Chip(text = skill.name,
+                selected = skillsState.selectedSkills.any { it.name == skill.name },
+                onChipClick = { onSkillClicked(skill) })
         }
     }
 }
@@ -296,9 +312,7 @@ fun BannerEditSection(
                 .size(profilePictureSize)
                 .clip(CircleShape)
                 .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colors.onSurface,
-                    shape = CircleShape
+                    width = 1.dp, color = MaterialTheme.colors.onSurface, shape = CircleShape
                 )
                 .clickable { onProfileImageClick() }
 

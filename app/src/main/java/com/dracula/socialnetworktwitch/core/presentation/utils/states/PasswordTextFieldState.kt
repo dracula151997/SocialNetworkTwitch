@@ -1,9 +1,9 @@
 package com.dracula.socialnetworktwitch.core.presentation.utils.states
 
-import com.dracula.socialnetworktwitch.core.utils.Error
+import com.dracula.socialnetworktwitch.core.utils.ValidationError
 
 data class PasswordTextFieldState(
     val text: String = "",
-    val error: Error? = null,
+    val error: ValidationError? = null,
     val isPasswordToggleVisible: Boolean = false,
 )

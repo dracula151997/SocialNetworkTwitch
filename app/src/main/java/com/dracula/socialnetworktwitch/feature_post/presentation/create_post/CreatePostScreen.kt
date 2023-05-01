@@ -36,7 +36,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
@@ -48,7 +48,7 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
 import com.dracula.socialnetworktwitch.core.utils.CropActivityResultContract
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
-import com.dracula.socialnetworktwitch.feature_post.domain.util.CreatePostError
+import com.dracula.socialnetworktwitch.feature_post.domain.util.CreatePostValidationError
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -128,8 +128,8 @@ fun CreatePostScreen(
                     )
                     imageUri?.let { uri ->
                         Image(
-                            painter = rememberImagePainter(
-                                request = ImageRequest.Builder(LocalContext.current)
+                            painter = rememberAsyncImagePainter(
+                                model = ImageRequest.Builder(LocalContext.current)
                                     .data(uri)
                                     .build()
                             ),
@@ -146,7 +146,7 @@ fun CreatePostScreen(
                     hint = stringResource(id = R.string.description),
                     singleLine = false,
                     error = when (descriptionState.error) {
-                        is CreatePostError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                        is CreatePostValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
                         else -> ""
                     },
                     maxLines = 5,

@@ -24,6 +24,7 @@ object Semantics {
         const val CSHARP = "C#"
         const val KOTLIN = "Kotlin"
         const val EDIT_PROFILE_ICON = "Edit Profile"
+        const val CLEAR = "Clear"
     }
 
     object TestTags {
