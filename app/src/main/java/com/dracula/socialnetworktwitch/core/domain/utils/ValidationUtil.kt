@@ -5,6 +5,11 @@ import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.feature_auth.domain.utils.AuthValidationError
 
 object ValidationUtil {
+    private val githubProfileUrlRegex = "^(https?://)?github.com/([A-Za-z0-9_-]+)/?\$".toRegex()
+    private val linkedinProfileUrlRegex =
+        "http(s)?://(\\w+\\.)?linkedin\\.com/in/[A-z0-9_-]+/?".toRegex()
+    private val instagramProfileUrlRegex =
+        "^(http://)?instagram\\.com/[a-z\\d-_]{1,255}\\s*\$".toRegex()
 
     fun validateEmail(email: String): AuthValidationError? {
         val trimmedEmail = email.trim()
@@ -46,14 +51,23 @@ object ValidationUtil {
 
     fun isGithubLinkValid(link: String?): Boolean {
         if (!link.isNullOrEmpty())
-            return link.startsWith("https://github.com") || link.startsWith("http://github.com")
-                    || link.startsWith("github.com")
+            return githubProfileUrlRegex.matches(link)
 
         return true
 
     }
 
-    fun isValidLink(link: String): Boolean {
-        return Patterns.WEB_URL.matcher(link).matches()
+    fun isLinkedinLinkValid(link: String?): Boolean {
+        if (!link.isNullOrEmpty())
+            return linkedinProfileUrlRegex.matches(link)
+
+        return true
+    }
+
+    fun isInstagramLinkValid(link: String?): Boolean {
+        if (!link.isNullOrEmpty())
+            return instagramProfileUrlRegex.matches(link)
+
+        return true
     }
 }

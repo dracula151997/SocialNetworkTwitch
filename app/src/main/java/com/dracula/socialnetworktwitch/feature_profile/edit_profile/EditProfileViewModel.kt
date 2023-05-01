@@ -137,6 +137,13 @@ class EditProfileViewModel @Inject constructor(
             if (uiResult.hasGithubError)
                 githubTextFieldState = githubTextFieldState.copy(error = uiResult.githubError)
 
+            if (uiResult.hasInstagramError)
+                instagramTextFieldState =
+                    instagramTextFieldState.copy(error = uiResult.instagramError)
+
+            if (uiResult.hasLinkedinError)
+                linkedInTextFieldState = linkedInTextFieldState.copy(error = uiResult.linkedinError)
+
             when (val result = uiResult.result) {
                 is ApiResult.Success -> {
                     _eventFlow.emit(UiEvent.SnackbarEvent(UiText.StringResource(R.string.profile_updated_success)))

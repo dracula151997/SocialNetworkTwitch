@@ -3,6 +3,10 @@ package com.dracula.socialnetworktwitch.feature_profile.edit_profile
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -60,8 +64,8 @@ import com.dracula.socialnetworktwitch.feature_profile.edit_profile.components.C
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import kotlinx.coroutines.flow.collectLatest
-import timber.log.Timber
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun EditProfileScreen(
     navController: NavController,
@@ -167,12 +171,17 @@ fun EditProfileScreen(
                     },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_github_icon_1),
                     onValueChanged = {
-                        Timber.d("onValueChanged: GITHUB = $it")
                         viewModel.onEvent(EditProfileEvent.GithubUrlEntered(it))
                     },
                     trailingIcon = {
-                        ClearButton {
-                            viewModel.onEvent(EditProfileEvent.ClearGithubUrlText)
+                        AnimatedVisibility(
+                            visible = viewModel.githubTextFieldState.text.isNotEmpty(),
+                            enter = scaleIn(),
+                            exit = scaleOut()
+                        ) {
+                            ClearButton {
+                                viewModel.onEvent(EditProfileEvent.ClearGithubUrlText)
+                            }
                         }
                     }
                 )
@@ -193,9 +202,16 @@ fun EditProfileScreen(
 
                     },
                     trailingIcon = {
-                        ClearButton {
-                            viewModel.onEvent(EditProfileEvent.ClearInstagramUrlText)
+                        AnimatedVisibility(
+                            visible = viewModel.instagramTextFieldState.text.isNotEmpty(),
+                            enter = scaleIn(),
+                            exit = scaleOut()
+                        ) {
+                            ClearButton {
+                                viewModel.onEvent(EditProfileEvent.ClearInstagramUrlText)
+                            }
                         }
+
                     }
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
@@ -216,10 +232,16 @@ fun EditProfileScreen(
 
                     },
                     trailingIcon = {
-                        if (viewModel.linkedInTextFieldState.text.isNotEmpty())
+                        AnimatedVisibility(
+                            viewModel.linkedInTextFieldState.text.isNotEmpty(),
+                            enter = scaleIn(),
+                            exit = scaleOut()
+                        ) {
                             ClearButton {
                                 viewModel.onEvent(EditProfileEvent.ClearLinkedinUrlText)
                             }
+                        }
+
                     }
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
@@ -241,8 +263,14 @@ fun EditProfileScreen(
 
                     },
                     trailingIcon = {
-                        ClearButton {
-                            viewModel.onEvent(EditProfileEvent.ClearBio)
+                        AnimatedVisibility(
+                            visible = viewModel.bioState.text.isNotEmpty(),
+                            enter = scaleIn(),
+                            exit = scaleOut()
+                        ) {
+                            ClearButton {
+                                viewModel.onEvent(EditProfileEvent.ClearBio)
+                            }
                         }
                     }
                 )

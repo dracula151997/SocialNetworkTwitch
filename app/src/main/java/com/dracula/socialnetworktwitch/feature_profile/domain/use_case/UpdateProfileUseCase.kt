@@ -19,11 +19,17 @@ class UpdateProfileUseCase(
             if (updateProfileRequest.username.isBlank()) EditProfileValidationError.FieldEmpty else null
         val githubError =
             if (!ValidationUtil.isGithubLinkValid(updateProfileRequest.gitHubUrl)) EditProfileValidationError.InvalidLink else null
+        val instagramError =
+            if (!ValidationUtil.isInstagramLinkValid(updateProfileRequest.instagramUrl)) EditProfileValidationError.InvalidLink else null
+        val linkedinError =
+            if (!ValidationUtil.isLinkedinLinkValid(updateProfileRequest.linkedInUrl)) EditProfileValidationError.InvalidLink else null
 
-        if (usernameError != null || githubError != null) {
+        if (usernameError != null || githubError != null || instagramError != null || linkedinError != null) {
             return EditProfileResult.error(
                 usernameError = usernameError,
-                githubError = githubError
+                githubError = githubError,
+                instagramError = instagramError,
+                linkedinError = linkedinError
             )
         }
         val result = repository.updateProfile(

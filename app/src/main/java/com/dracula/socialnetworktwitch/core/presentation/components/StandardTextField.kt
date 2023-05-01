@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.theme.IconSizeMedium
+import com.dracula.socialnetworktwitch.core.presentation.theme.LightGray
 
 @Composable
 fun StandardTextField(
@@ -69,7 +70,8 @@ fun StandardTextField(
             placeholder = {
                 Text(
                     text = hint,
-                    style = MaterialTheme.typography.body1
+                    style = MaterialTheme.typography.body1,
+                    color = LightGray
                 )
             },
             keyboardActions = keyboardActions,
