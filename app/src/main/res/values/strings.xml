@@ -54,4 +54,5 @@
     <string name="profile_updated_success">The profile has been updated</string>
     <string name="error_skill_max_skills">You must selecte only 3 skills</string>
     <string name="invalid_github_link">Invalid github link</string>
+    <string name="read_less">Read less</string>
 </resources>

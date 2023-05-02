@@ -2,7 +2,7 @@ package com.dracula.socialnetworktwitch.core.utils
 
 object Constants {
     const val SPLASH_SCREEN_DURATION = 3000L
-    const val MAX_POST_DESCRIPTION_LINES = 3
+    const val MAX_POST_DESCRIPTION_LINES = 1
     const val MIN_USERNAME_LENGTH = 5
     const val MIN_PASSWORD_LENGTH = 5
     const val DEFAULT_SHARED_PREFERENCE_NAME = "app_sharedpref"
@@ -11,6 +11,7 @@ object Constants {
 
     object SharedPrefKeys{
         const val KEY_TOKEN = "token"
+        const val KEY_USER_ID = "user_id"
     }
 
     object NavArguments {

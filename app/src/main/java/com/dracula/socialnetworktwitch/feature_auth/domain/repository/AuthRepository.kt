@@ -7,6 +7,8 @@ interface AuthRepository {
 
     suspend fun login(email: String, password: String): UnitApiResult
 
-    suspend fun authenticate() : UnitApiResult
+    suspend fun authenticate(): UnitApiResult
+
+    val ownUserId: String
 
 }

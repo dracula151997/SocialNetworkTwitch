@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.R
+import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
@@ -32,6 +33,7 @@ class EditProfileViewModel @Inject constructor(
     private val getSkillsUseCase: GetSkillsUseCase,
     private val updateProfileUseCase: UpdateProfileUseCase,
     private val setSkillSelectedUseCase: SetSkillSelectedUseCase,
+    private val getOwnUserIdUseCase: GetOwnUserIdUseCase,
 ) : ViewModel() {
 
     var state by mutableStateOf(EditProfileState())
@@ -161,10 +163,10 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
-    private fun getProfile(userId: String) {
+    private fun getProfile(userId: String?) {
         viewModelScope.launch {
             state = EditProfileState.loading()
-            when (val apiResult = getProfileUseCase(userId)) {
+            when (val apiResult = getProfileUseCase(userId ?: getOwnUserIdUseCase())) {
                 is ApiResult.Success -> {
                     val profile = apiResult.data ?: kotlin.run {
                         _eventFlow.emit(

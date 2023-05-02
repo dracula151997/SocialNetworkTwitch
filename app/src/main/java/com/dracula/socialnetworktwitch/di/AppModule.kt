@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.dracula.socialnetworktwitch.core.data.remote.interceptors.HeadersInterceptor
+import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
 import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.feature_auth.domain.repository.AuthRepository
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -18,15 +20,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
-/*    @Provides
-    @Singleton
-    fun provideHeadersInterceptor(
-        sharedPreferences: SharedPreferences
-    ): HeadersInterceptor {
-        return HeadersInterceptor(sharedPreferences)
-    }*/
-
     @Provides
     @Singleton
     fun provideGson(): Gson {
@@ -63,6 +56,14 @@ object AppModule {
     @Singleton
     fun provideJwtToken(sharedPreferences: SharedPreferences): String {
         return sharedPreferences.getString(Constants.SharedPrefKeys.KEY_TOKEN, "").orEmpty()
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetOwnUserId(
+        repository: AuthRepository
+    ): GetOwnUserIdUseCase {
+        return GetOwnUserIdUseCase(repository)
     }
 
 }

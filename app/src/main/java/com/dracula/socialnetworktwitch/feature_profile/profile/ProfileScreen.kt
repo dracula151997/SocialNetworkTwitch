@@ -19,13 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
@@ -69,7 +67,8 @@ fun ProfileScreen(
     }
     Column(modifier = Modifier.fillMaxSize()) {
         StandardTopBar(
-            title = stringResource(id = R.string.your_profile), navActions = {
+            title = username,
+            navActions = {
                 IconButton(
                     onClick = {},
                 ) {
@@ -79,7 +78,8 @@ fun ProfileScreen(
                         tint = Color.White
                     )
                 }
-            }, navController = navController
+            },
+            navController = navController
         )
         if (state.isLoading) CircularProgressIndicator(
             modifier = Modifier.align(Alignment.CenterHorizontally)

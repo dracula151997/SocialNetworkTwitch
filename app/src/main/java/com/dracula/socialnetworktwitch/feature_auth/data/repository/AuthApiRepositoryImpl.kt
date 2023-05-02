@@ -7,9 +7,9 @@ import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.UnitApiResult
+import com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote.AuthApi
 import com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote.dto.request.CreateAccountRequest
 import com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote.dto.request.LoginRequest
-import com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote.AuthApi
 import com.dracula.socialnetworktwitch.feature_auth.domain.repository.AuthRepository
 import okio.IOException
 import retrofit2.HttpException
@@ -51,6 +51,7 @@ class AuthApiRepositoryImpl(
                 response.data?.let { authResponse ->
                     sharedPreferences.edit {
                         putString(Constants.SharedPrefKeys.KEY_TOKEN, authResponse.token)
+                        putString(Constants.SharedPrefKeys.KEY_USER_ID, authResponse.userId)
                     }
                 }
 
@@ -85,4 +86,7 @@ class AuthApiRepositoryImpl(
             ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
         }
     }
+
+    override val ownUserId: String
+        get() = sharedPreferences.getString(Constants.SharedPrefKeys.KEY_USER_ID, "").orEmpty()
 }
