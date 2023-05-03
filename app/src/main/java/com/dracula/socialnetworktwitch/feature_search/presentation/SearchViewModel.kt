@@ -10,6 +10,7 @@ import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
+import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.ToggleFollowStateForUserUseCase
 import com.dracula.socialnetworktwitch.feature_search.domain.SearchUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -21,7 +22,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val searchUserUseCase: SearchUserUseCase
+    private val searchUserUseCase: SearchUserUseCase,
+    private val toggleFollowStateForUserUseCase: ToggleFollowStateForUserUseCase
 ) : ViewModel() {
 
     var searchFieldState by mutableStateOf(StandardTextFieldState())
@@ -41,10 +43,38 @@ class SearchViewModel @Inject constructor(
                 searchFieldState = searchFieldState.copy(text = event.query)
                 search(event.query)
             }
+
+            is SearchEvent.ToggleFollowState -> toggleFollowStateForUser(userId = event.userId)
+        }
+    }
+
+    private fun toggleFollowStateForUser(userId: String) {
+        viewModelScope.launch {
+            val isFollowing = state.userItems.find { it.userId == userId }?.isFollowing == true
+            state = state.copy(userItems = state.userItems.map {
+                if (it.userId == userId) it.copy(isFollowing = !it.isFollowing)
+                else it
+            })
+            val result = toggleFollowStateForUserUseCase(
+                userId = userId, isFollowing = isFollowing
+            )
+            when (result) {
+                is ApiResult.Success -> Unit
+
+                is ApiResult.Error -> {
+                    state = state.copy(userItems = state.userItems.map {
+                        if (it.userId == userId) it.copy(isFollowing = isFollowing)
+                        else it
+                    })
+                    _event.emit(UiEvent.SnackbarEvent(uiText = result.uiText.orUnknownError()))
+                }
+
+            }
         }
     }
 
     private fun search(query: String) {
+        searchJob?.cancel()
         searchJob = viewModelScope.launch {
             delay(Constants.SEARCH_DELAY)
             val response = searchUserUseCase(searchFieldState.text)

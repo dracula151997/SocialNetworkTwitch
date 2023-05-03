@@ -26,4 +26,8 @@ interface ProfileRepository {
     fun getUserPosts(userId: String): Flow<PagingData<Post>>
 
     suspend fun searchUser(username: String): ApiResult<List<UserItem>>
+
+    suspend fun followUser(userId: String): UnitApiResult
+
+    suspend fun unfollowUser(userId: String): UnitApiResult
 }

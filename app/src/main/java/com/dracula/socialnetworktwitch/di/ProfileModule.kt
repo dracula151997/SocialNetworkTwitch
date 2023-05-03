@@ -8,6 +8,7 @@ import com.dracula.socialnetworktwitch.feature_profile.domain.repository.Profile
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetProfileUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetUserPostsUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.SetSkillSelectedUseCase
+import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.ToggleFollowStateForUserUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.UpdateProfileUseCase
 import com.dracula.socialnetworktwitch.feature_search.domain.SearchUserUseCase
 import com.google.gson.Gson
@@ -80,5 +81,11 @@ object ProfileModule {
     @Singleton
     fun provideSearchUsersUseCase(repository: ProfileRepository): SearchUserUseCase {
         return SearchUserUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideToggleFollowStateForUserUseCase(repository: ProfileRepository): ToggleFollowStateForUserUseCase {
+        return ToggleFollowStateForUserUseCase(repository)
     }
 }

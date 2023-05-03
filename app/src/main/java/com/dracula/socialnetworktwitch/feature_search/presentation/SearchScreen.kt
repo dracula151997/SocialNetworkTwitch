@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
@@ -96,12 +97,17 @@ fun SearchScreen(
                             followingCount = 0,
                             postCount = 0
                         ), actionIcon = {
-                            Icon(
-                                imageVector = if (user.isFollowing) Icons.Default.PersonRemove else Icons.Default.PersonAdd,
-                                contentDescription = null,
-                                tint = MaterialTheme.colors.onBackground,
-                                modifier = Modifier.size(IconSizeMedium)
-                            )
+                            IconButton(onClick = {
+                                viewModel.onEvent(SearchEvent.ToggleFollowState(userId = user.userId))
+                            }) {
+                                Icon(
+                                    imageVector = if (user.isFollowing) Icons.Default.PersonRemove else Icons.Default.PersonAdd,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colors.onBackground,
+                                    modifier = Modifier.size(IconSizeMedium)
+                                )
+
+                            }
 
                         }, onItemClick = {
                             navController.navigate(Screens.ProfileScreen.createRoute(userId = user.userId))

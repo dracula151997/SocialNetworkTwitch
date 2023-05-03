@@ -15,6 +15,7 @@ import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.UnitApiResult
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.paging.PostSource
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.ProfileApi
+import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.dto.request.FollowUpdateRequest
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.dto.request.UpdateProfileRequest
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.dto.response.toSkillList
 import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
@@ -129,6 +130,40 @@ class ProfileRepositoryImpl(
             val response = api.searchUser(username)
             if (response.successful) {
                 ApiResult.Success(response.data?.map { it.toUserItem() })
+            } else {
+                response.message?.let { msg ->
+                    ApiResult.Error(UiText.DynamicString(msg))
+                } ?: ApiResult.Error(UiText.unknownError())
+            }
+        } catch (e: IOException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_couldnot_reach_server))
+        } catch (e: HttpException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
+        }
+    }
+
+    override suspend fun followUser(userId: String): UnitApiResult {
+        return try {
+            val response = api.followUser(FollowUpdateRequest(userId))
+            if (response.successful) {
+                ApiResult.Success(Unit)
+            } else {
+                response.message?.let { msg ->
+                    ApiResult.Error(UiText.DynamicString(msg))
+                } ?: ApiResult.Error(UiText.unknownError())
+            }
+        } catch (e: IOException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_couldnot_reach_server))
+        } catch (e: HttpException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
+        }
+    }
+
+    override suspend fun unfollowUser(userId: String): UnitApiResult {
+        return try {
+            val response = api.unfollowUser(userId)
+            if (response.successful) {
+                ApiResult.Success(Unit)
             } else {
                 response.message?.let { msg ->
                     ApiResult.Error(UiText.DynamicString(msg))
