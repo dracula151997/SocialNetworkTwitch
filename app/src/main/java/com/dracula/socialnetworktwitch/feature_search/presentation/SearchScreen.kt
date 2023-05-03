@@ -1,5 +1,6 @@
 package com.dracula.socialnetworktwitch.feature_search.presentation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,13 +8,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.PersonRemove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -27,73 +35,84 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
-import com.dracula.socialnetworktwitch.feature_search.utils.SearchValidationError
+import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SearchScreen(
     navController: NavController,
+    scaffoldState: ScaffoldState,
+    modifier: Modifier = Modifier,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        StandardTopBar(
-            title = stringResource(id = R.string.search_for_users),
-            showBackButton = true,
-            navController = navController
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(PaddingLarge)
-        ) {
-            StandardTextField(
-                text = viewModel.searchState.text,
-                hint = stringResource(id = R.string.search),
-                error = when (viewModel.searchState.error) {
-                    SearchValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
-                    else -> ""
-                },
-                leadingIcon = Icons.Default.Search,
-                onValueChanged = {
-                    viewModel.setSearch(
-                        StandardTextFieldState(text = it)
+    val state = viewModel.state
+    val searchFieldState = viewModel.searchFieldState
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = true) {
+        viewModel.event.collectLatest { event ->
+            when (event) {
+                is UiEvent.SnackbarEvent -> scaffoldState.snackbarHostState.showSnackbar(
+                    message = event.uiText.asString(
+                        context
                     )
-                }
+                )
+
+                else -> Unit
+            }
+        }
+    }
+    Box(modifier = modifier) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            StandardTopBar(
+                title = stringResource(id = R.string.search_for_users),
+                showBackButton = true,
+                navController = navController
             )
-            Spacer(modifier = Modifier.height(SpaceLarge))
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(PaddingLarge)
             ) {
-                items(10) {
-                    UserProfileItem(
-                        user = User(
-                            userId = "645012f3c2f7a23b6a6feb63",
-                            profilePictureUrl = "",
-                            username = "Philipp Lackner",
-                            bio = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed\n" +
-                                    "diam nonumy eirmod tempor invidunt ut labore et dolore \n" +
-                                    "magna aliquyam erat, sed diam voluptua",
-                            followerCount = 234,
-                            followingCount = 534,
-                            postCount = 65
-                        ),
-                        actionIcon = {
+                StandardTextField(text = searchFieldState.text,
+                    hint = stringResource(id = R.string.search),
+                    leadingIcon = Icons.Default.Search,
+                    onValueChanged = {
+                        viewModel.onEvent(SearchEvent.OnSearch(it))
+                    })
+                Spacer(modifier = Modifier.height(SpaceLarge))
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(state.userItems) { user ->
+                        UserProfileItem(user = User(
+                            userId = user.userId,
+                            profilePictureUrl = user.profilePictureUrl,
+                            username = user.username,
+                            bio = user.bio,
+                            followerCount = 0,
+                            followingCount = 0,
+                            postCount = 0
+                        ), actionIcon = {
                             Icon(
-                                imageVector = Icons.Default.PersonAdd,
+                                imageVector = if (user.isFollowing) Icons.Default.PersonRemove else Icons.Default.PersonAdd,
                                 contentDescription = null,
                                 tint = MaterialTheme.colors.onBackground,
                                 modifier = Modifier.size(IconSizeMedium)
                             )
-                        },
-                        onItemClick = {
-                            navController.navigate(Screens.ProfileScreen.createRoute(userId = "6447491868ca6478aaf6bb17"))
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(SpaceMedium))
+
+                        }, onItemClick = {
+                            navController.navigate(Screens.ProfileScreen.createRoute(userId = user.userId))
+                        })
+                        Spacer(modifier = Modifier.height(SpaceMedium))
+                    }
                 }
             }
         }
+        if (state.isLoading) CircularProgressIndicator(
+            modifier = Modifier.align(Alignment.Center)
+        )
     }
 }

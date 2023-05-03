@@ -8,6 +8,7 @@ import androidx.paging.PagingData
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.data.remote.PostApi
 import com.dracula.socialnetworktwitch.core.domain.model.Post
+import com.dracula.socialnetworktwitch.core.domain.model.UserItem
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiText
@@ -121,5 +122,22 @@ class ProfileRepositoryImpl(
         ) {
             PostSource(api = postApi, source = PostSource.Source.Profile(userId))
         }.flow
+    }
+
+    override suspend fun searchUser(username: String): ApiResult<List<UserItem>> {
+        return try {
+            val response = api.searchUser(username)
+            if (response.successful) {
+                ApiResult.Success(response.data?.map { it.toUserItem() })
+            } else {
+                response.message?.let { msg ->
+                    ApiResult.Error(UiText.DynamicString(msg))
+                } ?: ApiResult.Error(UiText.unknownError())
+            }
+        } catch (e: IOException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_couldnot_reach_server))
+        } catch (e: HttpException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
+        }
     }
 }

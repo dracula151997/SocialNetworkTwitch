@@ -2,6 +2,7 @@ package com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote
 
 import com.dracula.socialnetworktwitch.core.data.remote.dto.response.BasicApiResponse
 import com.dracula.socialnetworktwitch.core.data.remote.dto.response.UnitApiResponse
+import com.dracula.socialnetworktwitch.core.data.remote.dto.response.UserItemResponse
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.dto.response.ProfileResponse
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.dto.response.SkillDto
 import okhttp3.MultipartBody
@@ -27,6 +28,11 @@ interface ProfileApi {
         @Part profilePicture: MultipartBody.Part?,
         @Part updateProfileData: MultipartBody.Part
     ): UnitApiResponse
+
+    @GET("/api/user/search")
+    suspend fun searchUser(
+        @Query("query") username: String
+    ): BasicApiResponse<List<UserItemResponse>>
 
 
     companion object {

@@ -3,6 +3,7 @@ package com.dracula.socialnetworktwitch.feature_profile.domain.repository
 import android.net.Uri
 import androidx.paging.PagingData
 import com.dracula.socialnetworktwitch.core.domain.model.Post
+import com.dracula.socialnetworktwitch.core.domain.model.UserItem
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UnitApiResult
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.dto.request.UpdateProfileRequest
@@ -23,4 +24,6 @@ interface ProfileRepository {
     ): UnitApiResult
 
     fun getUserPosts(userId: String): Flow<PagingData<Post>>
+
+    suspend fun searchUser(username: String): ApiResult<List<UserItem>>
 }

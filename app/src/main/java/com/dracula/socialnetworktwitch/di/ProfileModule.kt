@@ -9,6 +9,7 @@ import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetProfil
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetUserPostsUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.SetSkillSelectedUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.UpdateProfileUseCase
+import com.dracula.socialnetworktwitch.feature_search.domain.SearchUserUseCase
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -73,5 +74,11 @@ object ProfileModule {
     @Singleton
     fun provideGetUserPostsUseCase(repository: ProfileRepository): GetUserPostsUseCase {
         return GetUserPostsUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSearchUsersUseCase(repository: ProfileRepository): SearchUserUseCase {
+        return SearchUserUseCase(repository)
     }
 }

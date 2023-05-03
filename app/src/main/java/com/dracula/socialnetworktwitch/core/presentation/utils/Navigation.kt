@@ -102,7 +102,10 @@ fun Navigation(
         }
 
         composable(route = Screens.SearchScreen.route) {
-            SearchScreen(navController = navController)
+            SearchScreen(
+                navController = navController,
+                scaffoldState = scaffoldState
+            )
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.dracula.socialnetworktwitch.core.presentation.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -8,11 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.theme.IconSizeMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeSmall
@@ -44,8 +41,8 @@ fun UserProfileItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.philipp),
+            StandardAsyncImage(
+                url = user.profilePictureUrl,
                 contentDescription = null,
                 modifier = Modifier
                     .size(ProfilePictureSizeSmall)
