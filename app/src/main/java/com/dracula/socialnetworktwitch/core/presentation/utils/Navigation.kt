@@ -62,7 +62,9 @@ fun Navigation(
         }
 
         composable(route = Screens.NotificationsScreen.route) {
-            ActivityScreen(navController = navController)
+            ActivityScreen(
+                navController = navController,
+                onNavigate = { navController.navigate(it) })
         }
         composable(
             route = Screens.ProfileScreen.route,

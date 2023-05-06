@@ -32,7 +32,7 @@ class PostRepositoryImpl(
     override val posts: Flow<PagingData<Post>>
         get() = Pager(
             config = PagingConfig(
-                pageSize = Constants.PAGE_SIZE_POSTS
+                pageSize = Constants.DEFAULT_PAGE_SIZE
             )
         ) {
             PostSource(api, source = PostSource.Source.Follows)

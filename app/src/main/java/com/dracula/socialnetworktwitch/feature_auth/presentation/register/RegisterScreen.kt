@@ -1,6 +1,5 @@
 package com.dracula.socialnetworktwitch.feature_auth.presentation.register
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
@@ -50,14 +50,26 @@ fun RegisterScreen(
     val passwordState = viewModel.passwordState
     val (isLoading, successful, message) = viewModel.registerState
     val context = LocalContext.current
+    val signInText = stringResource(id = R.string.sign_in)
+    val annotatedString = buildAnnotatedString {
+        append(stringResource(id = R.string.already_have_an_account))
+        append(" ")
+        withStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colors.primary
+            )
+        ) {
+            pushStringAnnotation(tag = signInText, annotation = signInText)
+            append(stringResource(id = R.string.sign_in))
+        }
+    }
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.SnackbarEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        message = event.uiText.asString(context)
-                    )
+                is UiEvent.SnackbarEvent -> scaffoldState.snackbarHostState.showSnackbar(
+                    message = event.uiText.asString(context)
+                )
 
                 else -> {}
             }
@@ -69,10 +81,7 @@ fun RegisterScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(
-                start = PaddingMedium,
-                end = PaddingMedium,
-                top = PaddingLarge,
-                bottom = 50.dp
+                start = PaddingMedium, end = PaddingMedium, top = PaddingLarge, bottom = 50.dp
             )
     ) {
         Column(
@@ -81,8 +90,7 @@ fun RegisterScreen(
                 .padding(horizontal = PaddingMedium),
         ) {
             Text(
-                text = stringResource(id = R.string.register),
-                style = MaterialTheme.typography.h1
+                text = stringResource(id = R.string.register), style = MaterialTheme.typography.h1
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(
@@ -108,8 +116,7 @@ fun RegisterScreen(
                 error = when (usernameState.error) {
                     AuthValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
                     AuthValidationError.InputTooShort -> stringResource(
-                        id = R.string.input_to_short,
-                        Constants.MIN_USERNAME_LENGTH
+                        id = R.string.input_to_short, Constants.MIN_USERNAME_LENGTH
                     )
 
                     else -> ""
@@ -152,30 +159,21 @@ fun RegisterScreen(
                 )
             }
 
-            if (isLoading)
-                CircularProgressIndicator()
+            if (isLoading) CircularProgressIndicator()
 
         }
-        Text(
-            text = buildAnnotatedString {
-                append(stringResource(id = R.string.already_have_an_account))
-                append(" ")
-                withStyle(
-                    style = SpanStyle(
-                        color = MaterialTheme.colors.primary
-                    )
-                ) {
-                    append(stringResource(id = R.string.sign_in))
+        ClickableText(
+            text = annotatedString, onClick = { offset ->
+                annotatedString.getStringAnnotations(offset, offset).firstOrNull()?.let {
+                    navController.navigateUp()
                 }
-            },
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.body1,
-            modifier = Modifier
+
+            }, style = MaterialTheme.typography.body1.copy(
+                textAlign = TextAlign.Center
+            ), modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .clickable { navController.popBackStack() }
         )
-
 
     }
 

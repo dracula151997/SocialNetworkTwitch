@@ -118,7 +118,7 @@ class ProfileRepositoryImpl(
     ): Flow<PagingData<Post>> {
         return Pager(
             config = PagingConfig(
-                pageSize = Constants.PAGE_SIZE_POSTS
+                pageSize = Constants.DEFAULT_PAGE_SIZE
             )
         ) {
             PostSource(api = postApi, source = PostSource.Source.Profile(userId))

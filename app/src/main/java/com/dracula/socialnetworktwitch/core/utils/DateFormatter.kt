@@ -1,11 +1,11 @@
 package com.dracula.socialnetworktwitch.core.utils
 
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
-fun Long.toFormattedString(pattern: String): String {
+fun Long.toFormattedDate(pattern: String, locale: Locale = Locale.getDefault()): String {
     return SimpleDateFormat(pattern, Locale.getDefault())
         .run {
-            format(this@toFormattedString)
+            format(this@toFormattedDate)
         }
 }

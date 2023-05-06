@@ -7,15 +7,23 @@ object Constants {
     const val MIN_USERNAME_LENGTH = 5
     const val MIN_PASSWORD_LENGTH = 5
     const val DEFAULT_SHARED_PREFERENCE_NAME = "app_sharedpref"
-    const val PAGE_SIZE_POSTS = 20
+    const val DEFAULT_PAGE_SIZE = 20
     const val DEFAULT_PAGE = 0
 
-    object SharedPrefKeys{
+    object SharedPrefKeys {
         const val KEY_TOKEN = "token"
         const val KEY_USER_ID = "user_id"
     }
 
     object NavArguments {
         const val NAV_USER_ID = "user_id"
+        const val NAV_POST_ID = "post_id"
+
+
+    }
+
+    object AnnotatedStringTags {
+        const val ANNOTATION_TAG_USERNAME = "username"
+        const val ANNOTATION_TAG_PARENT_ID = "parentId"
     }
 }
