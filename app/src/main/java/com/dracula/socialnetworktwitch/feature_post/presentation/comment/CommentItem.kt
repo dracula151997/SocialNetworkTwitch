@@ -1,7 +1,14 @@
 package com.dracula.socialnetworktwitch.feature_post.presentation.comment
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
@@ -10,18 +17,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.model.Comment
+import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.LikeButton
+import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeSmall
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
 import com.dracula.socialnetworktwitch.core.presentation.theme.StandardElevation
-import com.dracula.socialnetworktwitch.core.presentation.Semantics
 
 @Composable
 fun CommentItem(
@@ -46,8 +53,8 @@ fun CommentItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(
-                        painter = painterResource(id = R.drawable.philipp),
+                    StandardAsyncImage(
+                        url = comment.profilePictureUrl,
                         contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
                         modifier = Modifier
                             .size(ProfilePictureSizeSmall)
@@ -62,7 +69,7 @@ fun CommentItem(
                     )
                 }
                 Text(
-                    text = "2 days ago.",
+                    text = comment.formattedTime,
                     style = MaterialTheme.typography.body2
                 )
 
@@ -73,14 +80,16 @@ fun CommentItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = comment.commentText,
+                    text = comment.comment,
                     style = MaterialTheme.typography.body2,
                     modifier = Modifier.weight(
                         9f
                     )
                 )
                 LikeButton(
-                    isLiked = comment.isLiked, onClick = onLikedClicked, modifier = Modifier.weight(
+                    isLiked = comment.isLiked,
+                    onClick = onLikedClicked,
+                    modifier = Modifier.weight(
                         1f
                     )
                 )

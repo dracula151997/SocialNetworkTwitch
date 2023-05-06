@@ -119,7 +119,7 @@ fun ProfileScreen(
                     PostItem(
                         post = it,
                         onPostClicked = {
-                            navController.navigate(Screens.PostDetailsScreen.route)
+                            navController.navigate(Screens.PostDetailsScreen.createRoute(postId = post.id))
                         },
                         showProfileImage = false,
                         modifier = Modifier.offset(y = -ProfilePictureSizeLarge / 2f)

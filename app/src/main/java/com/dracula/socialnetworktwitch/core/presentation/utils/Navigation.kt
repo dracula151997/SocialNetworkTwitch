@@ -6,7 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.feature_activity.presentation.ActivityScreen
 import com.dracula.socialnetworktwitch.feature_auth.presentation.login.LoginScreen
@@ -84,10 +83,13 @@ fun Navigation(
             )
         }
 
-        composable(route = Screens.PostDetailsScreen.route) {
+        composable(
+            route = Screens.PostDetailsScreen.route,
+            arguments = Screens.PostDetailsScreen.navArgs
+        ) {
             PostDetailsScreen(
                 navController = navController,
-                post = Post.dummy()
+                scaffoldState = scaffoldState
             )
         }
 

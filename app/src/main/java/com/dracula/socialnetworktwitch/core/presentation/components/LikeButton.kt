@@ -2,6 +2,7 @@ package com.dracula.socialnetworktwitch.core.presentation.components
 
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -21,6 +22,7 @@ fun LikeButton(
     ) {
         Icon(
             imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+            tint = if (isLiked) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground,
             contentDescription = if (isLiked) Semantics.ContentDescriptions.UNLIKE else Semantics.ContentDescriptions.LIKE
         )
     }

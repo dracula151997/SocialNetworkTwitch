@@ -2,6 +2,8 @@ package com.dracula.socialnetworktwitch.core.data.remote
 
 import com.dracula.socialnetworktwitch.core.data.remote.dto.response.BasicApiResponse
 import com.dracula.socialnetworktwitch.core.domain.model.Post
+import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.response.CommentResponse
+import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.response.PostResponse
 import okhttp3.MultipartBody
 import retrofit2.http.GET
 import retrofit2.http.Multipart
@@ -29,6 +31,16 @@ interface PostApi {
         @Query("pageSize") pageSize: Int,
         @Query("userId") userId: String,
     ): List<Post>
+
+    @GET("/api/post/details")
+    suspend fun getPostDetails(
+        @Query("postId") postId: String
+    ): BasicApiResponse<PostResponse>
+
+    @GET("/api/comment/get")
+    suspend fun getCommentForPost(
+        @Query("postId") postId: String,
+    ): BasicApiResponse<List<CommentResponse>>
 
     companion object {
         const val BASE_URL = "http://10.0.2.2:8080"

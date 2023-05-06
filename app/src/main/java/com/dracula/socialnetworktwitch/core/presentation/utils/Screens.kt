@@ -37,7 +37,7 @@ sealed class Screens(val route: String, @StringRes val title: Int? = null) {
     object PostDetailsScreen :
         Screens("post_details_screen?postId={${Constants.NavArguments.NAV_POST_ID}}") {
         fun createRoute(postId: String?): String {
-            return "post_details_screen?${Constants.NavArguments.NAV_POST_ID}=${postId}"
+            return "post_details_screen?postId=${postId}"
         }
 
         val navArgs

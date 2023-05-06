@@ -26,7 +26,7 @@ fun StandardTopBar(
         },
         modifier = modifier,
         backgroundColor = MaterialTheme.colors.surface,
-        elevation = 5.dp,
+        elevation = 0.dp,
         navigationIcon = if (showBackButton) {
             val backIcon: @Composable () -> Unit = {
                 BackIcon(onBackClicked = { navController.navigateUp() })
