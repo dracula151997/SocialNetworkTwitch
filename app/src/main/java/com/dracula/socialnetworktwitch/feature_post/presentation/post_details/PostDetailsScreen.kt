@@ -3,6 +3,7 @@ package com.dracula.socialnetworktwitch.feature_post.presentation.post_details
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,24 +14,32 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.PostActionRow
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
+import com.dracula.socialnetworktwitch.core.presentation.components.StandardTextField
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.MediumGray
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
@@ -54,6 +63,9 @@ fun PostDetailsScreen(
     val post = state.post
     val comments = state.comments
     val context = LocalContext.current
+    val commentFieldState = viewModel.commentFieldState
+    val commentState = viewModel.commentState
+    val focusManager = LocalFocusManager.current
     LaunchedEffect(key1 = true) {
         viewModel.event.collectLatest { event ->
             when (event) {
@@ -81,6 +93,7 @@ fun PostDetailsScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
+                    .weight(1f)
                     .background(MaterialTheme.colors.surface),
             ) {
                 item {
@@ -160,6 +173,46 @@ fun PostDetailsScreen(
                             .padding(horizontal = PaddingMedium, vertical = PaddingSmall)
                     )
                 }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(PaddingMedium)
+                    .background(color = MaterialTheme.colors.surface),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                StandardTextField(
+                    text = commentFieldState.text,
+                    onValueChanged = {
+                        viewModel.onEvent(PostDetailsEvent.CommentEntered(it))
+                    },
+                    hint = stringResource(id = R.string.enter_your_comment),
+                    modifier = Modifier.weight(1f),
+                    imeAction = ImeAction.Done,
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            viewModel.onEvent(PostDetailsEvent.Comment)
+                            focusManager.clearFocus()
+                        }
+                    ),
+
+                    )
+                if (commentState.isLoading)
+                    CircularProgressIndicator()
+                else
+                    IconButton(
+                        onClick = {
+                            focusManager.clearFocus()
+                            viewModel.onEvent(PostDetailsEvent.Comment)
+                        },
+                        enabled = viewModel.commentFieldState.hasText
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Send,
+                            contentDescription = Semantics.ContentDescriptions.POST_PHOTO,
+                            tint = if (commentFieldState.hasError) MaterialTheme.colors.background else MaterialTheme.colors.primary
+                        )
+                    }
             }
         }
         if (state.isPostLoading)

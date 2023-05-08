@@ -13,4 +13,9 @@ interface PostRepository {
     suspend fun createPost(description: String, imageUri: Uri): UnitApiResult
     suspend fun getPostDetails(postId: String): ApiResult<Post>
     suspend fun getCommentsForPost(postId: String): ApiResult<List<Comment>>
+
+    suspend fun createComment(
+        comment: String,
+        postId: String
+    ): UnitApiResult
 }

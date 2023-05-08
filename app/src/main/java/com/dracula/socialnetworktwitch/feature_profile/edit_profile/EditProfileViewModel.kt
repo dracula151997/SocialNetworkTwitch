@@ -12,7 +12,6 @@ import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTe
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.UiText
-import com.dracula.socialnetworktwitch.core.utils.orDefault
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.dto.request.UpdateProfileRequest
 import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
@@ -102,7 +101,7 @@ class EditProfileViewModel @Inject constructor(
                 text = event.username
             )
 
-            is EditProfileEvent.GetProfile -> getProfile(event.userId.orDefault(""))
+            is EditProfileEvent.GetProfile -> getProfile(event.userId ?: getOwnUserIdUseCase())
             EditProfileEvent.GetSkills -> getSkills()
             EditProfileEvent.UpdateProfile -> updateProfile()
             EditProfileEvent.ClearGithubUrlText -> githubTextFieldState =

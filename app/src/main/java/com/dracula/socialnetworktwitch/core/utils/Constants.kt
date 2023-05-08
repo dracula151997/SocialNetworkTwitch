@@ -9,6 +9,7 @@ object Constants {
     const val DEFAULT_SHARED_PREFERENCE_NAME = "app_sharedpref"
     const val DEFAULT_PAGE_SIZE = 20
     const val DEFAULT_PAGE = 0
+    const val MAX_COMMENT_LENGTH = 2000
 
     object SharedPrefKeys {
         const val KEY_TOKEN = "token"

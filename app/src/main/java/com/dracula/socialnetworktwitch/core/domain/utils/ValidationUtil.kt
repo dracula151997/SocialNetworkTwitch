@@ -3,6 +3,7 @@ package com.dracula.socialnetworktwitch.core.domain.utils
 import android.util.Patterns
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.feature_auth.domain.utils.AuthValidationError
+import com.dracula.socialnetworktwitch.feature_post.domain.model.CreateCommentValidationError
 
 object ValidationUtil {
     private val githubProfileUrlRegex = "^(https?://)?github.com/([A-Za-z0-9_-]+)/?\$".toRegex()
@@ -42,6 +43,14 @@ object ValidationUtil {
             return AuthValidationError.InvalidPassword
         }
 
+        return null
+    }
+
+    fun validateComment(comment: String): CreateCommentValidationError? {
+        if (comment.isBlank())
+            return CreateCommentValidationError.FieldEmpty
+        if (comment.length > Constants.MAX_COMMENT_LENGTH)
+            return CreateCommentValidationError.InputTooLong
         return null
     }
 

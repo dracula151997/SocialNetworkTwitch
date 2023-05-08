@@ -51,7 +51,7 @@ sealed class Screens(val route: String, @StringRes val title: Int? = null) {
     object EditProfileScreen :
         Screens("edit_profile_screen?userId={${Constants.NavArguments.NAV_USER_ID}}") {
         fun createRoute(userId: String?): String {
-            return "edit_profile_screen?${Constants.NavArguments.NAV_USER_ID}=${userId}"
+            return "edit_profile_screen?userId=${userId}"
         }
 
         val navArgs

@@ -25,6 +25,7 @@ object Semantics {
         const val KOTLIN = "Kotlin"
         const val EDIT_PROFILE_ICON = "Edit Profile"
         const val CLEAR = "Clear"
+        const val SEND_COMMENT = "Send Comment"
     }
 
     object TestTags {

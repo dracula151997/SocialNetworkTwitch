@@ -24,7 +24,7 @@ import com.dracula.socialnetworktwitch.core.domain.model.Comment
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.LikeButton
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
-import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
+import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingSmall
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeSmall
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
@@ -45,7 +45,7 @@ fun CommentItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(PaddingMedium)
+                .padding(PaddingSmall)
         ) {
             Row(
                 Modifier.fillMaxWidth(),

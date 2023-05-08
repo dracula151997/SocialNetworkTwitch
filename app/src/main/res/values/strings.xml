@@ -56,6 +56,8 @@
     <string name="invalid_github_link">Invalid github link</string>
     <string name="read_less">Read less</string>
     <string name="on_your_comment">on your comment</string>
-    <string name="msg_no_activities_right_now">No activites right now</string>
+    <string name="msg_no_activities_right_now">No activities right now</string>
     <string name="post_details">Post Details</string>
+    <string name="enter_your_comment">Enter your comment here…</string>
+    <string name="comment_posted_successfully">Successfully posted comment</string>
 </resources>

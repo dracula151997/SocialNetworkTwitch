@@ -6,10 +6,14 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dracula.socialnetworktwitch.R
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
+import com.dracula.socialnetworktwitch.feature_post.domain.use_case.CreateCommentUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.GetCommentsForPostUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.GetPostDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,16 +26,23 @@ import javax.inject.Inject
 class PostDetailsViewModel @Inject constructor(
     private val getPostDetailsUseCase: GetPostDetailsUseCase,
     private val getCommentsForPostUseCase: GetCommentsForPostUseCase,
-    savedStateHandle: SavedStateHandle
+    private val createCommentUseCase: CreateCommentUseCase,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     var state by mutableStateOf(PostDetailsState())
+        private set
+
+    var commentState by mutableStateOf(CommentState())
         private set
 
     private val _event = MutableSharedFlow<UiEvent>()
     val event = _event.asSharedFlow()
 
+    var commentFieldState by mutableStateOf(StandardTextFieldState())
+        private set
+
     init {
-        savedStateHandle.get<String>(Constants.NavArguments.NAV_POST_ID)?.let { postId ->
+        savedStateHandle.postIdArgs?.let { postId ->
             getPostDetails(postId = postId)
             getCommentsForPost(postId = postId)
         }
@@ -39,10 +50,51 @@ class PostDetailsViewModel @Inject constructor(
 
     fun onEvent(event: PostDetailsEvent) {
         when (event) {
-            is PostDetailsEvent.Comment -> TODO()
+            PostDetailsEvent.Comment -> createComment(
+                postId = savedStateHandle.postIdArgs.orEmpty(),
+                comment = commentFieldState.text
+            )
+
             is PostDetailsEvent.LikeComment -> TODO()
             PostDetailsEvent.LikePost -> TODO()
             PostDetailsEvent.SharePost -> TODO()
+            is PostDetailsEvent.CommentEntered -> {
+                commentFieldState = StandardTextFieldState(
+                    text = event.commentText,
+                )
+            }
+        }
+    }
+
+    private fun createComment(postId: String, comment: String) {
+        viewModelScope.launch {
+            commentState = CommentState(isLoading = true)
+            val result =
+                createCommentUseCase(
+                    postId = postId,
+                    comment = comment
+                )
+            if (result.hasCommentError)
+                commentFieldState = commentFieldState.copy(
+                    error = result.commentError
+                )
+            if (result.hasPostIdError)
+                _event.emit(UiEvent.SnackbarEvent(UiText.unknownError()))
+
+            commentState = commentState.copy(isLoading = false)
+            when (val result = result.result) {
+                is ApiResult.Success -> {
+                    commentFieldState.defaultState()
+                    _event.emit(UiEvent.SnackbarEvent(UiText.StringResource(R.string.comment_posted_successfully)))
+                    getCommentsForPost(postId)
+                }
+
+                is ApiResult.Error -> {
+                    _event.emit(UiEvent.SnackbarEvent(result.uiText.orUnknownError()))
+                }
+
+                null -> Unit
+            }
         }
     }
 
@@ -99,4 +151,7 @@ class PostDetailsViewModel @Inject constructor(
             }
         }
     }
+
+    val SavedStateHandle.postIdArgs
+        get() = savedStateHandle.get<String>(Constants.NavArguments.NAV_POST_ID)
 }
