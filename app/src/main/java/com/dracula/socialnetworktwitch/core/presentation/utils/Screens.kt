@@ -63,5 +63,14 @@ sealed class Screens(val route: String, @StringRes val title: Int? = null) {
     }
 
     object SearchScreen : Screens("search_screen")
-    object PersonListScreen : Screens("person_list_screen")
+    object PersonListScreen : Screens("person_list_screen?parentId={parent_id}") {
+        fun createRoute(parentId: String?): String {
+            return "person_list_screen?parentId=${parentId}"
+        }
+
+        val navArgs
+            get() = listOf(navArgument(Constants.NavArguments.NAV_PARENT_ID) {
+                type = NavType.StringType
+            })
+    }
 }

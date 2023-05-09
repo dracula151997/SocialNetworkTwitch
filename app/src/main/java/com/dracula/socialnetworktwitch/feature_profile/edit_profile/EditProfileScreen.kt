@@ -102,7 +102,7 @@ fun EditProfileScreen(
         viewModel.onEvent(EditProfileEvent.GetSkills)
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.SnackbarEvent -> scaffoldState.snackbarHostState.showSnackbar(
+                is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
                     message = event.uiText.asString(
                         context
                     )

@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.paging.PagingData
 import com.dracula.socialnetworktwitch.core.domain.model.Comment
 import com.dracula.socialnetworktwitch.core.domain.model.Post
+import com.dracula.socialnetworktwitch.core.domain.model.UserItem
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UnitApiResult
 import kotlinx.coroutines.flow.Flow
@@ -25,4 +26,6 @@ interface PostRepository {
     ): UnitApiResult
 
     suspend fun unlikeParent(parentId: String, parentType: Int): UnitApiResult
+
+    suspend fun getLikesForParent(parentId: String): ApiResult<List<UserItem>>
 }

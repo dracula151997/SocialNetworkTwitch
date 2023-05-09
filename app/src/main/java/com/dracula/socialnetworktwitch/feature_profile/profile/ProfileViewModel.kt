@@ -56,7 +56,7 @@ class ProfileViewModel @Inject constructor(
 
                 is ApiResult.Error -> {
                     _state.value = ProfileState.error()
-                    _eventFlow.emit(UiEvent.SnackbarEvent(result.uiText.orUnknownError()))
+                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
                 }
             }
         }

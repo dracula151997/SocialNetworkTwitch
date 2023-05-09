@@ -12,6 +12,7 @@ import com.dracula.socialnetworktwitch.feature_auth.presentation.login.LoginScre
 import com.dracula.socialnetworktwitch.feature_auth.presentation.register.RegisterScreen
 import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedScreen
 import com.dracula.socialnetworktwitch.feature_post.presentation.create_post.CreatePostScreen
+import com.dracula.socialnetworktwitch.feature_post.presentation.person_list.PersonListScreen
 import com.dracula.socialnetworktwitch.feature_post.presentation.post_details.PostDetailsScreen
 import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileScreen
 import com.dracula.socialnetworktwitch.feature_profile.profile.ProfileScreen
@@ -107,6 +108,19 @@ fun Navigation(
 
         composable(route = Screens.SearchScreen.route) {
             SearchScreen(
+                navController = navController,
+                scaffoldState = scaffoldState
+            )
+        }
+        composable(
+            route = Screens.PersonListScreen.route,
+            arguments = Screens.PersonListScreen.navArgs
+        ) {
+            val parentId = it.arguments?.getString(Constants.NavArguments.NAV_PARENT_ID)
+            requireNotNull(parentId) {
+                "Nav arguments: ${Constants.NavArguments.NAV_PARENT_ID} is null"
+            }
+            PersonListScreen(
                 navController = navController,
                 scaffoldState = scaffoldState
             )

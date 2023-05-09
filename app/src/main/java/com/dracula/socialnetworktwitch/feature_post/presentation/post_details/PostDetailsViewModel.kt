@@ -98,18 +98,18 @@ class PostDetailsViewModel @Inject constructor(
                     error = result.commentError
                 )
             if (result.hasPostIdError)
-                _event.emit(UiEvent.SnackbarEvent(UiText.unknownError()))
+                _event.emit(UiEvent.ShowSnackbar(UiText.unknownError()))
 
             commentState = commentState.copy(isLoading = false)
             when (val result = result.result) {
                 is ApiResult.Success -> {
                     commentFieldState.defaultState()
-                    _event.emit(UiEvent.SnackbarEvent(UiText.StringResource(R.string.comment_posted_successfully)))
+                    _event.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.comment_posted_successfully)))
                     getCommentsForPost(postId)
                 }
 
                 is ApiResult.Error -> {
-                    _event.emit(UiEvent.SnackbarEvent(result.uiText.orUnknownError()))
+                    _event.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
                 }
 
                 null -> Unit
@@ -135,7 +135,7 @@ class PostDetailsViewModel @Inject constructor(
                         isPostLoading = false,
                     )
                     _event.emit(
-                        UiEvent.SnackbarEvent(
+                        UiEvent.ShowSnackbar(
                             result.uiText.orUnknownError()
                         )
                     )
@@ -162,7 +162,7 @@ class PostDetailsViewModel @Inject constructor(
                         isLoadingComments = false,
                     )
                     _event.emit(
-                        UiEvent.SnackbarEvent(
+                        UiEvent.ShowSnackbar(
                             result.uiText.orUnknownError()
                         )
                     )

@@ -2,6 +2,7 @@ package com.dracula.socialnetworktwitch.core.data.remote
 
 import com.dracula.socialnetworktwitch.core.data.remote.dto.response.BasicApiResponse
 import com.dracula.socialnetworktwitch.core.data.remote.dto.response.UnitApiResponse
+import com.dracula.socialnetworktwitch.core.data.remote.dto.response.UserItemResponse
 import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.request.CreateCommentRequest
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.request.LikeUpdateRequest
@@ -62,6 +63,11 @@ interface PostApi {
         @Query("parentId") parentId: String,
         @Query("parentType") parentType: Int
     ): UnitApiResponse
+
+    @GET("/api/like/parent")
+    suspend fun getLikesForParent(
+        @Query("parentId") parentId: String,
+    ): BasicApiResponse<List<UserItemResponse>>
 
 
     companion object {

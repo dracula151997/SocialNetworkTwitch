@@ -86,13 +86,13 @@ class RegisterViewModel @Inject constructor(
                 )
             when (val result = registerResult.result) {
                 is ApiResult.Success -> {
-                    _eventFlow.emit(UiEvent.SnackbarEvent(UiText.StringResource(R.string.success_registeration)))
+                    _eventFlow.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.success_registeration)))
                     registerState = RegisterState.success()
                     clearTextFieldStates()
                 }
 
                 is ApiResult.Error -> {
-                    _eventFlow.emit(UiEvent.SnackbarEvent(result.uiText.orUnknownError()))
+                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
                     registerState = RegisterState.error(result.uiText.orUnknownError())
                 }
 

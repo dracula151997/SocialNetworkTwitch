@@ -66,7 +66,7 @@ class SearchViewModel @Inject constructor(
                         if (it.userId == userId) it.copy(isFollowing = isFollowing)
                         else it
                     })
-                    _event.emit(UiEvent.SnackbarEvent(uiText = result.uiText.orUnknownError()))
+                    _event.emit(UiEvent.ShowSnackbar(uiText = result.uiText.orUnknownError()))
                 }
 
             }
@@ -89,7 +89,7 @@ class SearchViewModel @Inject constructor(
 
                 is ApiResult.Error -> {
                     _event.emit(
-                        UiEvent.SnackbarEvent(
+                        UiEvent.ShowSnackbar(
                             uiText = response.uiText.orUnknownError()
                         )
                     )

@@ -10,7 +10,6 @@ import com.dracula.socialnetworktwitch.core.presentation.utils.states.PasswordTe
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
-import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.isNotNull
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_auth.domain.use_case.LoginUseCase
@@ -72,7 +71,7 @@ class LoginViewModel @Inject constructor(
                 is ApiResult.Error -> {
                     state = LoginState.error(result.uiText.orUnknownError())
                     _eventFlow.emit(
-                        UiEvent.SnackbarEvent(result.uiText.orUnknownError())
+                        UiEvent.ShowSnackbar(result.uiText.orUnknownError())
                     )
                 }
 

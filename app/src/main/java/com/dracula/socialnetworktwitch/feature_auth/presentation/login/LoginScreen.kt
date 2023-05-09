@@ -72,7 +72,7 @@ fun LoginScreen(
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.Navigate -> navController.navigate(event.route)
-                is UiEvent.SnackbarEvent -> scaffoldState.snackbarHostState.showSnackbar(
+                is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
                     event.uiText.asString(context), duration = SnackbarDuration.Long
                 )
 

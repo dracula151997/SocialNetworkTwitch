@@ -10,6 +10,7 @@ import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.data.remote.PostApi
 import com.dracula.socialnetworktwitch.core.domain.model.Comment
 import com.dracula.socialnetworktwitch.core.domain.model.Post
+import com.dracula.socialnetworktwitch.core.domain.model.UserItem
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiText
@@ -143,6 +144,23 @@ class PostRepositoryImpl(
             val response = api.unlikeParent(parentId, parentType)
             if (response.successful) {
                 ApiResult.Success(Unit)
+            } else {
+                response.message?.let { msg ->
+                    ApiResult.Error(UiText.DynamicString(msg))
+                } ?: ApiResult.Error(UiText.unknownError())
+            }
+        } catch (e: IOException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_couldnot_reach_server))
+        } catch (e: HttpException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
+        }
+    }
+
+    override suspend fun getLikesForParent(parentId: String): ApiResult<List<UserItem>> {
+        return try {
+            val response = api.getLikesForParent(parentId)
+            if (response.successful) {
+                ApiResult.Success(response.data?.map { it.toUserItem() })
             } else {
                 response.message?.let { msg ->
                     ApiResult.Error(UiText.DynamicString(msg))

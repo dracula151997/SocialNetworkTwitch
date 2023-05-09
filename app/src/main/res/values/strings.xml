@@ -60,4 +60,6 @@
     <string name="post_details">Post Details</string>
     <string name="enter_your_comment">Enter your comment here…</string>
     <string name="comment_posted_successfully">Successfully posted comment</string>
+    <string name="liked_by">Liked by</string>
+    <string name="no_people_liked">Nobody liked</string>
 </resources>

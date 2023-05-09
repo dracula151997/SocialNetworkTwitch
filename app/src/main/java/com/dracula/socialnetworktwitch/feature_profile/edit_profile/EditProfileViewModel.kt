@@ -147,12 +147,12 @@ class EditProfileViewModel @Inject constructor(
 
             when (val result = uiResult.result) {
                 is ApiResult.Success -> {
-                    _eventFlow.emit(UiEvent.SnackbarEvent(UiText.StringResource(R.string.profile_updated_success)))
+                    _eventFlow.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.profile_updated_success)))
                     _eventFlow.emit(UiEvent.NavigateUp)
                 }
 
                 is ApiResult.Error -> {
-                    _eventFlow.emit(UiEvent.SnackbarEvent(result.uiText.orUnknownError()))
+                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
                 }
 
                 null -> {
@@ -169,7 +169,7 @@ class EditProfileViewModel @Inject constructor(
                 is ApiResult.Success -> {
                     val profile = apiResult.data ?: kotlin.run {
                         _eventFlow.emit(
-                            UiEvent.SnackbarEvent(UiText.StringResource(R.string.error_could_not_load_profile))
+                            UiEvent.ShowSnackbar(UiText.StringResource(R.string.error_could_not_load_profile))
                         )
                         return@launch
                     }
@@ -179,7 +179,7 @@ class EditProfileViewModel @Inject constructor(
                 }
 
                 is ApiResult.Error -> {
-                    _eventFlow.emit(UiEvent.SnackbarEvent(apiResult.uiText.orUnknownError()))
+                    _eventFlow.emit(UiEvent.ShowSnackbar(apiResult.uiText.orUnknownError()))
                 }
             }
         }
@@ -191,7 +191,7 @@ class EditProfileViewModel @Inject constructor(
                 is ApiResult.Success -> {
                     val skills = result.data ?: kotlin.run {
                         _eventFlow.emit(
-                            UiEvent.SnackbarEvent(UiText.StringResource(R.string.error_could_not_load_skills))
+                            UiEvent.ShowSnackbar(UiText.StringResource(R.string.error_could_not_load_skills))
                         )
                         return@launch
                     }
@@ -201,7 +201,7 @@ class EditProfileViewModel @Inject constructor(
                 }
 
                 is ApiResult.Error -> {
-                    _eventFlow.emit(UiEvent.SnackbarEvent(result.uiText.orUnknownError()))
+                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
                     return@launch
                 }
             }
@@ -214,13 +214,13 @@ class EditProfileViewModel @Inject constructor(
                 is ApiResult.Success -> skillsState = skillsState.copy(
                     selectedSkills = result.data ?: kotlin.run {
                         _eventFlow.emit(
-                            UiEvent.SnackbarEvent(UiText.unknownError())
+                            UiEvent.ShowSnackbar(UiText.unknownError())
                         )
                         return@launch
                     }
                 )
 
-                is ApiResult.Error -> _eventFlow.emit(UiEvent.SnackbarEvent(result.uiText.orUnknownError()))
+                is ApiResult.Error -> _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
             }
         }
     }

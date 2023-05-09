@@ -62,7 +62,6 @@ fun MainFeedScreen(
                     style = MaterialTheme.typography.h2
                 )
             } else {
-                if (isLoadingFirstTime) CircularProgressIndicator(modifier = Modifier.align(Center))
                 LazyColumn {
                     items(posts) { post ->
                         post?.let {
@@ -104,6 +103,7 @@ fun MainFeedScreen(
                 }
 
             }
+            if (isLoadingFirstTime) CircularProgressIndicator(modifier = Modifier.align(Center))
         }
 
     }

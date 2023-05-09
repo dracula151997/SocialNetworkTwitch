@@ -1,6 +1,7 @@
 package com.dracula.socialnetworktwitch.feature_post.presentation.post_details
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,6 +49,7 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingSmall
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
+import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.feature_post.presentation.comment.CommentItem
 import kotlinx.coroutines.flow.collectLatest
@@ -69,7 +71,7 @@ fun PostDetailsScreen(
     LaunchedEffect(key1 = true) {
         viewModel.event.collectLatest { event ->
             when (event) {
-                is UiEvent.SnackbarEvent -> scaffoldState.snackbarHostState.showSnackbar(
+                is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
                     message = event.uiText.asString(
                         context
                     )
@@ -150,7 +152,14 @@ fun PostDetailsScreen(
                                         fontWeight = FontWeight.Bold,
                                         style = MaterialTheme.typography.body2.copy(
                                             fontWeight = FontWeight.Bold,
-                                        )
+                                        ),
+                                        modifier = Modifier.clickable {
+                                            navController.navigate(
+                                                Screens.PersonListScreen.createRoute(
+                                                    parentId = post?.id
+                                                )
+                                            )
+                                        }
                                     )
                                 }
                             }

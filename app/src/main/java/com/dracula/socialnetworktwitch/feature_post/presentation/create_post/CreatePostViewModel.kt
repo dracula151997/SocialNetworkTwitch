@@ -61,20 +61,20 @@ class CreatePostViewModel @Inject constructor(
                     description.copy(error = apiResult.descriptionError)
 
             if (apiResult.hasImageError)
-                _eventFlow.emit(UiEvent.SnackbarEvent(UiText.StringResource(R.string.error_no_image_picked)))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.error_no_image_picked)))
 
             when (val result = apiResult.result) {
                 is ApiResult.Success -> {
                     clearAllFieldState()
                     state = CreatePostState.success()
-                    _eventFlow.emit(UiEvent.SnackbarEvent(UiText.StringResource(R.string.post_created)))
+                    _eventFlow.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.post_created)))
                     _eventFlow.emit(UiEvent.NavigateUp)
                 }
 
                 is ApiResult.Error -> {
                     state = CreatePostState.error()
                     _eventFlow.emit(
-                        UiEvent.SnackbarEvent(
+                        UiEvent.ShowSnackbar(
                             uiText = result.uiText.orUnknownError()
                         )
                     )

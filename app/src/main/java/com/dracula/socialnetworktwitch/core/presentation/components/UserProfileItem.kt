@@ -10,7 +10,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.dracula.socialnetworktwitch.core.domain.model.User
+import com.dracula.socialnetworktwitch.core.domain.model.UserItem
 import com.dracula.socialnetworktwitch.core.presentation.theme.IconSizeMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeSmall
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
@@ -19,8 +19,9 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UserProfileItem(
-    user: User,
+    user: UserItem,
     modifier: Modifier = Modifier,
+    ownUserId: String? = null,
     actionIcon: @Composable () -> Unit = {},
     onItemClick: () -> Unit = {},
     onActionItemClick: () -> Unit = {}
