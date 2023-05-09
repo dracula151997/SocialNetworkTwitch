@@ -122,20 +122,22 @@ fun PostDetailsScreen(
                                         .fillMaxWidth()
                                         .padding(PaddingMedium)
                                 ) {
-                                    PostActionRow(username = state.post?.username.orEmpty(),
+                                    PostActionRow(
+                                        username = state.post?.username.orEmpty(),
                                         modifier = Modifier.fillMaxWidth(),
                                         onLikeClicked = { isLiked ->
-
+                                            viewModel.onEvent(PostDetailsEvent.LikePost)
                                         },
                                         onShareClicked = {
 
                                         },
                                         onCommentClicked = {
-
                                         },
                                         onUsernameClicked = { username ->
 
-                                        })
+                                        },
+                                        isLiked = state.post?.isLiked == true
+                                    )
                                     Text(
                                         text = post?.description.orEmpty(),
                                         style = MaterialTheme.typography.body2,

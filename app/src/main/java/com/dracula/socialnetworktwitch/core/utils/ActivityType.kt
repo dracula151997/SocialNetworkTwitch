@@ -1,4 +1,4 @@
-package com.dracula.socialnetworktwitch.feature_activity.domain.model
+package com.dracula.socialnetworktwitch.core.utils
 
 sealed class ActivityType(val type: Int) {
     object LikedPost : ActivityType(0)

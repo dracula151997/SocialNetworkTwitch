@@ -10,12 +10,14 @@ import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.core.utils.ParentType
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.CreateCommentUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.GetCommentsForPostUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.GetPostDetailsUseCase
+import com.dracula.socialnetworktwitch.feature_post.domain.use_case.ToggleLikeForParentUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -27,6 +29,7 @@ class PostDetailsViewModel @Inject constructor(
     private val getPostDetailsUseCase: GetPostDetailsUseCase,
     private val getCommentsForPostUseCase: GetCommentsForPostUseCase,
     private val createCommentUseCase: CreateCommentUseCase,
+    private val toggleLikeForParentUseCase: ToggleLikeForParentUseCase,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     var state by mutableStateOf(PostDetailsState())
@@ -55,8 +58,24 @@ class PostDetailsViewModel @Inject constructor(
                 comment = commentFieldState.text
             )
 
-            is PostDetailsEvent.LikeComment -> TODO()
-            PostDetailsEvent.LikePost -> TODO()
+            is PostDetailsEvent.LikeComment -> {
+                val isLiked = state.comments.find { it.id == event.commentId }?.isLiked == true
+                toggleLikeForParent(
+                    parentId = event.commentId,
+                    parentType = ParentType.Comment.type,
+                    isLiked = isLiked
+                )
+            }
+
+            PostDetailsEvent.LikePost -> {
+                val isLiked = state.post?.isLiked == true
+                toggleLikeForParent(
+                    parentId = state.post?.id ?: return,
+                    parentType = ParentType.Post.type,
+                    isLiked = isLiked
+                )
+            }
+
             PostDetailsEvent.SharePost -> TODO()
             is PostDetailsEvent.CommentEntered -> {
                 commentFieldState = StandardTextFieldState(
@@ -147,6 +166,48 @@ class PostDetailsViewModel @Inject constructor(
                             result.uiText.orUnknownError()
                         )
                     )
+                }
+            }
+        }
+    }
+
+    private fun toggleLikeForParent(parentId: String, parentType: Int, isLiked: Boolean) {
+        viewModelScope.launch {
+            when (ParentType.fromType(type = parentType)) {
+                ParentType.Post -> state = state.copy(
+                    post = state.post?.copy(isLiked = !isLiked)
+                )
+
+                ParentType.Comment -> {
+                    state = state.copy(
+                        comments = state.comments.map {
+                            if (it.id == parentId)
+                                it.copy(isLiked = !isLiked)
+                            else it
+                        }
+                    )
+                }
+
+                else -> Unit
+            }
+            when (toggleLikeForParentUseCase(parentId, parentType, isLiked)) {
+                is ApiResult.Success -> Unit
+                is ApiResult.Error -> {
+                    when (ParentType.fromType(type = parentType)) {
+                        ParentType.Post -> state = state.copy(
+                            post = state.post?.copy(isLiked = isLiked)
+                        )
+
+                        ParentType.Comment -> state = state.copy(
+                            comments = state.comments.map {
+                                if (it.id == parentId)
+                                    it.copy(isLiked = isLiked)
+                                else it
+                            }
+                        )
+
+                        else -> Unit
+                    }
                 }
             }
         }

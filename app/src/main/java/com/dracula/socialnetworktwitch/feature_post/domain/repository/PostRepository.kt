@@ -18,4 +18,11 @@ interface PostRepository {
         comment: String,
         postId: String
     ): UnitApiResult
+
+    suspend fun likeParent(
+        parentId: String,
+        parentType: Int
+    ): UnitApiResult
+
+    suspend fun unlikeParent(parentId: String, parentType: Int): UnitApiResult
 }

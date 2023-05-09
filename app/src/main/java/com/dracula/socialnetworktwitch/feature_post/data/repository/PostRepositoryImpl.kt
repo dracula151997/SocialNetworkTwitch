@@ -17,6 +17,7 @@ import com.dracula.socialnetworktwitch.core.utils.UnitApiResult
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.paging.PostSource
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.request.CreateCommentRequest
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.request.CreatePostRequest
+import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.request.LikeUpdateRequest
 import com.dracula.socialnetworktwitch.feature_post.domain.repository.PostRepository
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
@@ -107,6 +108,42 @@ class PostRepositoryImpl(
             )
             if (response.successful) ApiResult.Success(Unit)
             else {
+                response.message?.let { msg ->
+                    ApiResult.Error(UiText.DynamicString(msg))
+                } ?: ApiResult.Error(UiText.unknownError())
+            }
+        } catch (e: IOException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_couldnot_reach_server))
+        } catch (e: HttpException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
+        }
+    }
+
+    override suspend fun likeParent(parentId: String, parentType: Int): UnitApiResult {
+        return try {
+            val response = api.likeParent(
+                LikeUpdateRequest(parentId, parentType)
+            )
+            if (response.successful) {
+                ApiResult.Success(Unit)
+            } else {
+                response.message?.let { msg ->
+                    ApiResult.Error(UiText.DynamicString(msg))
+                } ?: ApiResult.Error(UiText.unknownError())
+            }
+        } catch (e: IOException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_couldnot_reach_server))
+        } catch (e: HttpException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
+        }
+    }
+
+    override suspend fun unlikeParent(parentId: String, parentType: Int): UnitApiResult {
+        return try {
+            val response = api.unlikeParent(parentId, parentType)
+            if (response.successful) {
+                ApiResult.Success(Unit)
+            } else {
                 response.message?.let { msg ->
                     ApiResult.Error(UiText.DynamicString(msg))
                 } ?: ApiResult.Error(UiText.unknownError())

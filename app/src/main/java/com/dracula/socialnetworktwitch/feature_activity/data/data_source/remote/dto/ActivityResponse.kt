@@ -1,8 +1,8 @@
 package com.dracula.socialnetworktwitch.feature_activity.data.data_source.remote.dto
 
+import com.dracula.socialnetworktwitch.core.utils.ActivityType
 import com.dracula.socialnetworktwitch.core.utils.toFormattedDate
 import com.dracula.socialnetworktwitch.feature_activity.domain.model.Activity
-import com.dracula.socialnetworktwitch.feature_activity.domain.model.ActivityType
 
 data class ActivityResponse(
     val timestamp: Long,

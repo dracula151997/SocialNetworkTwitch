@@ -4,10 +4,12 @@ import com.dracula.socialnetworktwitch.core.data.remote.dto.response.BasicApiRes
 import com.dracula.socialnetworktwitch.core.data.remote.dto.response.UnitApiResponse
 import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.request.CreateCommentRequest
+import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.request.LikeUpdateRequest
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.response.CommentResponse
 import com.dracula.socialnetworktwitch.feature_post.data.data_source.remote.dto.response.PostResponse
 import okhttp3.MultipartBody
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -51,10 +53,16 @@ interface PostApi {
     ): UnitApiResponse
 
     @POST("/api/like")
-    suspend fun likePost(
-        @Query("postId") postId: String,
-        @Query("userId") userId: String
+    suspend fun likeParent(
+        @Body request: LikeUpdateRequest
     ): UnitApiResponse
+
+    @DELETE("/api/unlike")
+    suspend fun unlikeParent(
+        @Query("parentId") parentId: String,
+        @Query("parentType") parentType: Int
+    ): UnitApiResponse
+
 
     companion object {
         const val BASE_URL = "http://10.0.2.2:8080"

@@ -32,9 +32,9 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.StandardElevation
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
+import com.dracula.socialnetworktwitch.core.utils.ActivityType
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.feature_activity.domain.model.Activity
-import com.dracula.socialnetworktwitch.feature_activity.domain.model.ActivityType
 import timber.log.Timber
 
 @Composable
