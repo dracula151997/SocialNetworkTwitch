@@ -14,10 +14,12 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -28,7 +30,9 @@ import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
+import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.feature_post.presentation.components.PostItem
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -40,6 +44,23 @@ fun MainFeedScreen(
     val posts = viewModel.posts.collectAsLazyPagingItems()
     val (isLoadingFirstTime, isLoadingNewPost, page) = viewModel.state
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                MainFeedUiEvent.LikedPost -> {
+                    posts.refresh()
+                }
+
+                is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
+                    message = event.uiText.asString(
+                        context
+                    )
+                )
+            }
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         StandardTopBar(
@@ -67,7 +88,12 @@ fun MainFeedScreen(
                         post?.let {
                             PostItem(
                                 post = post,
-                                onPostClicked = { navController.navigate(Screens.PostDetailsScreen.route) })
+                                onPostClicked = { navController.navigate(Screens.PostDetailsScreen.route) },
+                                onUsernameClicked = {},
+                                onShareClicked = {},
+                                onLikeClicked = { viewModel.onEvent(MainFeedAction.LikePost(post.id)) },
+                                onCommentClicked = {}
+                            )
                         }
 
                     }
@@ -82,12 +108,15 @@ fun MainFeedScreen(
                     posts.apply {
                         when {
                             loadState.refresh is LoadState.Loading -> viewModel.onEvent(
-                                MainFeedEvent.LoadedPage
+                                MainFeedAction.LoadedPage
                             )
 
-                            loadState.append is LoadState.Loading -> viewModel.onEvent(MainFeedEvent.LoadMorePosts)
+                            loadState.append is LoadState.Loading -> viewModel.onEvent(
+                                MainFeedAction.LoadMorePosts
+                            )
+
                             loadState.append is LoadState.NotLoading -> viewModel.onEvent(
-                                MainFeedEvent.LoadedPage
+                                MainFeedAction.LoadedPage
                             )
 
                             loadState.append is LoadState.Error -> scope.launch {

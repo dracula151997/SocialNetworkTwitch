@@ -20,10 +20,10 @@ class ActivityViewModel @Inject constructor(
     var state by mutableStateOf(ActivityState())
         private set
 
-    fun onEvent(event: ActivityEvent) {
+    fun onEvent(event: ActivityAction) {
         when (event) {
-            is ActivityEvent.ClickOnUser -> TODO()
-            is ActivityEvent.ClickOnParent -> TODO()
+            is ActivityAction.ClickOnUser -> TODO()
+            is ActivityAction.ClickOnParent -> TODO()
         }
     }
 }

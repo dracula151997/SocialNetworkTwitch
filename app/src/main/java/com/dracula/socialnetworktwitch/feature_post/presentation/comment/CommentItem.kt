@@ -1,5 +1,6 @@
 package com.dracula.socialnetworktwitch.feature_post.presentation.comment
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,7 +35,8 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.StandardElevation
 fun CommentItem(
     comment: Comment,
     modifier: Modifier = Modifier,
-    onLikedClicked: (Boolean) -> Unit = {},
+    onLikedClicked: (isLiked: Boolean) -> Unit = {},
+    onLikedByClicked: (commentId: String) -> Unit = {},
 ) {
     Card(
         modifier = modifier,
@@ -103,7 +105,8 @@ fun CommentItem(
                 ),
                 style = MaterialTheme.typography.body2.copy(
                     fontWeight = FontWeight.Bold
-                )
+                ),
+                modifier = Modifier.clickable { onLikedByClicked(comment.id) }
             )
         }
     }

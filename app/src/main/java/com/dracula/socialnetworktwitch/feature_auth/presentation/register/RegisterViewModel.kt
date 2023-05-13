@@ -38,25 +38,25 @@ class RegisterViewModel @Inject constructor(
     val eventFlow = _eventFlow.asSharedFlow()
 
 
-    fun onEvent(event: RegisterEvent) {
+    fun onEvent(event: RegisterAction) {
         when (event) {
-            is RegisterEvent.OnEmailEntered -> emailState = emailState.copy(
+            is RegisterAction.OnEmailEntered -> emailState = emailState.copy(
                 text = event.value,
             )
 
-            is RegisterEvent.OnPasswordEntered -> passwordState = passwordState.copy(
+            is RegisterAction.OnPasswordEntered -> passwordState = passwordState.copy(
                 text = event.value,
             )
 
-            is RegisterEvent.OnUserNameEntered -> usernameState = usernameState.copy(
+            is RegisterAction.OnUserNameEntered -> usernameState = usernameState.copy(
                 text = event.value
             )
 
-            RegisterEvent.TogglePasswordVisibility -> passwordState = passwordState.copy(
+            RegisterAction.TogglePasswordVisibility -> passwordState = passwordState.copy(
                 isPasswordToggleVisible = !passwordState.isPasswordToggleVisible
             )
 
-            RegisterEvent.Register -> {
+            RegisterAction.Register -> {
                 register()
             }
 

@@ -51,6 +51,10 @@ fun PostItem(
     post: Post,
     modifier: Modifier = Modifier,
     showProfileImage: Boolean = true,
+    onLikeClicked: () -> Unit = {},
+    onCommentClicked: () -> Unit = {},
+    onShareClicked: () -> Unit = {},
+    onUsernameClicked: () -> Unit = {},
     onPostClicked: (Post) -> Unit,
 ) {
     Box(
@@ -83,16 +87,16 @@ fun PostItem(
                 PostActionRow(username = post.username,
                     modifier = Modifier.fillMaxWidth(),
                     onLikeClicked = { isLiked ->
-
+                        onLikeClicked()
                     },
                     onShareClicked = {
-
+                        onShareClicked()
                     },
                     onCommentClicked = {
-
+                        onCommentClicked()
                     },
                     onUsernameClicked = { username ->
-
+                        onUsernameClicked()
                     })
                 Text(
                     text = buildAnnotatedString {

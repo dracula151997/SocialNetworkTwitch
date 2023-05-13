@@ -80,7 +80,7 @@ fun SearchScreen(
                     hint = stringResource(id = R.string.search),
                     leadingIcon = Icons.Default.Search,
                     onValueChanged = {
-                        viewModel.onEvent(SearchEvent.OnSearch(it))
+                        viewModel.onEvent(SearchAction.OnSearch(it))
                     })
                 Spacer(modifier = Modifier.height(SpaceLarge))
                 LazyColumn(
@@ -89,7 +89,7 @@ fun SearchScreen(
                     items(state.userItems) { user ->
                         UserProfileItem(user = user, actionIcon = {
                             IconButton(onClick = {
-                                viewModel.onEvent(SearchEvent.ToggleFollowState(userId = user.userId))
+                                viewModel.onEvent(SearchAction.ToggleFollowState(userId = user.userId))
                             }) {
                                 Icon(
                                     imageVector = if (user.isFollowing) Icons.Default.PersonRemove else Icons.Default.PersonAdd,

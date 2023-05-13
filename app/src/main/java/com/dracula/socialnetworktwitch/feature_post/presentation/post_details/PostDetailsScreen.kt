@@ -128,7 +128,7 @@ fun PostDetailsScreen(
                                         username = state.post?.username.orEmpty(),
                                         modifier = Modifier.fillMaxWidth(),
                                         onLikeClicked = { isLiked ->
-                                            viewModel.onEvent(PostDetailsEvent.LikePost)
+                                            viewModel.onEvent(PostDetailsAction.LikePost)
                                         },
                                         onShareClicked = {
 
@@ -181,7 +181,13 @@ fun PostDetailsScreen(
                         comment = comment,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = PaddingMedium, vertical = PaddingSmall)
+                            .padding(horizontal = PaddingMedium, vertical = PaddingSmall),
+                        onLikedByClicked = { commentId ->
+                            navController.navigate(Screens.PersonListScreen.createRoute(parentId = commentId))
+                        },
+                        onLikedClicked = {
+                            viewModel.onEvent(PostDetailsAction.LikeComment(commentId = comment.id))
+                        }
                     )
                 }
             }
@@ -195,14 +201,14 @@ fun PostDetailsScreen(
                 StandardTextField(
                     text = commentFieldState.text,
                     onValueChanged = {
-                        viewModel.onEvent(PostDetailsEvent.CommentEntered(it))
+                        viewModel.onEvent(PostDetailsAction.CommentEntered(it))
                     },
                     hint = stringResource(id = R.string.enter_your_comment),
                     modifier = Modifier.weight(1f),
                     imeAction = ImeAction.Done,
                     keyboardActions = KeyboardActions(
                         onDone = {
-                            viewModel.onEvent(PostDetailsEvent.Comment)
+                            viewModel.onEvent(PostDetailsAction.Comment)
                             focusManager.clearFocus()
                         }
                     ),
@@ -214,7 +220,7 @@ fun PostDetailsScreen(
                     IconButton(
                         onClick = {
                             focusManager.clearFocus()
-                            viewModel.onEvent(PostDetailsEvent.Comment)
+                            viewModel.onEvent(PostDetailsAction.Comment)
                         },
                         enabled = viewModel.commentFieldState.hasText
                     ) {

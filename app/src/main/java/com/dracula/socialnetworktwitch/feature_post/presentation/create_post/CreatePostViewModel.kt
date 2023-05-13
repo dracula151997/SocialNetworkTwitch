@@ -35,15 +35,15 @@ class CreatePostViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    fun onEvent(event: CreatePostEvent) {
+    fun onEvent(event: CreatePostAction) {
         when (event) {
-            is CreatePostEvent.DescriptionEntered -> description = description.copy(
+            is CreatePostAction.DescriptionEntered -> description = description.copy(
                 text = event.text
             )
 
-            is CreatePostEvent.PickImage -> chosenImageUri = event.uri
-            CreatePostEvent.CreatePost -> createPost()
-            is CreatePostEvent.CropImage -> chosenImageUri = event.uri
+            is CreatePostAction.PickImage -> chosenImageUri = event.uri
+            CreatePostAction.CreatePost -> createPost()
+            is CreatePostAction.CropImage -> chosenImageUri = event.uri
         }
     }
 

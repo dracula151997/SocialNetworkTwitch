@@ -40,7 +40,6 @@ fun UserProfileItem(
                     horizontal = SpaceMedium
                 ),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             StandardAsyncImage(
                 url = user.profilePictureUrl,
@@ -52,7 +51,7 @@ fun UserProfileItem(
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(0.8f)
+                    .weight(1f)
                     .padding(horizontal = SpaceSmall)
             ) {
                 Text(
@@ -69,13 +68,14 @@ fun UserProfileItem(
                     maxLines = 2
                 )
             }
-            IconButton(
-                onClick = onActionItemClick,
-                modifier = Modifier.size(IconSizeMedium)
+            if (user.userId != ownUserId)
+                IconButton(
+                    onClick = onActionItemClick,
+                    modifier = Modifier.size(IconSizeMedium)
 
-            ) {
-                actionIcon()
-            }
+                ) {
+                    actionIcon()
+                }
         }
     }
 }

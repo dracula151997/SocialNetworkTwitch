@@ -81,11 +81,11 @@ fun EditProfileScreen(
 
     val cropProfileImageLauncher =
         rememberLauncherForActivityResult(CropActivityResultContract(2f, 3f)) {
-            viewModel.onEvent(EditProfileEvent.CropProfileImage(it))
+            viewModel.onEvent(EditProfileAction.CropProfileImage(it))
         }
     val cropBannerImageLauncher =
         rememberLauncherForActivityResult(CropActivityResultContract(16f, 9f)) {
-            viewModel.onEvent(EditProfileEvent.CropBannerImage(it))
+            viewModel.onEvent(EditProfileAction.CropBannerImage(it))
         }
 
     val pickProfileImageLauncher =
@@ -98,8 +98,8 @@ fun EditProfileScreen(
         }
 
     LaunchedEffect(key1 = true) {
-        viewModel.onEvent(EditProfileEvent.GetProfile(userId))
-        viewModel.onEvent(EditProfileEvent.GetSkills)
+        viewModel.onEvent(EditProfileAction.GetProfile(userId))
+        viewModel.onEvent(EditProfileAction.GetSkills)
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
@@ -119,7 +119,7 @@ fun EditProfileScreen(
     ) {
         StandardTopBar(
             title = stringResource(id = R.string.edit_your_profile), navActions = {
-                IconButton(onClick = { viewModel.onEvent(EditProfileEvent.UpdateProfile) }) {
+                IconButton(onClick = { viewModel.onEvent(EditProfileAction.UpdateProfile) }) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = stringResource(id = R.string.save_changes),
@@ -157,7 +157,7 @@ fun EditProfileScreen(
                     },
                     leadingIcon = Icons.Default.Person,
                     onValueChanged = {
-                        viewModel.onEvent(EditProfileEvent.UsernameEntered(it))
+                        viewModel.onEvent(EditProfileAction.UsernameEntered(it))
                     },
 
                     )
@@ -171,7 +171,7 @@ fun EditProfileScreen(
                     },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_github_icon_1),
                     onValueChanged = {
-                        viewModel.onEvent(EditProfileEvent.GithubUrlEntered(it))
+                        viewModel.onEvent(EditProfileAction.GithubUrlEntered(it))
                     },
                     trailingIcon = {
                         AnimatedVisibility(
@@ -180,7 +180,7 @@ fun EditProfileScreen(
                             exit = scaleOut()
                         ) {
                             ClearButton {
-                                viewModel.onEvent(EditProfileEvent.ClearGithubUrlText)
+                                viewModel.onEvent(EditProfileAction.ClearGithubUrlText)
                             }
                         }
                     }
@@ -198,7 +198,7 @@ fun EditProfileScreen(
                     },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_instagram_glyph_1),
                     onValueChanged = {
-                        viewModel.onEvent(EditProfileEvent.InstagramUrlEntered(it))
+                        viewModel.onEvent(EditProfileAction.InstagramUrlEntered(it))
 
                     },
                     trailingIcon = {
@@ -208,7 +208,7 @@ fun EditProfileScreen(
                             exit = scaleOut()
                         ) {
                             ClearButton {
-                                viewModel.onEvent(EditProfileEvent.ClearInstagramUrlText)
+                                viewModel.onEvent(EditProfileAction.ClearInstagramUrlText)
                             }
                         }
 
@@ -228,7 +228,7 @@ fun EditProfileScreen(
                     },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_linkedin_icon_1),
                     onValueChanged = {
-                        viewModel.onEvent(EditProfileEvent.LinkedinUrlEntered(it))
+                        viewModel.onEvent(EditProfileAction.LinkedinUrlEntered(it))
 
                     },
                     trailingIcon = {
@@ -238,7 +238,7 @@ fun EditProfileScreen(
                             exit = scaleOut()
                         ) {
                             ClearButton {
-                                viewModel.onEvent(EditProfileEvent.ClearLinkedinUrlText)
+                                viewModel.onEvent(EditProfileAction.ClearLinkedinUrlText)
                             }
                         }
 
@@ -259,7 +259,7 @@ fun EditProfileScreen(
                     maxLines = 3,
                     leadingIcon = Icons.Default.Description,
                     onValueChanged = {
-                        viewModel.onEvent(EditProfileEvent.BioEntered(it))
+                        viewModel.onEvent(EditProfileAction.BioEntered(it))
 
                     },
                     trailingIcon = {
@@ -269,7 +269,7 @@ fun EditProfileScreen(
                             exit = scaleOut()
                         ) {
                             ClearButton {
-                                viewModel.onEvent(EditProfileEvent.ClearBio)
+                                viewModel.onEvent(EditProfileAction.ClearBio)
                             }
                         }
                     }
@@ -283,7 +283,7 @@ fun EditProfileScreen(
                 )
                 Spacer(modifier = Modifier.height(SpaceLarge))
                 SkillsFlowRow(skillsState, modifier = Modifier.fillMaxWidth()) {
-                    viewModel.onEvent(EditProfileEvent.SkillSelected(skill = it))
+                    viewModel.onEvent(EditProfileAction.SkillSelected(skill = it))
                 }
             }
 

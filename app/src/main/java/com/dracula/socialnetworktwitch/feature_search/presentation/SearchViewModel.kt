@@ -37,14 +37,14 @@ class SearchViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
-    fun onEvent(event: SearchEvent) {
+    fun onEvent(event: SearchAction) {
         when (event) {
-            is SearchEvent.OnSearch -> {
+            is SearchAction.OnSearch -> {
                 searchFieldState = searchFieldState.copy(text = event.query)
                 search(event.query)
             }
 
-            is SearchEvent.ToggleFollowState -> toggleFollowStateForUser(userId = event.userId)
+            is SearchAction.ToggleFollowState -> toggleFollowStateForUser(userId = event.userId)
         }
     }
 

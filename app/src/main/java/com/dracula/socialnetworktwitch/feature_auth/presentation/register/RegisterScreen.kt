@@ -95,7 +95,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(
                 text = emailState.text,
-                onValueChanged = { viewModel.onEvent(RegisterEvent.OnEmailEntered(it)) },
+                onValueChanged = { viewModel.onEvent(RegisterAction.OnEmailEntered(it)) },
                 hint = stringResource(
                     id = R.string.email_hint
                 ),
@@ -109,7 +109,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(
                 text = usernameState.text,
-                onValueChanged = { viewModel.onEvent(RegisterEvent.OnUserNameEntered(it)) },
+                onValueChanged = { viewModel.onEvent(RegisterAction.OnUserNameEntered(it)) },
                 hint = stringResource(
                     id = R.string.username_hint
                 ),
@@ -125,7 +125,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(
                 text = passwordState.text,
-                onValueChanged = { viewModel.onEvent(RegisterEvent.OnPasswordEntered(it)) },
+                onValueChanged = { viewModel.onEvent(RegisterAction.OnPasswordEntered(it)) },
                 keyboardType = KeyboardType.Password,
                 hint = stringResource(id = R.string.password_hint),
                 error = when (passwordState.error) {
@@ -140,16 +140,16 @@ fun RegisterScreen(
                 },
                 showPasswordToggle = passwordState.isPasswordToggleVisible,
                 onPasswordToggleClicked = {
-                    viewModel.onEvent(RegisterEvent.TogglePasswordVisibility)
+                    viewModel.onEvent(RegisterAction.TogglePasswordVisibility)
                 },
                 imeAction = ImeAction.Done,
                 keyboardActions = KeyboardActions(
-                    onDone = { viewModel.onEvent(RegisterEvent.Register) },
+                    onDone = { viewModel.onEvent(RegisterAction.Register) },
                 ),
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             Button(
-                onClick = { viewModel.onEvent(RegisterEvent.Register) },
+                onClick = { viewModel.onEvent(RegisterAction.Register) },
                 modifier = Modifier.align(Alignment.End),
                 enabled = !isLoading
             ) {

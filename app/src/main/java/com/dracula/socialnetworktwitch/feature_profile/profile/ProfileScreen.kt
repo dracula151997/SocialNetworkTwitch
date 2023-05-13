@@ -51,7 +51,7 @@ fun ProfileScreen(
     val context = LocalContext.current
 
     LaunchedEffect(key1 = true) {
-        viewModel.onEvent(ProfileEvent.GetProfile(userId))
+        viewModel.onEvent(ProfileScreenAction.GetProfile(userId))
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
@@ -122,7 +122,14 @@ fun ProfileScreen(
                             navController.navigate(Screens.PostDetailsScreen.createRoute(postId = post.id))
                         },
                         showProfileImage = false,
-                        modifier = Modifier.offset(y = -ProfilePictureSizeLarge / 2f)
+                        modifier = Modifier.offset(y = -ProfilePictureSizeLarge / 2f),
+                        onCommentClicked = {
+
+                        },
+                        onLikeClicked = {
+                        },
+                        onShareClicked = {},
+                        onUsernameClicked = {}
                     )
                 }
             }

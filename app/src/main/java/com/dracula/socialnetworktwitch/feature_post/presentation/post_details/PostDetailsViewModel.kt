@@ -51,14 +51,14 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun onEvent(event: PostDetailsEvent) {
+    fun onEvent(event: PostDetailsAction) {
         when (event) {
-            PostDetailsEvent.Comment -> createComment(
+            PostDetailsAction.Comment -> createComment(
                 postId = savedStateHandle.postIdArgs.orEmpty(),
                 comment = commentFieldState.text
             )
 
-            is PostDetailsEvent.LikeComment -> {
+            is PostDetailsAction.LikeComment -> {
                 val isLiked = state.comments.find { it.id == event.commentId }?.isLiked == true
                 toggleLikeForParent(
                     parentId = event.commentId,
@@ -67,7 +67,7 @@ class PostDetailsViewModel @Inject constructor(
                 )
             }
 
-            PostDetailsEvent.LikePost -> {
+            PostDetailsAction.LikePost -> {
                 val isLiked = state.post?.isLiked == true
                 toggleLikeForParent(
                     parentId = state.post?.id ?: return,
@@ -76,8 +76,8 @@ class PostDetailsViewModel @Inject constructor(
                 )
             }
 
-            PostDetailsEvent.SharePost -> TODO()
-            is PostDetailsEvent.CommentEntered -> {
+            PostDetailsAction.SharePost -> TODO()
+            is PostDetailsAction.CommentEntered -> {
                 commentFieldState = StandardTextFieldState(
                     text = event.commentText,
                 )

@@ -12,6 +12,7 @@ import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.GetLikesForParentUseCase
+import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.ToggleFollowStateForUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -22,6 +23,7 @@ import javax.inject.Inject
 class PersonListViewModel @Inject constructor(
     private val getLikesForParentUseCase: GetLikesForParentUseCase,
     private val getOwnUserIdUseCase: GetOwnUserIdUseCase,
+    private val toggleFollowStateForUserUseCase: ToggleFollowStateForUserUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     var state by mutableStateOf(PersonListState())
@@ -46,8 +48,7 @@ class PersonListViewModel @Inject constructor(
             state = state.copy(
                 isLoading = true,
             )
-            val result = getLikesForParentUseCase(parentId = parentId)
-            when (result) {
+            when (val result = getLikesForParentUseCase(parentId = parentId)) {
                 is ApiResult.Success -> {
                     state = state.copy(
                         isLoading = false,
@@ -70,9 +71,35 @@ class PersonListViewModel @Inject constructor(
         }
     }
 
-    fun onEvent(event: PersonListEvent) {
+    fun onEvent(event: PersonListAction) {
         when (event) {
-            is PersonListEvent.ToggleFollowStateForUser -> TODO()
+            is PersonListAction.ToggleFollowStateForUser -> toggleFollowStateForUser(event.userId)
         }
     }
+
+    private fun toggleFollowStateForUser(userId: String) {
+        viewModelScope.launch {
+            val isFollowing = state.users.find { it.userId == userId }?.isFollowing == true
+            state = state.copy(users = state.users.map {
+                if (it.userId == userId) it.copy(isFollowing = !it.isFollowing)
+                else it
+            })
+            val result = toggleFollowStateForUserUseCase(
+                userId = userId, isFollowing = isFollowing
+            )
+            when (result) {
+                is ApiResult.Success -> Unit
+
+                is ApiResult.Error -> {
+                    state = state.copy(users = state.users.map {
+                        if (it.userId == userId) it.copy(isFollowing = isFollowing)
+                        else it
+                    })
+                    _eventFlow.emit(UiEvent.ShowSnackbar(uiText = result.uiText.orUnknownError()))
+                }
+
+            }
+        }
+    }
+
 }

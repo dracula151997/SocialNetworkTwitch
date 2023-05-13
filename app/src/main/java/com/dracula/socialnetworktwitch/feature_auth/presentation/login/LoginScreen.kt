@@ -98,7 +98,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(
                 text = emailState.text, onValueChanged = {
-                    viewModel.onEvent(LoginEvent.EmailEntered(it))
+                    viewModel.onEvent(LoginAction.EmailEntered(it))
                 }, hint = stringResource(
                     id = R.string.username_or_email_hint
                 ), error = when (emailState.error) {
@@ -109,13 +109,13 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(text = passwordState.text,
                 onValueChanged = {
-                    viewModel.onEvent(LoginEvent.PasswordEntered(it))
+                    viewModel.onEvent(LoginAction.PasswordEntered(it))
                 },
                 keyboardType = KeyboardType.Password,
                 hint = stringResource(id = R.string.password_hint),
                 showPasswordToggle = passwordState.isPasswordToggleVisible,
                 onPasswordToggleClicked = {
-                    viewModel.onEvent(LoginEvent.TogglePasswordVisibility)
+                    viewModel.onEvent(LoginAction.TogglePasswordVisibility)
                 },
                 error = when (passwordState.error) {
                     is AuthValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
@@ -124,14 +124,14 @@ fun LoginScreen(
                 imeAction = ImeAction.Done,
                 keyboardActions = KeyboardActions(onDone = {
                     focusManager.clearFocus()
-                    viewModel.onEvent(LoginEvent.Login)
+                    viewModel.onEvent(LoginAction.Login)
                 })
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             Button(
                 onClick = {
                     focusManager.clearFocus()
-                    viewModel.onEvent(LoginEvent.Login)
+                    viewModel.onEvent(LoginAction.Login)
                 }, modifier = Modifier.align(Alignment.End), enabled = !state.isLoading
             ) {
                 Text(

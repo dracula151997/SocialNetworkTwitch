@@ -6,9 +6,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
+import com.dracula.socialnetworktwitch.core.utils.BaseUiEvent
 import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.core.utils.ParentType
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
+import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedUiEvent
+import com.dracula.socialnetworktwitch.feature_post.domain.use_case.ToggleLikeForParentUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetProfileUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetUserPostsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,6 +28,7 @@ class ProfileViewModel @Inject constructor(
     private val getProfileUseCase: GetProfileUseCase,
     private val getUserPostsUseCase: GetUserPostsUseCase,
     private val getOwnUserIdUseCase: GetOwnUserIdUseCase,
+    private val toggleLikeForParentUseCase: ToggleLikeForParentUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -31,18 +36,23 @@ class ProfileViewModel @Inject constructor(
     private val _state = MutableStateFlow(ProfileState())
     val state = _state.asStateFlow()
 
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    private val _eventFlow = MutableSharedFlow<BaseUiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
     val userPosts = getUserPostsUseCase(
         savedStateHandle.get<String>(Constants.NavArguments.NAV_USER_ID) ?: getOwnUserIdUseCase()
     ).cachedIn(viewModelScope)
 
-    fun onEvent(event: ProfileEvent) {
+    fun onEvent(event: ProfileScreenAction) {
         when (event) {
-            is ProfileEvent.GetProfile -> {
+            is ProfileScreenAction.GetProfile -> {
                 getProfile(event.userId)
             }
+
+            is ProfileScreenAction.ToggleLikeForPost -> toggleLikeForParent(
+                event.postId,
+                isLiked = false
+            )
         }
     }
 
@@ -56,6 +66,21 @@ class ProfileViewModel @Inject constructor(
 
                 is ApiResult.Error -> {
                     _state.value = ProfileState.error()
+                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
+                }
+            }
+        }
+    }
+
+    private fun toggleLikeForParent(parentId: String, isLiked: Boolean) {
+        viewModelScope.launch {
+            when (val result =
+                toggleLikeForParentUseCase(parentId, ParentType.Post.type, isLiked)) {
+                is ApiResult.Success -> {
+                    _eventFlow.emit(MainFeedUiEvent.LikedPost)
+                }
+
+                is ApiResult.Error -> {
                     _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
                 }
             }

@@ -97,7 +97,7 @@ fun PersonListScreen(
                                 onNavigate(Screens.ProfileScreen.createRoute(userId = user.userId))
                             },
                             onActionItemClick = {
-                                viewModel.onEvent(PersonListEvent.ToggleFollowStateForUser(user.userId))
+                                viewModel.onEvent(PersonListAction.ToggleFollowStateForUser(user.userId))
                             },
                             ownUserId = viewModel.ownUserId
                         )

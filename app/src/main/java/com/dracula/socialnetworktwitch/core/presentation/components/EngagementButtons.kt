@@ -1,7 +1,10 @@
 package com.dracula.socialnetworktwitch.core.presentation.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -76,6 +79,7 @@ fun PostActionRow(
     username: String,
     modifier: Modifier = Modifier,
     isLiked: Boolean = false,
+    ownUserId: String = "",
     onCommentClicked: () -> Unit = {},
     onShareClicked: () -> Unit = {},
     onLikeClicked: (Boolean) -> Unit = {},

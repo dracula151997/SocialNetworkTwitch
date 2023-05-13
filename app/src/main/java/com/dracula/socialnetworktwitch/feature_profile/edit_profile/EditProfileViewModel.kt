@@ -64,54 +64,54 @@ class EditProfileViewModel @Inject constructor(
     var skillsState: SkillsState by mutableStateOf(SkillsState())
         private set
 
-    fun onEvent(event: EditProfileEvent) {
+    fun onEvent(event: EditProfileAction) {
         when (event) {
-            is EditProfileEvent.BioEntered -> bioState = bioState.copy(
+            is EditProfileAction.BioEntered -> bioState = bioState.copy(
                 text = event.bio
             )
 
-            is EditProfileEvent.CropBannerImage -> {
+            is EditProfileAction.CropBannerImage -> {
                 bannerImageUri = event.uri
             }
 
-            is EditProfileEvent.CropProfileImage -> {
+            is EditProfileAction.CropProfileImage -> {
                 profileImageUri = event.uri
             }
 
-            is EditProfileEvent.GithubUrlEntered -> githubTextFieldState =
+            is EditProfileAction.GithubUrlEntered -> githubTextFieldState =
                 githubTextFieldState.copy(
                     text = event.githubUrl
                 )
 
-            is EditProfileEvent.InstagramUrlEntered -> instagramTextFieldState =
+            is EditProfileAction.InstagramUrlEntered -> instagramTextFieldState =
                 instagramTextFieldState.copy(
                     text = event.instagramUrl
                 )
 
-            is EditProfileEvent.LinkedinUrlEntered -> linkedInTextFieldState =
+            is EditProfileAction.LinkedinUrlEntered -> linkedInTextFieldState =
                 linkedInTextFieldState.copy(
                     text = event.linkedinUrl
                 )
 
-            is EditProfileEvent.SkillSelected -> {
+            is EditProfileAction.SkillSelected -> {
                 setSkillSelected(skillsState.selectedSkills, event.skill)
             }
 
-            is EditProfileEvent.UsernameEntered -> usernameState = usernameState.copy(
+            is EditProfileAction.UsernameEntered -> usernameState = usernameState.copy(
                 text = event.username
             )
 
-            is EditProfileEvent.GetProfile -> getProfile(event.userId ?: getOwnUserIdUseCase())
-            EditProfileEvent.GetSkills -> getSkills()
-            EditProfileEvent.UpdateProfile -> updateProfile()
-            EditProfileEvent.ClearGithubUrlText -> githubTextFieldState =
+            is EditProfileAction.GetProfile -> getProfile(event.userId ?: getOwnUserIdUseCase())
+            EditProfileAction.GetSkills -> getSkills()
+            EditProfileAction.UpdateProfile -> updateProfile()
+            EditProfileAction.ClearGithubUrlText -> githubTextFieldState =
                 githubTextFieldState.copy(text = "")
 
-            EditProfileEvent.ClearBio -> bioState = bioState.copy(text = "")
-            EditProfileEvent.ClearInstagramUrlText -> instagramTextFieldState =
+            EditProfileAction.ClearBio -> bioState = bioState.copy(text = "")
+            EditProfileAction.ClearInstagramUrlText -> instagramTextFieldState =
                 instagramTextFieldState.copy(text = "")
 
-            EditProfileEvent.ClearLinkedinUrlText -> linkedInTextFieldState =
+            EditProfileAction.ClearLinkedinUrlText -> linkedInTextFieldState =
                 linkedInTextFieldState.copy(text = "")
         }
     }

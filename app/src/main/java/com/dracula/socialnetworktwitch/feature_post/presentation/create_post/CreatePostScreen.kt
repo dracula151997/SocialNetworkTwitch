@@ -66,7 +66,7 @@ fun CreatePostScreen(
     val cropActivityLauncher = rememberLauncherForActivityResult(
         contract = CropActivityResultContract(16f, 9f),
     ) {
-        viewModel.onEvent(CreatePostEvent.CropImage(it))
+        viewModel.onEvent(CreatePostAction.CropImage(it))
     }
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -151,12 +151,12 @@ fun CreatePostScreen(
                     },
                     maxLines = 5,
                     onValueChanged = {
-                        viewModel.onEvent(CreatePostEvent.DescriptionEntered(it))
+                        viewModel.onEvent(CreatePostAction.DescriptionEntered(it))
                     },
                     imeAction = ImeAction.Done,
                     keyboardActions = KeyboardActions(
                         onDone = {
-                            viewModel.onEvent(CreatePostEvent.CreatePost)
+                            viewModel.onEvent(CreatePostAction.CreatePost)
                             focusManager.clearFocus()
                         }
                     )
@@ -164,7 +164,7 @@ fun CreatePostScreen(
                 Spacer(modifier = Modifier.height(SpaceLarge))
                 Button(
                     onClick = {
-                        viewModel.onEvent(CreatePostEvent.CreatePost)
+                        viewModel.onEvent(CreatePostAction.CreatePost)
                         focusManager.clearFocus()
                     },
                     modifier = Modifier.align(Alignment.End),

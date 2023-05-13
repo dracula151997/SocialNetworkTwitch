@@ -35,17 +35,17 @@ class LoginViewModel @Inject constructor(
     var state by mutableStateOf(LoginState())
         private set
 
-    fun onEvent(event: LoginEvent) {
+    fun onEvent(event: LoginAction) {
         when (event) {
-            is LoginEvent.EmailEntered -> emailState = emailState.copy(text = event.email)
-            is LoginEvent.PasswordEntered -> passwordState =
+            is LoginAction.EmailEntered -> emailState = emailState.copy(text = event.email)
+            is LoginAction.PasswordEntered -> passwordState =
                 passwordState.copy(text = event.password)
 
-            LoginEvent.TogglePasswordVisibility -> passwordState = passwordState.copy(
+            LoginAction.TogglePasswordVisibility -> passwordState = passwordState.copy(
                 isPasswordToggleVisible = !passwordState.isPasswordToggleVisible
             )
 
-            LoginEvent.Login -> login()
+            LoginAction.Login -> login()
         }
     }
 
