@@ -1,13 +1,17 @@
 package com.dracula.socialnetworktwitch.feature_profile.profile
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.cachedIn
+import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.BaseUiEvent
 import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.core.utils.ParentType
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
@@ -29,9 +33,8 @@ class ProfileViewModel @Inject constructor(
     private val getUserPostsUseCase: GetUserPostsUseCase,
     private val getOwnUserIdUseCase: GetOwnUserIdUseCase,
     private val toggleLikeForParentUseCase: ToggleLikeForParentUseCase,
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
 
     private val _state = MutableStateFlow(ProfileState())
     val state = _state.asStateFlow()
@@ -39,9 +42,15 @@ class ProfileViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<BaseUiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    val userPosts = getUserPostsUseCase(
-        savedStateHandle.get<String>(Constants.NavArguments.NAV_USER_ID) ?: getOwnUserIdUseCase()
-    ).cachedIn(viewModelScope)
+    private var _currentPage = 0
+
+    var postsPagingState by mutableStateOf<PagingState<Post>>(PagingState())
+        private set
+
+    init {
+        loadNextPost()
+    }
+
 
     fun onEvent(event: ProfileScreenAction) {
         when (event) {
@@ -53,6 +62,35 @@ class ProfileViewModel @Inject constructor(
                 event.postId,
                 isLiked = false
             )
+        }
+    }
+
+    fun loadNextPost() {
+        viewModelScope.launch {
+            postsPagingState = postsPagingState.copy(
+                isLoading = true
+            )
+            val result = getUserPostsUseCase(
+                savedStateHandle.get<String>(Constants.NavArguments.NAV_USER_ID)
+                    ?: getOwnUserIdUseCase(),
+                page = _currentPage,
+                pageSize = Constants.DEFAULT_PAGE_SIZE,
+            )
+            when (result) {
+                is ApiResult.Success -> {
+                    postsPagingState =
+                        postsPagingState.copy(
+                            isLoading = false,
+                            items = postsPagingState.items + result.data.orEmpty(),
+                            endReached = result.data?.isEmpty() == true
+                        )
+                    _currentPage++
+                }
+
+                is ApiResult.Error -> {
+                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
+                }
+            }
         }
     }
 

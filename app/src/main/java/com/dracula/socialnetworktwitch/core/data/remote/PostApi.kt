@@ -36,7 +36,7 @@ interface PostApi {
         @Query("page") page: Int,
         @Query("pageSize") pageSize: Int,
         @Query("userId") userId: String,
-    ): List<Post>
+    ): List<PostResponse>
 
     @GET("/api/post/details")
     suspend fun getPostDetails(

@@ -22,8 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
 import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
@@ -45,7 +43,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val userPosts = viewModel.userPosts.collectAsLazyPagingItems()
+    val userPosts = viewModel.postsPagingState
     val (userId1, username, bio, followerCount, followingCount, postCount, profilePictureUrl, bannerUrl, topSkills, gitHubUrl, instagramUrl, linkedinUrl, isOwnProfile, isFollowing) = state.data
         ?: Profile.empty()
     val context = LocalContext.current
@@ -114,24 +112,26 @@ fun ProfileScreen(
                     })
             }
 
-            items(userPosts) { post ->
-                post?.let {
-                    PostItem(
-                        post = it,
-                        onPostClicked = {
-                            navController.navigate(Screens.PostDetailsScreen.createRoute(postId = post.id))
-                        },
-                        showProfileImage = false,
-                        modifier = Modifier.offset(y = -ProfilePictureSizeLarge / 2f),
-                        onCommentClicked = {
-
-                        },
-                        onLikeClicked = {
-                        },
-                        onShareClicked = {},
-                        onUsernameClicked = {}
-                    )
+            items(userPosts.items.size) { index ->
+                val post = userPosts.items[index]
+                if (index > userPosts.items.size - 1 && !userPosts.endReached && !userPosts.isLoading) {
+                    viewModel.loadNextPost()
                 }
+                PostItem(
+                    post = post,
+                    onPostClicked = {
+                        navController.navigate(Screens.PostDetailsScreen.createRoute(postId = post.id))
+                    },
+                    showProfileImage = false,
+                    modifier = Modifier.offset(y = -ProfilePictureSizeLarge / 2f),
+                    onCommentClicked = {
+
+                    },
+                    onLikeClicked = {
+                    },
+                    onShareClicked = {},
+                    onUsernameClicked = {}
+                )
             }
 
 
