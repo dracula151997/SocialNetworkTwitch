@@ -9,23 +9,17 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
-import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
@@ -33,7 +27,6 @@ import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.feature_post.presentation.components.PostItem
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 @Composable
 fun MainFeedScreen(
@@ -41,16 +34,15 @@ fun MainFeedScreen(
     scaffoldState: ScaffoldState,
     viewModel: MainFeedViewModel = hiltViewModel()
 ) {
-    val posts = viewModel.posts.collectAsLazyPagingItems()
-    val (isLoadingFirstTime, isLoadingNewPost, page) = viewModel.state
-    val scope = rememberCoroutineScope()
+    val postsPagingState = viewModel.postsPagingState
+    val posts = postsPagingState.items
     val context = LocalContext.current
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 MainFeedUiEvent.LikedPost -> {
-                    posts.refresh()
+//                    posts.refresh()
                 }
 
                 is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
@@ -76,7 +68,7 @@ fun MainFeedScreen(
             }
         }
         Box(modifier = Modifier.fillMaxSize()) {
-            if (posts.itemCount == 0) {
+            if (posts.isEmpty()) {
                 Text(
                     text = stringResource(id = R.string.msg_no_posts_to_display),
                     modifier = Modifier.align(Center),
@@ -84,57 +76,47 @@ fun MainFeedScreen(
                 )
             } else {
                 LazyColumn {
-                    items(posts) { post ->
-                        post?.let {
-                            PostItem(
-                                post = post,
-                                onPostClicked = { navController.navigate(Screens.PostDetailsScreen.route) },
-                                onUsernameClicked = {},
-                                onShareClicked = {},
-                                onLikeClicked = { viewModel.onEvent(MainFeedAction.LikePost(post.id)) },
-                                onCommentClicked = {}
-                            )
+                    items(posts.size) { index ->
+                        val post = posts[index]
+                        if (index > posts.size - 1 && !postsPagingState.endReached && !postsPagingState.isLoading) {
+                            viewModel.loadNextPost()
                         }
-
-                    }
-                    item {
-                        if (isLoadingNewPost) CircularProgressIndicator(
-                            modifier = Modifier.align(
-                                BottomCenter
-                            )
-                        )
-                    }
-
-                    posts.apply {
-                        when {
-                            loadState.refresh is LoadState.Loading -> viewModel.onEvent(
-                                MainFeedAction.LoadedPage
-                            )
-
-                            loadState.append is LoadState.Loading -> viewModel.onEvent(
-                                MainFeedAction.LoadMorePosts
-                            )
-
-                            loadState.append is LoadState.NotLoading -> viewModel.onEvent(
-                                MainFeedAction.LoadedPage
-                            )
-
-                            loadState.append is LoadState.Error -> scope.launch {
-                                scaffoldState.snackbarHostState.showSnackbar(
-                                    message = "Error",
-                                    duration = SnackbarDuration.Long
+                        PostItem(
+                            post = post,
+                            onPostClicked = {
+                                navController.navigate(
+                                    Screens.PostDetailsScreen.createRoute(
+                                        postId = post.id
+                                    )
+                                )
+                            },
+                            onUsernameClicked = {
+                                navController.navigate(
+                                    Screens.ProfileScreen.createRoute(
+                                        userId = post.userId
+                                    )
+                                )
+                            },
+                            onShareClicked = {},
+                            onLikeClicked = { viewModel.onEvent(MainFeedAction.LikePost(post.id)) },
+                            onCommentClicked = {
+                                navController.navigate(
+                                    Screens.PostDetailsScreen.createRoute(
+                                        postId = post.id,
+                                        showKeyboard = true
+                                    )
                                 )
                             }
-                        }
+                        )
+
                     }
-
-
                 }
-
+                if (postsPagingState.isLoading) CircularProgressIndicator(
+                    modifier = Modifier.align(
+                        Center
+                    )
+                )
             }
-            if (isLoadingFirstTime) CircularProgressIndicator(modifier = Modifier.align(Center))
         }
-
     }
-
 }

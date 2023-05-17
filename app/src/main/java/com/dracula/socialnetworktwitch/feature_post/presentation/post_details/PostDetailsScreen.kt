@@ -1,6 +1,8 @@
 package com.dracula.socialnetworktwitch.feature_post.presentation.post_details
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,14 +28,24 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
@@ -50,15 +62,20 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSiz
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.KeyboardState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.keyboardAsState
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.feature_post.domain.model.CreateCommentValidationError
 import com.dracula.socialnetworktwitch.feature_post.presentation.comment.CommentItem
 import kotlinx.coroutines.flow.collectLatest
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PostDetailsScreen(
     navController: NavController,
     scaffoldState: ScaffoldState,
     viewModel: PostDetailsViewModel = hiltViewModel(),
+    showKeyboard: Boolean = false,
 
     ) {
     val state = viewModel.state
@@ -68,7 +85,20 @@ fun PostDetailsScreen(
     val commentFieldState = viewModel.commentFieldState
     val commentState = viewModel.commentState
     val focusManager = LocalFocusManager.current
+    val focusRequester = remember {
+        FocusRequester()
+    }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val keyboardState by keyboardAsState()
+    when (keyboardState) {
+        KeyboardState.Opened -> Unit
+        KeyboardState.Closed -> focusManager.clearFocus()
+    }
     LaunchedEffect(key1 = true) {
+        if (showKeyboard) {
+            keyboardController?.show()
+            focusRequester.requestFocus()
+        }
         viewModel.event.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
@@ -134,11 +164,17 @@ fun PostDetailsScreen(
 
                                         },
                                         onCommentClicked = {
+                                            focusRequester.requestFocus()
                                         },
                                         onUsernameClicked = { username ->
-
+                                            navController.navigate(
+                                                Screens.ProfileScreen.createRoute(
+                                                    userId = post?.userId
+                                                )
+                                            )
                                         },
-                                        isLiked = state.post?.isLiked == true
+                                        isLiked = state.post?.isLiked == true,
+                                        isOwnPost = post?.isOwnPost == true || post?.userId == viewModel.ownUserId
                                     )
                                     Text(
                                         text = post?.description.orEmpty(),
@@ -147,7 +183,7 @@ fun PostDetailsScreen(
                                     Spacer(modifier = Modifier.height(SpaceSmall))
                                     Text(
                                         text = stringResource(
-                                            id = R.string.liked_by_x_people, post?.likeCount ?: 0
+                                            id = R.string.x_likes, post?.likeCount ?: 0
                                         ),
                                         fontWeight = FontWeight.Bold,
                                         style = MaterialTheme.typography.body2.copy(
@@ -164,11 +200,22 @@ fun PostDetailsScreen(
                                 }
                             }
                             StandardAsyncImage(
-                                url = post?.profileImageUrl.orEmpty(),
+                                url = post?.profileImageUrl,
                                 contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
+                                errorPlaceholder = painterResource(id = R.drawable.avatar),
+                                placeholder = painterResource(id = R.drawable.avatar),
+                                contentScale = ContentScale.Crop,
                                 modifier = Modifier
+                                    .border(
+                                        BorderStroke(
+                                            1.dp,
+                                            color = MaterialTheme.colors.primary,
+                                        ),
+                                        shape = CircleShape
+                                    )
                                     .clip(CircleShape)
                                     .size(ProfilePictureSizeMedium)
+                                    .background(color = Color.LightGray, shape = CircleShape)
                                     .align(Alignment.TopCenter)
                             )
 
@@ -204,7 +251,9 @@ fun PostDetailsScreen(
                         viewModel.onEvent(PostDetailsAction.CommentEntered(it))
                     },
                     hint = stringResource(id = R.string.enter_your_comment),
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .focusRequester(focusRequester),
                     imeAction = ImeAction.Done,
                     keyboardActions = KeyboardActions(
                         onDone = {
@@ -212,8 +261,12 @@ fun PostDetailsScreen(
                             focusManager.clearFocus()
                         }
                     ),
+                    error = when (commentFieldState.error) {
+                        is CreateCommentValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                        else -> ""
+                    }
 
-                    )
+                )
                 if (commentState.isLoading)
                     CircularProgressIndicator()
                 else

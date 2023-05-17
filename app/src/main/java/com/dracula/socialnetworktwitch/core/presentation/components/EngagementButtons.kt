@@ -32,6 +32,7 @@ fun EngagementButtons(
     modifier: Modifier = Modifier,
     isLiked: Boolean = false,
     iconSize: Dp = 30.dp,
+    isOwnProfile: Boolean = false,
     onLikeClicked: (Boolean) -> Unit = {},
     onCommentClicked: () -> Unit = {},
     onShareClicked: () -> Unit = {}
@@ -40,27 +41,29 @@ fun EngagementButtons(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceAround
     ) {
-        IconButton(onClick = { onLikeClicked(!isLiked) }) {
-            Icon(
-                imageVector = Icons.Filled.Favorite,
-                contentDescription =
-                if (isLiked)
-                    Semantics.ContentDescriptions.UNLIKE
-                else
-                    Semantics.ContentDescriptions.LIKE,
-                modifier = Modifier.size(iconSize),
-                tint = if (isLiked) Color.Red else TextWhite
-            )
-        }
+        if (!isOwnProfile)
+            IconButton(onClick = { onLikeClicked(!isLiked) }) {
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription =
+                    if (isLiked)
+                        Semantics.ContentDescriptions.UNLIKE
+                    else
+                        Semantics.ContentDescriptions.LIKE,
+                    modifier = Modifier.size(iconSize),
+                    tint = if (isLiked) Color.Red else TextWhite
+                )
+            }
 
-        IconButton(onClick = onCommentClicked) {
-            Icon(
-                imageVector = Icons.Filled.Comment,
-                contentDescription = Semantics.ContentDescriptions.COMMENT,
-                modifier = Modifier.size(iconSize)
+        if (!isOwnProfile)
+            IconButton(onClick = onCommentClicked) {
+                Icon(
+                    imageVector = Icons.Filled.Comment,
+                    contentDescription = Semantics.ContentDescriptions.COMMENT,
+                    modifier = Modifier.size(iconSize)
 
-            )
-        }
+                )
+            }
         IconButton(onClick = onShareClicked) {
             Icon(
                 imageVector = Icons.Filled.Share,
@@ -80,6 +83,7 @@ fun PostActionRow(
     modifier: Modifier = Modifier,
     isLiked: Boolean = false,
     ownUserId: String = "",
+    isOwnPost: Boolean = false,
     onCommentClicked: () -> Unit = {},
     onShareClicked: () -> Unit = {},
     onLikeClicked: (Boolean) -> Unit = {},
@@ -105,6 +109,7 @@ fun PostActionRow(
             onLikeClicked = onLikeClicked,
             onShareClicked = onShareClicked,
             iconSize = 24.dp,
+            isOwnProfile = isOwnPost,
             modifier = Modifier.wrapContentWidth()
 
         )

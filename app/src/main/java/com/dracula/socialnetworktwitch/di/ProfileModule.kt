@@ -1,5 +1,6 @@
 package com.dracula.socialnetworktwitch.di
 
+import android.content.SharedPreferences
 import com.dracula.socialnetworktwitch.core.data.remote.PostApi
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.ProfileApi
 import com.dracula.socialnetworktwitch.feature_profile.data.repository.ProfileRepositoryImpl
@@ -42,9 +43,10 @@ object ProfileModule {
     fun provideProfileRepository(
         api: ProfileApi,
         postApi: PostApi,
-        gson: Gson
+        gson: Gson,
+        sharedPreferences: SharedPreferences,
     ): ProfileRepository {
-        return ProfileRepositoryImpl(api, postApi, gson)
+        return ProfileRepositoryImpl(api, postApi, gson, sharedPreferences)
     }
 
     @Provides

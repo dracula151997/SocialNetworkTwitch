@@ -11,14 +11,16 @@ import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.BaseUiEvent
 import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.core.utils.DefaultPaginator
 import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.core.utils.ParentType
+import com.dracula.socialnetworktwitch.core.utils.PostLiker
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
-import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedUiEvent
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.ToggleLikeForParentUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetProfileUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetUserPostsUseCase
+import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.LogoutUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +35,7 @@ class ProfileViewModel @Inject constructor(
     private val getUserPostsUseCase: GetUserPostsUseCase,
     private val getOwnUserIdUseCase: GetOwnUserIdUseCase,
     private val toggleLikeForParentUseCase: ToggleLikeForParentUseCase,
+    private val logoutUseCase: LogoutUseCase,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -42,10 +45,37 @@ class ProfileViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<BaseUiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    private var _currentPage = 0
-
     var postsPagingState by mutableStateOf<PagingState<Post>>(PagingState())
         private set
+
+    @Inject
+    lateinit var postLiker: PostLiker
+
+    private val paginator = DefaultPaginator(
+        onLoad = { isLoading ->
+            postsPagingState = postsPagingState.copy(isLoading = isLoading)
+        },
+        onRequest = { page ->
+            getUserPostsUseCase(
+                savedStateHandle.get<String>(Constants.NavArguments.NAV_USER_ID)
+                    ?: getOwnUserIdUseCase(),
+                page = page,
+                pageSize = Constants.DEFAULT_PAGE_SIZE,
+            )
+        },
+        onSuccess = { result ->
+            postsPagingState = postsPagingState.copy(
+                isLoading = false,
+                items = postsPagingState.items + result,
+                endReached = result.isEmpty()
+            )
+        },
+        onError = { message ->
+            viewModelScope.launch {
+                _eventFlow.emit(UiEvent.ShowSnackbar(message))
+            }
+        }
+    )
 
     init {
         loadNextPost()
@@ -58,39 +88,40 @@ class ProfileViewModel @Inject constructor(
                 getProfile(event.userId)
             }
 
-            is ProfileScreenAction.ToggleLikeForPost -> toggleLikeForParent(
-                event.postId,
-                isLiked = false
+            is ProfileScreenAction.LikePost -> {
+                toggleLikeForPost(
+                    event.postId
+                )
+            }
+
+            ProfileScreenAction.HideLogoutDialog -> _state.value = state.value.copy(
+                showLogoutDialog = false
             )
+
+            ProfileScreenAction.ShowLogoutDialog -> _state.value = state.value.copy(
+                showLogoutDialog = true
+            )
+
+            ProfileScreenAction.ShowMorePopupMenu -> _state.value = state.value.copy(
+                showMorePopupMenu = true
+            )
+
+            ProfileScreenAction.ShowMorePopupMenu -> _state.value = state.value.copy(
+                showMorePopupMenu = false
+            )
+
+            ProfileScreenAction.Logout -> {
+                _state.value = state.value.copy(
+                    showLogoutDialog = false
+                )
+                logoutUseCase()
+            }
         }
     }
 
     fun loadNextPost() {
         viewModelScope.launch {
-            postsPagingState = postsPagingState.copy(
-                isLoading = true
-            )
-            val result = getUserPostsUseCase(
-                savedStateHandle.get<String>(Constants.NavArguments.NAV_USER_ID)
-                    ?: getOwnUserIdUseCase(),
-                page = _currentPage,
-                pageSize = Constants.DEFAULT_PAGE_SIZE,
-            )
-            when (result) {
-                is ApiResult.Success -> {
-                    postsPagingState =
-                        postsPagingState.copy(
-                            isLoading = false,
-                            items = postsPagingState.items + result.data.orEmpty(),
-                            endReached = result.data?.isEmpty() == true
-                        )
-                    _currentPage++
-                }
-
-                is ApiResult.Error -> {
-                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
-                }
-            }
+            paginator.loadNextItems()
         }
     }
 
@@ -110,18 +141,20 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun toggleLikeForParent(parentId: String, isLiked: Boolean) {
+    private fun toggleLikeForPost(postId: String) {
         viewModelScope.launch {
-            when (val result =
-                toggleLikeForParentUseCase(parentId, ParentType.Post.type, isLiked)) {
-                is ApiResult.Success -> {
-                    _eventFlow.emit(MainFeedUiEvent.LikedPost)
-                }
+            postLiker.likePost(
+                posts = postsPagingState.items,
+                postId = postId,
+                onRequest = { currentlyLiked ->
+                    toggleLikeForParentUseCase(postId, ParentType.Post.type, currentlyLiked)
+                },
+                onError = {},
+                onStateUpdated = { newPosts ->
+                    postsPagingState = postsPagingState.copy(items = newPosts)
 
-                is ApiResult.Error -> {
-                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
                 }
-            }
+            )
         }
     }
 

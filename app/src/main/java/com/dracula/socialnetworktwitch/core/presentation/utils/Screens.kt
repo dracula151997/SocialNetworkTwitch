@@ -35,17 +35,23 @@ sealed class Screens(val route: String, @StringRes val title: Int? = null) {
     object CreatePostScreen : Screens("create_profile_screen")
 
     object PostDetailsScreen :
-        Screens("post_details_screen?postId={${Constants.NavArguments.NAV_POST_ID}}") {
-        fun createRoute(postId: String?): String {
-            return "post_details_screen?postId=${postId}"
+        Screens("post_details_screen?postId={post_id}&showKeyboard={show_keyboard}") {
+        fun createRoute(postId: String?, showKeyboard: Boolean = false): String {
+            return "post_details_screen?postId=${postId}&showKeyboard=${showKeyboard}"
         }
 
         val navArgs
-            get() = listOf(navArgument(Constants.NavArguments.NAV_POST_ID) {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-            })
+            get() = listOf(
+                navArgument(Constants.NavArguments.NAV_POST_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument(Constants.NavArguments.NAV_SHOW_KEYBOARD) {
+                    type = NavType.BoolType
+                    defaultValue = true
+                }
+            )
     }
 
     object EditProfileScreen :

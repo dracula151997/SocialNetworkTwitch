@@ -6,6 +6,8 @@ import android.content.SharedPreferences
 import com.dracula.socialnetworktwitch.core.data.remote.interceptors.HeadersInterceptor
 import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
 import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.core.utils.DefaultPostLiker
+import com.dracula.socialnetworktwitch.core.utils.PostLiker
 import com.dracula.socialnetworktwitch.feature_auth.domain.repository.AuthRepository
 import com.google.gson.Gson
 import dagger.Module
@@ -37,6 +39,10 @@ object AppModule {
             .addInterceptor(loggingInterceptor)
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun providePostLiker(): PostLiker = DefaultPostLiker()
 
     @Provides
     @Singleton

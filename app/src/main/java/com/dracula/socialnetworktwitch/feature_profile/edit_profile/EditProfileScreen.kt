@@ -80,21 +80,22 @@ fun EditProfileScreen(
     val skillsState = viewModel.skillsState
 
     val cropProfileImageLauncher =
-        rememberLauncherForActivityResult(CropActivityResultContract(2f, 3f)) {
+        rememberLauncherForActivityResult(CropActivityResultContract(5f, 2f)) {
             viewModel.onEvent(EditProfileAction.CropProfileImage(it))
         }
     val cropBannerImageLauncher =
-        rememberLauncherForActivityResult(CropActivityResultContract(16f, 9f)) {
+        rememberLauncherForActivityResult(CropActivityResultContract(1f, 1f)) {
             viewModel.onEvent(EditProfileAction.CropBannerImage(it))
         }
 
     val pickProfileImageLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
-            cropProfileImageLauncher.launch(it)
+            it?.let { uri -> cropProfileImageLauncher.launch(it) }
         }
     val pickBannerImageLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
-            cropBannerImageLauncher.launch(it)
+            it?.let { uri -> cropBannerImageLauncher.launch(it) }
+
         }
 
     LaunchedEffect(key1 = true) {

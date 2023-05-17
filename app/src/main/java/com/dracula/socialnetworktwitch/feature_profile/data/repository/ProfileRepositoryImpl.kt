@@ -1,12 +1,15 @@
 package com.dracula.socialnetworktwitch.feature_profile.data.repository
 
+import android.content.SharedPreferences
 import android.net.Uri
+import androidx.core.content.edit
 import androidx.core.net.toFile
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.data.remote.PostApi
 import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.core.domain.model.UserItem
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
+import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.UnitApiResult
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.ProfileApi
@@ -27,6 +30,7 @@ class ProfileRepositoryImpl(
     private val api: ProfileApi,
     private val postApi: PostApi,
     private val gson: Gson,
+    private val sharedPreferences: SharedPreferences,
 ) : ProfileRepository {
 
     override suspend fun getProfile(userId: String): ApiResult<Profile> {
@@ -170,6 +174,13 @@ class ProfileRepositoryImpl(
             ApiResult.Error(UiText.StringResource(R.string.error_couldnot_reach_server))
         } catch (e: HttpException) {
             ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
+        }
+    }
+
+    override fun logout() {
+        sharedPreferences.edit {
+            remove(Constants.SharedPrefKeys.KEY_TOKEN)
+            remove(Constants.SharedPrefKeys.KEY_USER_ID)
         }
     }
 }

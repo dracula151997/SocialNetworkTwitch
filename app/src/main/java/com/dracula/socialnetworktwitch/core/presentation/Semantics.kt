@@ -2,6 +2,7 @@ package com.dracula.socialnetworktwitch.core.presentation
 
 object Semantics {
     object ContentDescriptions {
+        const val LOGOUT = "Logout"
         const val SHOW_PASSWORD_ICON: String = "Show password icon"
         const val HIDE_PASSWORD_ICON = "Hide password icon"
         const val SPLASH_LOGO = "Logo"

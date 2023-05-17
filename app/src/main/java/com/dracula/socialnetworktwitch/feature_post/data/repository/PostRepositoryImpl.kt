@@ -85,6 +85,18 @@ class PostRepositoryImpl(
         }
     }
 
+    override suspend fun getPostsForFollowers(page: Int, pageSize: Int): ApiResult<List<Post>> {
+        return try {
+            val response = api.getPostsForFollows(page, pageSize)
+            ApiResult.Success(response)
+        } catch (e: IOException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_couldnot_reach_server))
+        } catch (e: HttpException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
+
+        }
+    }
+
     override suspend fun createComment(comment: String, postId: String): UnitApiResult {
         return try {
             val response = api.createComment(

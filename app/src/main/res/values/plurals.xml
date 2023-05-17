@@ -4,9 +4,9 @@
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
     </plurals>
-    <plurals name="liked_by_x_peoples">
-        <item quantity="one">Liked by %d person</item>
-        <item quantity="other">Liked by %d people</item>
+    <plurals name="x_likes">
+        <item quantity="one">%d like</item>
+        <item quantity="other">%d likes</item>
     </plurals>
     <plurals name="x_post">
         <item quantity="one">Post</item>

@@ -1,29 +1,33 @@
 package com.dracula.socialnetworktwitch.feature_profile.profile
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.model.User
-import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
@@ -34,6 +38,7 @@ import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
 import com.dracula.socialnetworktwitch.feature_profile.profile.components.BannerSection
 import com.dracula.socialnetworktwitch.feature_profile.profile.components.ProfileHeaderSection
 import kotlinx.coroutines.flow.collectLatest
+import java.util.Locale
 
 @Composable
 fun ProfileScreen(
@@ -65,18 +70,8 @@ fun ProfileScreen(
     }
     Column(modifier = Modifier.fillMaxSize()) {
         StandardTopBar(
-            title = username,
-            navActions = {
-                IconButton(
-                    onClick = {},
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = Semantics.ContentDescriptions.MORE,
-                        tint = Color.White
-                    )
-                }
-            },
+            title = stringResource(id = R.string.x_profile,
+                username.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }),
             navController = navController
         )
         if (state.isLoading) CircularProgressIndicator(
@@ -109,6 +104,9 @@ fun ProfileScreen(
                     modifier = Modifier.padding(SpaceMedium),
                     onEditClick = {
                         navController.navigate(Screens.EditProfileScreen.createRoute(userId = userId))
+                    },
+                    onLogoutClicked = {
+                        viewModel.onEvent(ProfileScreenAction.ShowLogoutDialog)
                     })
             }
 
@@ -117,8 +115,7 @@ fun ProfileScreen(
                 if (index > userPosts.items.size - 1 && !userPosts.endReached && !userPosts.isLoading) {
                     viewModel.loadNextPost()
                 }
-                PostItem(
-                    post = post,
+                PostItem(post = post,
                     onPostClicked = {
                         navController.navigate(Screens.PostDetailsScreen.createRoute(postId = post.id))
                     },
@@ -128,13 +125,53 @@ fun ProfileScreen(
 
                     },
                     onLikeClicked = {
+                        viewModel.onEvent(ProfileScreenAction.LikePost(post.id))
                     },
                     onShareClicked = {},
-                    onUsernameClicked = {}
-                )
+                    onUsernameClicked = {})
             }
 
 
+        }
+
+        if (state.showLogoutDialog) {
+            AlertDialog(onDismissRequest = { viewModel.onEvent(ProfileScreenAction.HideLogoutDialog) },
+                title = {
+                    Text(text = stringResource(id = R.string.logout))
+                },
+                text = {
+                    Text(text = stringResource(id = R.string.are_you_sure_to_logout))
+                },
+                buttons = {
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        TextButton(
+                            onClick = {
+                                viewModel.onEvent(ProfileScreenAction.HideLogoutDialog)
+                            },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colors.primary
+                            )
+                        ) {
+                            Text(text = stringResource(id = R.string.dismiss_btn))
+                        }
+
+                        TextButton(onClick = {
+                            viewModel.onEvent(ProfileScreenAction.Logout)
+                            navController.navigate(Screens.LoginScreen.route) {
+                                popUpTo(Screens.LoginScreen.route) {
+                                    inclusive = true
+                                }
+                            }
+                        }) {
+                            Text(text = stringResource(id = R.string.logout_btn))
+                        }
+                    }
+
+
+                })
         }
 
     }

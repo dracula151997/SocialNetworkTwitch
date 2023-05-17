@@ -88,9 +88,12 @@ fun Navigation(
             route = Screens.PostDetailsScreen.route,
             arguments = Screens.PostDetailsScreen.navArgs
         ) {
+            val showKeyboard =
+                it.arguments?.getBoolean(Constants.NavArguments.NAV_SHOW_KEYBOARD) ?: false
             PostDetailsScreen(
                 navController = navController,
-                scaffoldState = scaffoldState
+                scaffoldState = scaffoldState,
+                showKeyboard = showKeyboard
             )
         }
 

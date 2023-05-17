@@ -3,6 +3,7 @@ package com.dracula.socialnetworktwitch.core.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,10 +18,12 @@ import com.dracula.socialnetworktwitch.core.presentation.components.StandardScaf
 import com.dracula.socialnetworktwitch.core.presentation.theme.SocialNetworkTwitchTheme
 import com.dracula.socialnetworktwitch.core.presentation.utils.Navigation
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.UserStateViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val userState by viewModels<UserStateViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

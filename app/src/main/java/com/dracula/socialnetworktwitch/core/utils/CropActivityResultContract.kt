@@ -1,5 +1,6 @@
 package com.dracula.socialnetworktwitch.core.utils
 
+import android.app.Activity.RESULT_CANCELED
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -23,7 +24,7 @@ class CropActivityResultContract(
 
     override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
         if (intent == null) return null
-        if (resultCode == RESULT_ERROR) {
+        if (resultCode == RESULT_ERROR || resultCode == RESULT_CANCELED) {
             val error = UCrop.getError(intent)
             error?.printStackTrace()
         }

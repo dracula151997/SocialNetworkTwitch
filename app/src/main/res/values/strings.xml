@@ -11,7 +11,7 @@
     <string name="already_have_an_account">Already have an account?</string>
     <string name="register">Register</string>
     <string name="read_more">Read more</string>
-    <string name="liked_by_x_people">Liked by %d people</string>
+    <string name="x_likes">%d like</string>
     <string name="your_feed">Your Feed</string>
     <string name="your_activity">Your Activity</string>
     <string name="commented_on">commented on</string>
@@ -62,4 +62,9 @@
     <string name="comment_posted_successfully">Successfully posted comment</string>
     <string name="liked_by">Liked by</string>
     <string name="no_people_liked">Nobody liked</string>
+    <string name="logout_btn">Logout</string>
+    <string name="dismiss_btn">Dismiss</string>
+    <string name="x_profile">%s\'s profile</string>
+    <string name="logout">Logout</string>
+    <string name="are_you_sure_to_logout">Are you sure to logout?</string>
 </resources>

@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.R
+import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
@@ -30,6 +31,7 @@ class PostDetailsViewModel @Inject constructor(
     private val getCommentsForPostUseCase: GetCommentsForPostUseCase,
     private val createCommentUseCase: CreateCommentUseCase,
     private val toggleLikeForParentUseCase: ToggleLikeForParentUseCase,
+    private val getOwnUserIdUseCase: GetOwnUserIdUseCase,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     var state by mutableStateOf(PostDetailsState())
@@ -44,18 +46,25 @@ class PostDetailsViewModel @Inject constructor(
     var commentFieldState by mutableStateOf(StandardTextFieldState())
         private set
 
+    var ownUserId: String = ""
+        private set
+
+    var shouldShowKeyboard by mutableStateOf(false)
+        private set
+
     init {
         savedStateHandle.postIdArgs?.let { postId ->
             getPostDetails(postId = postId)
             getCommentsForPost(postId = postId)
         }
+        ownUserId = getOwnUserIdUseCase()
+
     }
 
     fun onEvent(event: PostDetailsAction) {
         when (event) {
             PostDetailsAction.Comment -> createComment(
-                postId = savedStateHandle.postIdArgs.orEmpty(),
-                comment = commentFieldState.text
+                postId = savedStateHandle.postIdArgs.orEmpty(), comment = commentFieldState.text
             )
 
             is PostDetailsAction.LikeComment -> {
@@ -88,17 +97,13 @@ class PostDetailsViewModel @Inject constructor(
     private fun createComment(postId: String, comment: String) {
         viewModelScope.launch {
             commentState = CommentState(isLoading = true)
-            val result =
-                createCommentUseCase(
-                    postId = postId,
-                    comment = comment
-                )
-            if (result.hasCommentError)
-                commentFieldState = commentFieldState.copy(
-                    error = result.commentError
-                )
-            if (result.hasPostIdError)
-                _event.emit(UiEvent.ShowSnackbar(UiText.unknownError()))
+            val result = createCommentUseCase(
+                postId = postId, comment = comment
+            )
+            if (result.hasCommentError) commentFieldState = commentFieldState.copy(
+                error = result.commentError
+            )
+            if (result.hasPostIdError) _event.emit(UiEvent.ShowSnackbar(UiText.unknownError()))
 
             commentState = commentState.copy(isLoading = false)
             when (val result = result.result) {
@@ -152,8 +157,7 @@ class PostDetailsViewModel @Inject constructor(
             when (val result = getCommentsForPostUseCase(postId)) {
                 is ApiResult.Success -> {
                     state = state.copy(
-                        isLoadingComments = false,
-                        comments = result.data.orEmpty()
+                        isLoadingComments = false, comments = result.data.orEmpty()
                     )
                 }
 
@@ -179,13 +183,10 @@ class PostDetailsViewModel @Inject constructor(
                 )
 
                 ParentType.Comment -> {
-                    state = state.copy(
-                        comments = state.comments.map {
-                            if (it.id == parentId)
-                                it.copy(isLiked = !isLiked)
-                            else it
-                        }
-                    )
+                    state = state.copy(comments = state.comments.map {
+                        if (it.id == parentId) it.copy(isLiked = !isLiked)
+                        else it
+                    })
                 }
 
                 else -> Unit
@@ -194,17 +195,29 @@ class PostDetailsViewModel @Inject constructor(
                 is ApiResult.Success -> Unit
                 is ApiResult.Error -> {
                     when (ParentType.fromType(type = parentType)) {
-                        ParentType.Post -> state = state.copy(
-                            post = state.post?.copy(isLiked = isLiked)
-                        )
+                        ParentType.Post -> {
+                            val post = state.post
+                            state = state.copy(
+                                post = state.post?.copy(
+                                    isLiked = isLiked,
+                                    likeCount = if (isLiked) post?.likeCount?.minus(1)
+                                        ?: 0 else post?.likeCount?.plus(1) ?: 0
+                                )
+                            )
+                        }
 
-                        ParentType.Comment -> state = state.copy(
-                            comments = state.comments.map {
-                                if (it.id == parentId)
-                                    it.copy(isLiked = isLiked)
+                        ParentType.Comment -> {
+                            state = state.copy(comments = state.comments.map {
+                                if (it.id == parentId) it.copy(
+                                    isLiked = isLiked,
+                                    likeCount = if (it.isLiked) it.likeCount.minus(1)
+                                    else it.likeCount.plus(
+                                        1
+                                    )
+                                )
                                 else it
-                            }
-                        )
+                            })
+                        }
 
                         else -> Unit
                     }
@@ -213,6 +226,7 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    val SavedStateHandle.postIdArgs
+    private val SavedStateHandle.postIdArgs
         get() = savedStateHandle.get<String>(Constants.NavArguments.NAV_POST_ID)
+    private val SavedStateHandle.shouldShowKeyboard get() = savedStateHandle.get<Boolean>(Constants.NavArguments.NAV_SHOW_KEYBOARD)
 }

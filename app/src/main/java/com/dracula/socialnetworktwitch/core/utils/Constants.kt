@@ -20,6 +20,7 @@ object Constants {
         const val NAV_USER_ID = "user_id"
         const val NAV_POST_ID = "post_id"
         const val NAV_PARENT_ID = "parent_id"
+        const val NAV_SHOW_KEYBOARD = "show_keyboard"
 
 
     }

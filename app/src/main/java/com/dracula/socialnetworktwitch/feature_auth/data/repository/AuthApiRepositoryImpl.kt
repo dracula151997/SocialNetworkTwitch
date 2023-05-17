@@ -89,4 +89,6 @@ class AuthApiRepositoryImpl(
 
     override val ownUserId: String
         get() = sharedPreferences.getString(Constants.SharedPrefKeys.KEY_USER_ID, "").orEmpty()
+    override val userToken: String
+        get() = sharedPreferences.getString(Constants.SharedPrefKeys.KEY_USER_ID, "").orEmpty()
 }

@@ -11,4 +11,6 @@ interface AuthRepository {
 
     val ownUserId: String
 
+    val userToken: String
+
 }

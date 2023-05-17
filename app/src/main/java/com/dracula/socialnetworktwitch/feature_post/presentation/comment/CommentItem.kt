@@ -99,7 +99,7 @@ fun CommentItem(
             Spacer(modifier = Modifier.height(SpaceMedium))
             Text(
                 text = pluralStringResource(
-                    id = R.plurals.liked_by_x_peoples,
+                    id = R.plurals.x_likes,
                     count = comment.likeCount,
                     comment.likeCount
                 ),

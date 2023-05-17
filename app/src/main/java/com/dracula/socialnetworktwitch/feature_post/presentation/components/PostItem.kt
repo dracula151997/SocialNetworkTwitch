@@ -1,7 +1,8 @@
 package com.dracula.socialnetworktwitch.feature_post.presentation.components
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -84,8 +86,10 @@ fun PostItem(
                     .fillMaxWidth()
                     .padding(PaddingSmall)
             ) {
-                PostActionRow(username = post.username,
+                PostActionRow(
+                    username = post.username,
                     modifier = Modifier.fillMaxWidth(),
+                    isLiked = post.isLiked,
                     onLikeClicked = { isLiked ->
                         onLikeClicked()
                     },
@@ -97,7 +101,9 @@ fun PostItem(
                     },
                     onUsernameClicked = { username ->
                         onUsernameClicked()
-                    })
+                    },
+                    isOwnPost = post.isOwnPost
+                )
                 Text(
                     text = buildAnnotatedString {
                         append(post.description)
@@ -120,7 +126,11 @@ fun PostItem(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = stringResource(id = R.string.liked_by_x_people, post.likeCount),
+                        text = pluralStringResource(
+                            id = R.plurals.x_likes,
+                            count = post.likeCount,
+                            post.likeCount
+                        ),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.h2.copy(
                             fontWeight = FontWeight.Bold,
@@ -139,13 +149,24 @@ fun PostItem(
             }
         }
 
-        if (showProfileImage) Image(
-            painter = painterResource(id = R.drawable.philipp),
-            contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
-            modifier = Modifier
-                .clip(CircleShape)
-                .size(ProfilePictureSizeMedium)
-                .align(Alignment.TopCenter)
-        )
+        if (showProfileImage)
+            StandardAsyncImage(
+                url = post.profileImageUrl,
+                contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
+                errorPlaceholder = painterResource(id = R.drawable.avatar),
+                placeholder = painterResource(id = R.drawable.avatar),
+                modifier = Modifier
+                    .border(
+                        BorderStroke(
+                            1.dp,
+                            color = MaterialTheme.colors.primary,
+                        ),
+                        shape = CircleShape
+                    )
+                    .size(ProfilePictureSizeMedium)
+                    .background(color = Color.LightGray, shape = CircleShape)
+                    .align(Alignment.TopCenter),
+
+                )
     }
 }
