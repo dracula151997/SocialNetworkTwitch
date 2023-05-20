@@ -11,8 +11,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Comment
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,7 +44,7 @@ fun EngagementButtons(
         if (!isOwnProfile)
             IconButton(onClick = { onLikeClicked(!isLiked) }) {
                 Icon(
-                    imageVector = Icons.Filled.Favorite,
+                    imageVector = Icons.Outlined.Favorite,
                     contentDescription =
                     if (isLiked)
                         Semantics.ContentDescriptions.UNLIKE

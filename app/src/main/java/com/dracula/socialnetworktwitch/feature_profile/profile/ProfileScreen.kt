@@ -124,6 +124,12 @@ fun ProfileScreen(
                     showProfileImage = false,
                     modifier = Modifier.offset(y = -ProfilePictureSizeLarge / 2f),
                     onCommentClicked = {
+                        navController.navigate(
+                            Screens.PostDetailsScreen.createRoute(
+                                postId = post.id,
+                                showKeyboard = true
+                            )
+                        )
                     },
                     onLikeClicked = {
                         viewModel.onEvent(ProfileScreenAction.LikePost(post.id))

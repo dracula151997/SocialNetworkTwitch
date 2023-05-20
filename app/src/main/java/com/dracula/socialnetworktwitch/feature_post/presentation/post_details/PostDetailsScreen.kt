@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -28,7 +29,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -62,8 +62,7 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSiz
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.KeyboardState
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.keyboardAsState
+import com.dracula.socialnetworktwitch.core.presentation.utils.clearFocusOnKeyboardDismiss
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
 import com.dracula.socialnetworktwitch.feature_post.domain.model.CreateCommentValidationError
@@ -90,16 +89,8 @@ fun PostDetailsScreen(
         FocusRequester()
     }
     val keyboardController = LocalSoftwareKeyboardController.current
-    val keyboardState by keyboardAsState()
-    when (keyboardState) {
-        KeyboardState.Opened -> Unit
-        KeyboardState.Closed -> focusManager.clearFocus()
-    }
+
     LaunchedEffect(key1 = true) {
-        if (showKeyboard) {
-            keyboardController?.show()
-            focusRequester.requestFocus()
-        }
         viewModel.event.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
@@ -112,6 +103,7 @@ fun PostDetailsScreen(
             }
         }
     }
+
     Box(modifier = Modifier) {
         Column(
             modifier = Modifier
@@ -242,6 +234,7 @@ fun PostDetailsScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .imePadding()
                     .padding(PaddingMedium)
                     .background(color = MaterialTheme.colors.surface),
                 verticalAlignment = Alignment.CenterVertically
@@ -254,7 +247,8 @@ fun PostDetailsScreen(
                     hint = stringResource(id = R.string.enter_your_comment),
                     modifier = Modifier
                         .weight(1f)
-                        .focusRequester(focusRequester),
+                        .focusRequester(focusRequester)
+                        .clearFocusOnKeyboardDismiss(),
                     imeAction = ImeAction.Done,
                     keyboardActions = KeyboardActions(
                         onDone = {
@@ -290,5 +284,10 @@ fun PostDetailsScreen(
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
+
+        LaunchedEffect(key1 = Unit) {
+            if (showKeyboard)
+                focusRequester.requestFocus()
+        }
     }
 }

@@ -19,7 +19,6 @@ import com.dracula.socialnetworktwitch.feature_profile.profile.ProfileScreen
 import com.dracula.socialnetworktwitch.feature_search.presentation.SearchScreen
 import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashScreen
 import com.dracula.socialnetworktwitch.presentation.ui.chat.ChatScreen
-import timber.log.Timber
 
 private const val TAG = "Navigation"
 
@@ -92,7 +91,6 @@ fun Navigation(
         ) {
             val showKeyboard =
                 it.arguments?.getBoolean(Constants.NavArguments.NAV_SHOW_KEYBOARD) ?: false
-            Timber.d("postId: ${it.arguments?.getString("post_id")}")
             PostDetailsScreen(
                 navController = navController,
                 scaffoldState = scaffoldState,
