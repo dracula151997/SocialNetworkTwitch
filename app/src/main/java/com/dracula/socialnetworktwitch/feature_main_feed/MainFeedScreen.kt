@@ -25,6 +25,7 @@ import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
 import com.dracula.socialnetworktwitch.feature_post.presentation.components.PostItem
 import kotlinx.coroutines.flow.collectLatest
 
@@ -42,7 +43,6 @@ fun MainFeedScreen(
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 MainFeedUiEvent.LikedPost -> {
-//                    posts.refresh()
                 }
 
                 is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
@@ -97,7 +97,7 @@ fun MainFeedScreen(
                                     )
                                 )
                             },
-                            onShareClicked = {},
+                            onShareClicked = { context.sendSharePostIntent(postId = post.id) },
                             onLikeClicked = { viewModel.onEvent(MainFeedAction.LikePost(post.id)) },
                             onCommentClicked = {
                                 navController.navigate(

@@ -65,6 +65,7 @@ import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.KeyboardState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.keyboardAsState
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
 import com.dracula.socialnetworktwitch.feature_post.domain.model.CreateCommentValidationError
 import com.dracula.socialnetworktwitch.feature_post.presentation.comment.CommentItem
 import kotlinx.coroutines.flow.collectLatest
@@ -161,7 +162,7 @@ fun PostDetailsScreen(
                                             viewModel.onEvent(PostDetailsAction.LikePost)
                                         },
                                         onShareClicked = {
-
+                                            context.sendSharePostIntent(postId = post?.id.orEmpty())
                                         },
                                         onCommentClicked = {
                                             focusRequester.requestFocus()

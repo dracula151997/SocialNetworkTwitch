@@ -1,8 +1,10 @@
 package com.dracula.socialnetworktwitch.core.presentation.utils
 
+import android.content.Intent
 import androidx.annotation.StringRes
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.utils.Constants
 
@@ -39,6 +41,13 @@ sealed class Screens(val route: String, @StringRes val title: Int? = null) {
         fun createRoute(postId: String?, showKeyboard: Boolean = false): String {
             return "post_details_screen?postId=${postId}&showKeyboard=${showKeyboard}"
         }
+
+        val deepLink = listOf(
+            navDeepLink {
+                uriPattern = "${DEEP_LINK_URL}/post/details/{post_id}"
+                action = Intent.ACTION_VIEW
+            }
+        )
 
         val navArgs
             get() = listOf(
@@ -78,5 +87,9 @@ sealed class Screens(val route: String, @StringRes val title: Int? = null) {
             get() = listOf(navArgument(Constants.NavArguments.NAV_PARENT_ID) {
                 type = NavType.StringType
             })
+    }
+
+    companion object {
+        const val DEEP_LINK_URL = "social://dracula.com"
     }
 }

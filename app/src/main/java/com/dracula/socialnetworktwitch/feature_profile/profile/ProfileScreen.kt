@@ -33,6 +33,7 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSiz
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
 import com.dracula.socialnetworktwitch.feature_post.presentation.components.PostItem
 import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
 import com.dracula.socialnetworktwitch.feature_profile.profile.components.BannerSection
@@ -115,20 +116,24 @@ fun ProfileScreen(
                 if (index > userPosts.items.size - 1 && !userPosts.endReached && !userPosts.isLoading) {
                     viewModel.loadNextPost()
                 }
-                PostItem(post = post,
+                PostItem(
+                    post = post,
                     onPostClicked = {
                         navController.navigate(Screens.PostDetailsScreen.createRoute(postId = post.id))
                     },
                     showProfileImage = false,
                     modifier = Modifier.offset(y = -ProfilePictureSizeLarge / 2f),
                     onCommentClicked = {
-
                     },
                     onLikeClicked = {
                         viewModel.onEvent(ProfileScreenAction.LikePost(post.id))
                     },
-                    onShareClicked = {},
-                    onUsernameClicked = {})
+                    onShareClicked = {
+                        context.sendSharePostIntent(postId = post.id)
+                    },
+                    onUsernameClicked = {
+                    },
+                )
             }
 
 

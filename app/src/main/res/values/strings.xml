@@ -67,4 +67,5 @@
     <string name="x_profile">%s\'s profile</string>
     <string name="logout">Logout</string>
     <string name="are_you_sure_to_logout">Are you sure to logout?</string>
+    <string name="share_intent_text">Hey, I found a great post, check it out :)\n%s</string>
 </resources>
