@@ -36,3 +36,28 @@ fun StandardTopBar(
         actions = navActions
     )
 }
+
+@Composable
+fun StandardTopBar(
+    title: @Composable () -> Unit,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    navigationIcon: @Composable() (() -> Unit)? = null,
+    showBackButton: Boolean = false,
+    navActions: @Composable() (RowScope.() -> Unit) = {},
+) {
+
+    TopAppBar(
+        title = title,
+        modifier = modifier,
+        backgroundColor = MaterialTheme.colors.surface,
+        elevation = 0.dp,
+        navigationIcon = if (showBackButton) {
+            val backIcon: @Composable () -> Unit = {
+                BackIcon(onBackClicked = { navController.navigateUp() })
+            }
+            backIcon
+        } else navigationIcon,
+        actions = navActions
+    )
+}

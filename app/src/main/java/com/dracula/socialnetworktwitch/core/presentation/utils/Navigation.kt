@@ -10,6 +10,9 @@ import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.feature_activity.presentation.ActivityScreen
 import com.dracula.socialnetworktwitch.feature_auth.presentation.login.LoginScreen
 import com.dracula.socialnetworktwitch.feature_auth.presentation.register.RegisterScreen
+import com.dracula.socialnetworktwitch.feature_chat.domain.Chat
+import com.dracula.socialnetworktwitch.feature_chat.presentation.chat.ChatScreen
+import com.dracula.socialnetworktwitch.feature_chat.presentation.message.MessagesScreen
 import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedScreen
 import com.dracula.socialnetworktwitch.feature_post.presentation.create_post.CreatePostScreen
 import com.dracula.socialnetworktwitch.feature_post.presentation.person_list.PersonListScreen
@@ -18,7 +21,6 @@ import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileS
 import com.dracula.socialnetworktwitch.feature_profile.profile.ProfileScreen
 import com.dracula.socialnetworktwitch.feature_search.presentation.SearchScreen
 import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashScreen
-import com.dracula.socialnetworktwitch.presentation.ui.chat.ChatScreen
 
 private const val TAG = "Navigation"
 
@@ -57,8 +59,28 @@ fun Navigation(
                 scaffoldState = scaffoldState
             )
         }
-        composable(route = Screens.MessagesScreen.route) {
-            ChatScreen(navController = navController)
+        composable(route = Screens.ChatListScreen.route) {
+            ChatScreen(
+                navController = navController, chats = listOf(
+                    Chat(
+                        username = "Dylan Stanton",
+                        profilePictureUrl = "https://duckduckgo.com/?q=libris",
+                        lastMessage = "reprehendunt",
+                        lastMessageFormattedTimestamp = "adipiscing"
+                    ),
+                    Chat(
+                        username = "Gerard Mayer",
+                        profilePictureUrl = "https://duckduckgo.com/?q=semper",
+                        lastMessage = "himenaeos",
+                        lastMessageFormattedTimestamp = "ante"
+                    )
+                )
+            )
+        }
+        composable(route = Screens.MessageScreen.route) {
+            MessagesScreen(
+                profilePicture = null, navController = navController
+            )
         }
 
         composable(route = Screens.NotificationsScreen.route) {

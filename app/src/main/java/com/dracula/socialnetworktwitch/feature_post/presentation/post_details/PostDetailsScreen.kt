@@ -6,27 +6,20 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -35,7 +28,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -44,15 +36,14 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.PostActionRow
+import com.dracula.socialnetworktwitch.core.presentation.components.SendTextField
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
-import com.dracula.socialnetworktwitch.core.presentation.components.StandardTextField
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.MediumGray
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
@@ -62,7 +53,6 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSiz
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
-import com.dracula.socialnetworktwitch.core.presentation.utils.clearFocusOnKeyboardDismiss
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
 import com.dracula.socialnetworktwitch.feature_post.domain.model.CreateCommentValidationError
@@ -231,54 +221,70 @@ fun PostDetailsScreen(
                     )
                 }
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .imePadding()
-                    .padding(PaddingMedium)
-                    .background(color = MaterialTheme.colors.surface),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                StandardTextField(
-                    text = commentFieldState.text,
-                    onValueChanged = {
-                        viewModel.onEvent(PostDetailsAction.CommentEntered(it))
-                    },
-                    hint = stringResource(id = R.string.enter_your_comment),
-                    modifier = Modifier
-                        .weight(1f)
-                        .focusRequester(focusRequester)
-                        .clearFocusOnKeyboardDismiss(),
-                    imeAction = ImeAction.Done,
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            viewModel.onEvent(PostDetailsAction.Comment)
-                            focusManager.clearFocus()
-                        }
-                    ),
-                    error = when (commentFieldState.error) {
-                        is CreateCommentValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
-                        else -> ""
-                    }
+            SendTextField(
+                text = commentFieldState.text,
+                hint = stringResource(id = R.string.enter_your_comment),
+                onValueChange = { viewModel.onEvent(PostDetailsAction.CommentEntered(it)) },
+                onSend = {
+                    viewModel.onEvent(PostDetailsAction.Comment)
+                    focusManager.clearFocus()
+                },
+                focusRequester = focusRequester,
+                error = when (commentFieldState.error) {
+                    is CreateCommentValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                    else -> ""
+                }
+            )
+            /*
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .imePadding()
+                                .padding(PaddingMedium)
+                                .background(color = MaterialTheme.colors.surface),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            StandardTextField(
+                                text = commentFieldState.text,
+                                onValueChanged = {
+                                    viewModel.onEvent(PostDetailsAction.CommentEntered(it))
+                                },
+                                hint = stringResource(id = R.string.enter_your_comment),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .focusRequester(focusRequester)
+                                    .clearFocusOnKeyboardDismiss(),
+                                imeAction = ImeAction.Done,
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        viewModel.onEvent(PostDetailsAction.Comment)
+                                        focusManager.clearFocus()
+                                    }
+                                ),
+                                error = when (commentFieldState.error) {
+                                    is CreateCommentValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
+                                    else -> ""
+                                }
 
-                )
-                if (commentState.isLoading)
-                    CircularProgressIndicator()
-                else
-                    IconButton(
-                        onClick = {
-                            focusManager.clearFocus()
-                            viewModel.onEvent(PostDetailsAction.Comment)
-                        },
-                        enabled = viewModel.commentFieldState.hasText
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Send,
-                            contentDescription = Semantics.ContentDescriptions.POST_PHOTO,
-                            tint = if (commentFieldState.hasError) MaterialTheme.colors.background else MaterialTheme.colors.primary
-                        )
-                    }
-            }
+                            )
+                            if (commentState.isLoading)
+                                CircularProgressIndicator()
+                            else
+                                IconButton(
+                                    onClick = {
+                                        focusManager.clearFocus()
+                                        viewModel.onEvent(PostDetailsAction.Comment)
+                                    },
+                                    enabled = viewModel.commentFieldState.hasText
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Send,
+                                        contentDescription = Semantics.ContentDescriptions.POST_PHOTO,
+                                        tint = if (commentFieldState.hasError) MaterialTheme.colors.background else MaterialTheme.colors.primary
+                                    )
+                                }
+                        }
+            */
         }
         if (state.isPostLoading)
             CircularProgressIndicator(

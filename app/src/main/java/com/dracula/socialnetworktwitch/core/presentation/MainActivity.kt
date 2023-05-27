@@ -63,6 +63,6 @@ private fun showBottomBar(route: String): Boolean {
         Screens.ProfileScreen.route,
         Screens.MainFeedScreen.route,
         Screens.NotificationsScreen.route,
-        Screens.MessagesScreen.route
+        Screens.ChatListScreen.route
     )
 }

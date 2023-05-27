@@ -16,7 +16,8 @@ sealed class Screens(val route: String, @StringRes val title: Int? = null) {
 
     object MainFeedScreen : Screens("feeds_screen", title = R.string.your_feed)
 
-    object MessagesScreen : Screens("chat_screen")
+    object ChatListScreen : Screens("chats_screen")
+    object MessageScreen : Screens("messages_screen")
 
     object NotificationsScreen : Screens("notifications_screen")
 

@@ -37,7 +37,7 @@ fun StandardScaffold(
             contentDescription = Semantics.ContentDescriptions.HOME,
         ),
         BottomNavItem(
-            route = Screens.MessagesScreen.route,
+            route = Screens.ChatListScreen.route,
             icon = Icons.Outlined.Chat,
             contentDescription = Semantics.ContentDescriptions.CHAT,
         ),

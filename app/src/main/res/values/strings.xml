@@ -68,4 +68,6 @@
     <string name="logout">Logout</string>
     <string name="are_you_sure_to_logout">Are you sure to logout?</string>
     <string name="share_intent_text">Hey, I found a great post, check it out :)\n%s</string>
+    <string name="chats">Chats</string>
+    <string name="enter_your_message">Enter your message</string>
 </resources>
