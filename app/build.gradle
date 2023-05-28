@@ -141,5 +141,12 @@ dependencies {
 
     implementation("io.coil-kt:coil:2.3.0")
 
+    def scarletVersion = '0.1.12'
+    implementation "com.tinder.scarlet:scarlet:$scarletVersion"
+    implementation "com.tinder.scarlet:websocket-okhttp:$scarletVersion"
+    implementation "com.tinder.scarlet:lifecycle-android:$scarletVersion"
+    implementation "com.tinder.scarlet:message-adapter-gson:$scarletVersion"
+    implementation "com.tinder.scarlet:stream-adapter-coroutines:$scarletVersion"
+
 
 }
