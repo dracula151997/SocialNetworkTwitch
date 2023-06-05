@@ -1,6 +1,6 @@
-package com.dracula.socialnetworktwitch.feature_chat.data.remote
+package com.dracula.socialnetworktwitch.feature_chat.data.remote.dto
 
-import com.dracula.socialnetworktwitch.feature_chat.domain.Message
+import com.dracula.socialnetworktwitch.feature_chat.domain.model.Message
 import java.text.SimpleDateFormat
 import java.util.Locale
 

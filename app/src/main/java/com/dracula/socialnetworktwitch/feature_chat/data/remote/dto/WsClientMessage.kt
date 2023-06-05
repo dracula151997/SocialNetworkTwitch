@@ -1,4 +1,4 @@
-package com.dracula.socialnetworktwitch.feature_chat.data.remote
+package com.dracula.socialnetworktwitch.feature_chat.data.remote.dto
 
 data class WsClientMessage(
     val toId: String,

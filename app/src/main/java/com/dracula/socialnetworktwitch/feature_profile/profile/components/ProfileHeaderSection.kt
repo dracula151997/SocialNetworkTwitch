@@ -17,6 +17,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +43,7 @@ fun ProfileHeaderSection(
     isFollowing: Boolean = false,
     onLogoutClicked: () -> Unit = {},
     onEditClick: () -> Unit,
+    onMessageClicked: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -85,6 +87,10 @@ fun ProfileHeaderSection(
                         imageVector = Icons.Filled.Logout,
                         contentDescription = Semantics.ContentDescriptions.LOGOUT
                     )
+                }
+            } else {
+                IconButton(onClick = onMessageClicked) {
+                    Icon(imageVector = Icons.Default.Message, contentDescription = null)
                 }
             }
         }

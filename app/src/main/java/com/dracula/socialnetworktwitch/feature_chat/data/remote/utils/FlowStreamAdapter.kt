@@ -29,7 +29,7 @@ class FlowStreamAdapter<T> : StreamAdapter<T, Flow<T>> {
                 override fun onNext(data: T) {
                     Timber.d("onNext with data: $data")
                     if (!isClosedForSend) {
-                        trySend(data).isSuccess
+                        trySend(data)
                     }
                 }
             })

@@ -1,4 +1,4 @@
-package com.dracula.socialnetworktwitch.feature_chat.domain
+package com.dracula.socialnetworktwitch.feature_chat.domain.model
 
 data class Message(
     val fromId: String,

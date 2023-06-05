@@ -90,11 +90,11 @@ fun EditProfileScreen(
 
     val pickProfileImageLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
-            it?.let { uri -> cropProfileImageLauncher.launch(it) }
+            it?.let { uri -> cropProfileImageLauncher.launch(uri) }
         }
     val pickBannerImageLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
-            it?.let { uri -> cropBannerImageLauncher.launch(it) }
+            it?.let { uri -> cropBannerImageLauncher.launch(uri) }
 
         }
 

@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -18,47 +18,27 @@ import com.dracula.socialnetworktwitch.core.presentation.components.SendTextFiel
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
-import com.dracula.socialnetworktwitch.feature_chat.domain.Message
+import okio.ByteString.Companion.decodeBase64
+import java.nio.charset.Charset
 
 @Composable
 fun MessagesScreen(
     navController: NavController,
-    profilePicture: String? = null,
+    remoteUserId: String,
+    encodedRemoteUserProfilePic: String? = null,
     viewModel: MessageViewModel = hiltViewModel(),
 ) {
+    val remoteUserProfilePic = remember {
+        encodedRemoteUserProfilePic?.decodeBase64()?.string(charset = Charset.defaultCharset())
+    }
     val messageState = viewModel.messageFieldState
-    val messages = listOf(
-        Message(
-            fromId = "mi",
-            toId = "sale",
-            text = "appetere",
-            formattedTime = "1/1/2023 4:00 PM",
-            chatId = "enim",
-            id = "ius"
-        ),
-        Message(
-            fromId = "mi",
-            toId = "sale",
-            text = "appetere",
-            formattedTime = "1/1/2023 4:10 PM",
-            chatId = "enim",
-            id = "ius"
-        ),
-        Message(
-            fromId = "mi",
-            toId = "sale",
-            text = "appetere",
-            formattedTime = "1/1/2023 4:10 PM",
-            chatId = "enim",
-            id = "ius"
-        ),
-    )
+    val pagingState = viewModel.pagingState
     Column(
         Modifier.fillMaxSize()
     ) {
         StandardTopBar(
             title = {
-                StandardAsyncImage(url = profilePicture)
+                StandardAsyncImage(url = encodedRemoteUserProfilePic)
             },
             navController = navController
         )
@@ -68,10 +48,27 @@ fun MessagesScreen(
                 contentPadding = PaddingValues(SpaceMedium),
                 verticalArrangement = Arrangement.spacedBy(SpaceMedium)
             ) {
-                items(messages) { message ->
-                    RemoteMessageItem(message = message.text, formattedTime = message.formattedTime)
-                    Spacer(modifier = Modifier.height(SpaceMedium))
-                    OwnMessageItem(message = message.text, formattedTime = message.formattedTime)
+                items(pagingState.items.size) { index ->
+                    val message = pagingState.items[index]
+                    if (index >= pagingState.items.size - 1
+                        && !pagingState.endReached
+                        && !pagingState.isLoading
+                    ) {
+                        viewModel.onEvent(MessageEvent.GetMessagesForChat)
+                    }
+                    if (message.fromId == remoteUserId) {
+                        RemoteMessageItem(
+                            message = message.text,
+                            formattedTime = message.formattedTime
+                        )
+                        Spacer(modifier = Modifier.height(SpaceMedium))
+                    } else {
+                        OwnMessageItem(
+                            message = message.text,
+                            formattedTime = message.formattedTime
+                        )
+
+                    }
                 }
 
             }

@@ -10,7 +10,6 @@ import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.feature_activity.presentation.ActivityScreen
 import com.dracula.socialnetworktwitch.feature_auth.presentation.login.LoginScreen
 import com.dracula.socialnetworktwitch.feature_auth.presentation.register.RegisterScreen
-import com.dracula.socialnetworktwitch.feature_chat.domain.Chat
 import com.dracula.socialnetworktwitch.feature_chat.presentation.chat.ChatScreen
 import com.dracula.socialnetworktwitch.feature_chat.presentation.message.MessagesScreen
 import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedScreen
@@ -61,25 +60,24 @@ fun Navigation(
         }
         composable(route = Screens.ChatListScreen.route) {
             ChatScreen(
-                navController = navController, chats = listOf(
-                    Chat(
-                        username = "Dylan Stanton",
-                        profilePictureUrl = "https://duckduckgo.com/?q=libris",
-                        lastMessage = "reprehendunt",
-                        lastMessageFormattedTimestamp = "adipiscing"
-                    ),
-                    Chat(
-                        username = "Gerard Mayer",
-                        profilePictureUrl = "https://duckduckgo.com/?q=semper",
-                        lastMessage = "himenaeos",
-                        lastMessageFormattedTimestamp = "ante"
-                    )
-                )
+                navController = navController,
+                scaffoldState = scaffoldState
             )
+
         }
-        composable(route = Screens.MessageScreen.route) {
+        composable(
+            route = Screens.MessageScreen.route,
+            arguments = Screens.MessageScreen.navArgs
+        ) {
+            val remoteUserProfilePic =
+                it.arguments?.getString(Constants.NavArguments.NAV_REMOTE_USER_PROFILE_PICTURE)
+                    .orEmpty()
+            val remoteUserId =
+                it.arguments?.getString(Constants.NavArguments.NAV_REMOTE_USER_ID).orEmpty()
             MessagesScreen(
-                profilePicture = null, navController = navController
+                encodedRemoteUserProfilePic = remoteUserProfilePic,
+                navController = navController,
+                remoteUserId = remoteUserId
             )
         }
 

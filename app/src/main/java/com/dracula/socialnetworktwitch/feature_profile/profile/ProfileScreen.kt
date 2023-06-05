@@ -1,5 +1,6 @@
 package com.dracula.socialnetworktwitch.feature_profile.profile
 
+import android.util.Base64
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,7 +51,7 @@ fun ProfileScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val userPosts = viewModel.postsPagingState
-    val (userId1, username, bio, followerCount, followingCount, postCount, profilePictureUrl, bannerUrl, topSkills, gitHubUrl, instagramUrl, linkedinUrl, isOwnProfile, isFollowing) = state.data
+    val profile = state.data
         ?: Profile.empty()
     val context = LocalContext.current
 
@@ -72,7 +73,7 @@ fun ProfileScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         StandardTopBar(
             title = stringResource(id = R.string.x_profile,
-                username.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }),
+                profile.username.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }),
             navController = navController
         )
         if (state.isLoading) CircularProgressIndicator(
@@ -84,31 +85,47 @@ fun ProfileScreen(
             item {
                 BannerSection(
                     modifier = Modifier.aspectRatio(2.5f),
-                    topSkillUrls = topSkills,
-                    githubUrl = gitHubUrl,
-                    instagramUrl = instagramUrl,
-                    linkedinUrl = linkedinUrl,
-                    bannerUrl = bannerUrl
+                    topSkillUrls = profile.topSkills,
+                    githubUrl = profile.gitHubUrl,
+                    instagramUrl = profile.instagramUrl,
+                    linkedinUrl = profile.linkedinUrl,
+                    bannerUrl = profile.bannerUrl
 
                 )
-                ProfileHeaderSection(user = User(
-                    userId = userId1,
-                    profilePictureUrl = profilePictureUrl,
-                    username = username,
-                    bio = bio,
-                    followingCount = followingCount,
-                    followerCount = followerCount,
-                    postCount = postCount,
-                ),
-                    isOwnProfile = isOwnProfile,
-                    isFollowing = isFollowing,
+                ProfileHeaderSection(
+                    user = User(
+                        userId = profile.userId,
+                        profilePictureUrl = profile.profilePictureUrl,
+                        username = profile.username,
+                        bio = profile.bio,
+                        followingCount = profile.followingCount,
+                        followerCount = profile.followerCount,
+                        postCount = profile.postCount,
+                    ),
+                    isOwnProfile = profile.isOwnProfile,
+                    isFollowing = profile.isFollowing,
                     modifier = Modifier.padding(SpaceMedium),
                     onEditClick = {
                         navController.navigate(Screens.EditProfileScreen.createRoute(userId = userId))
                     },
                     onLogoutClicked = {
                         viewModel.onEvent(ProfileScreenAction.ShowLogoutDialog)
-                    })
+                    },
+                    onMessageClicked = {
+                        navController.navigate(
+                            Screens.MessageScreen.createRoute(
+                                chatId = null,
+                                remoteUserName = profile.username,
+                                remoteUserProfilePic = Base64.encodeToString(
+                                    profile.profilePictureUrl.encodeToByteArray(),
+                                    0
+                                ),
+                                remoteUserId = profile.userId,
+
+                                )
+                        )
+                    }
+                )
             }
 
             items(userPosts.items.size) { index ->

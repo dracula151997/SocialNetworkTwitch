@@ -4,7 +4,7 @@ class DefaultPaginator<T>(
     private val onLoad: (Boolean) -> Unit,
     private val onRequest: suspend (nextPage: Int) -> ApiResult<List<T>>,
     private val onSuccess: (items: List<T>) -> Unit,
-    private val onError: (message: UiText) -> Unit,
+    private val onError: suspend (message: UiText) -> Unit,
 ) : Paginator<T> {
     private var page = 0
     override suspend fun loadNextItems() {

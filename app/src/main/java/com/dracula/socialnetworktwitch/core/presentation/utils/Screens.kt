@@ -17,7 +17,45 @@ sealed class Screens(val route: String, @StringRes val title: Int? = null) {
     object MainFeedScreen : Screens("feeds_screen", title = R.string.your_feed)
 
     object ChatListScreen : Screens("chats_screen")
-    object MessageScreen : Screens("messages_screen")
+    object MessageScreen :
+        Screens(
+            "message_screen" +
+                    "/{${Constants.NavArguments.NAV_REMOTE_USER_NAME}}" +
+                    "/{${Constants.NavArguments.NAV_REMOTE_USER_PROFILE_PICTURE}}" +
+                    "/{${Constants.NavArguments.NAV_REMOTE_USER_ID}}" +
+                    "?chatId={${Constants.NavArguments.NAV_CHAT_ID}}"
+        ) {
+        fun createRoute(
+            remoteUserName: String,
+            remoteUserProfilePic: String,
+            remoteUserId: String,
+            chatId: String? = null
+        ): String {
+            return "message_screen" +
+                    "/${remoteUserName}" +
+                    "/${remoteUserProfilePic}" +
+                    "/${remoteUserId}" +
+                    "?chatId=${chatId}"
+        }
+
+        val navArgs
+            get() = listOf(
+                navArgument(Constants.NavArguments.NAV_REMOTE_USER_ID) {
+                    type = NavType.StringType
+                },
+                navArgument(Constants.NavArguments.NAV_CHAT_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument(Constants.NavArguments.NAV_REMOTE_USER_NAME) {
+                    type = NavType.StringType
+                },
+                navArgument(Constants.NavArguments.NAV_REMOTE_USER_PROFILE_PICTURE) {
+                    type = NavType.StringType
+                }
+            )
+    }
 
     object NotificationsScreen : Screens("notifications_screen")
 

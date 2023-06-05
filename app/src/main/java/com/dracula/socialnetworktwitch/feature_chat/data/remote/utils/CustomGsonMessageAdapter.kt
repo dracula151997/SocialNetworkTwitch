@@ -1,7 +1,7 @@
 package com.dracula.socialnetworktwitch.feature_chat.data.remote.utils
 
-import com.dracula.socialnetworktwitch.feature_chat.data.remote.WsClientMessage
-import com.dracula.socialnetworktwitch.feature_chat.data.remote.WsServerMessage
+import com.dracula.socialnetworktwitch.feature_chat.data.remote.dto.WsClientMessage
+import com.dracula.socialnetworktwitch.feature_chat.data.remote.dto.WsServerMessage
 import com.google.gson.Gson
 import com.tinder.scarlet.Message
 import com.tinder.scarlet.MessageAdapter

@@ -26,7 +26,7 @@ import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyn
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeSmall
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
-import com.dracula.socialnetworktwitch.feature_chat.domain.Chat
+import com.dracula.socialnetworktwitch.feature_chat.domain.model.Chat
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -53,7 +53,7 @@ fun ChatUserProfileItem(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             StandardAsyncImage(
-                url = chat.profilePictureUrl,
+                url = chat.remoteUserProfilePicture,
                 contentDescription = null,
                 modifier = Modifier
                     .size(ProfilePictureSizeSmall)
@@ -69,14 +69,14 @@ fun ChatUserProfileItem(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
-                        text = chat.username,
+                        text = chat.remoteUsername,
                         style = MaterialTheme.typography.body1.copy(
                             fontWeight = FontWeight.Bold
                         ),
                         modifier = Modifier.weight(1f)
                     )
                     Text(
-                        text = chat.lastMessageFormattedTimestamp,
+                        text = chat.formattedTimestamp,
                         style = MaterialTheme.typography.body1.copy(
                             fontWeight = FontWeight.Normal,
                             fontSize = 12.sp,

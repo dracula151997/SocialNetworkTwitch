@@ -2,7 +2,7 @@ package com.dracula.socialnetworktwitch.feature_chat.presentation.chat
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.dracula.socialnetworktwitch.feature_chat.domain.Chat
+import com.dracula.socialnetworktwitch.feature_chat.domain.model.Chat
 
 @Composable
 fun ChatItem(
