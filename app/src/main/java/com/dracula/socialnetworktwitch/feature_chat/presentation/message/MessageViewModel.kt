@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,7 +45,7 @@ class MessageViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    private val _messageReceived = MutableSharedFlow<Unit>(replay = 1)
+    private val _messageReceived = MutableSharedFlow<MessageScreenEvent>(replay = 1)
     val messageReceived = _messageReceived.asSharedFlow()
 
     private val paginator = DefaultPaginator(
@@ -88,7 +87,7 @@ class MessageViewModel @Inject constructor(
     private fun loadNextMessages() {
         viewModelScope.launch {
             paginator.loadNextItems()
-            _messageReceived.emit(Unit)
+            _messageReceived.emit(MessageScreenEvent.AllMessagesLoaded)
         }
 
     }
@@ -99,17 +98,13 @@ class MessageViewModel @Inject constructor(
                 when (it) {
                     is WebSocket.Event.OnConnectionOpened<*> -> {
                         observeChatMessages()
-                        Timber.d("OnConnectionOpened")
                     }
 
                     is WebSocket.Event.OnMessageReceived -> {
-                        Timber.d("OnMessageReceived: ${it.message}")
-                        _messageReceived.emit(Unit)
+                        _messageReceived.emit(MessageScreenEvent.NewMessageReceived)
                     }
 
-                    is WebSocket.Event.OnConnectionClosing -> Timber.d("OnConnectionClosing: ${it.shutdownReason}")
-                    is WebSocket.Event.OnConnectionClosed -> Timber.d("OnConnectionClosed: ${it.shutdownReason}")
-                    is WebSocket.Event.OnConnectionFailed -> Timber.e("OnConnectionFailed: ${it.throwable}")
+                    else -> Unit
                 }
             }.launchIn(viewModelScope)
     }
@@ -128,9 +123,17 @@ class MessageViewModel @Inject constructor(
             sendMessageUseCase(
                 text = messageFieldState.text,
                 toId = savedStateHandle.get<String>(Constants.NavArguments.NAV_REMOTE_USER_ID)
-                    .orEmpty(),
+                    ?: return@launch,
                 chatId = savedStateHandle.get<String>(Constants.NavArguments.NAV_CHAT_ID)
             )
+            messageFieldState = StandardTextFieldState()
+            _messageReceived.emit(MessageScreenEvent.MessageSent)
         }
     }
+}
+
+sealed interface MessageScreenEvent {
+    object NewMessageReceived : MessageScreenEvent
+    object AllMessagesLoaded : MessageScreenEvent
+    object MessageSent : MessageScreenEvent
 }
