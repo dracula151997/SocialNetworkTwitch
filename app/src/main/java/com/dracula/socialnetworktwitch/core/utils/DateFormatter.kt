@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 fun Long.toFormattedDate(pattern: String, locale: Locale = Locale.getDefault()): String {
-    return SimpleDateFormat(pattern, Locale.getDefault())
+    return SimpleDateFormat(pattern, locale)
         .run {
             format(this@toFormattedDate)
         }

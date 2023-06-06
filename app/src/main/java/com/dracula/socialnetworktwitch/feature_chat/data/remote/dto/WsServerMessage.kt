@@ -1,8 +1,7 @@
 package com.dracula.socialnetworktwitch.feature_chat.data.remote.dto
 
+import com.dracula.socialnetworktwitch.core.utils.toFormattedDate
 import com.dracula.socialnetworktwitch.feature_chat.domain.model.Message
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 data class WsServerMessage(
     val fromId: String,
@@ -16,8 +15,7 @@ data class WsServerMessage(
             fromId = fromId,
             toId = toId,
             text = text,
-            formattedTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-                .format(timestamp),
+            formattedTime = timestamp.toFormattedDate("dd MMM h:mma"),
             chatId = chatId.orEmpty(),
             id = ""
         )

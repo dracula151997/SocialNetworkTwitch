@@ -17,7 +17,7 @@ data class MessageResponse(
             fromId = fromId,
             toId = toId,
             text = text,
-            formattedTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
+            formattedTime = SimpleDateFormat("dd MMM h:mma", Locale.getDefault()).format(
                 timestamp
             ),
             chatId = chatId.orEmpty(),

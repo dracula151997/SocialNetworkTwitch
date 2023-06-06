@@ -1,8 +1,7 @@
 package com.dracula.socialnetworktwitch.feature_chat.data.remote.dto
 
+import com.dracula.socialnetworktwitch.core.utils.toFormattedDate
 import com.dracula.socialnetworktwitch.feature_chat.domain.model.Chat
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 data class ChatResponse(
     val chatId: String,
@@ -19,10 +18,7 @@ data class ChatResponse(
             remoteUsername = remoteUsername.orEmpty(),
             remoteUserProfilePictureUrl = remoteUserProfilePictureUrl.orEmpty(),
             lastMessage = lastMessage.orEmpty(),
-            formattedTimestamp = SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss",
-                Locale.getDefault()
-            ).format(timestamp)
+            formattedTimestamp = timestamp?.toFormattedDate("dd MMM h:mma").orEmpty()
         )
     }
 }

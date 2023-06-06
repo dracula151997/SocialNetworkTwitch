@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
@@ -47,7 +49,13 @@ fun MessagesScreen(
         ) {
             StandardTopBar(
                 title = {
-                    StandardAsyncImage(url = remoteUserProfilePic, modifier = Modifier.size(30.dp))
+                    StandardAsyncImage(
+                        url = remoteUserProfilePic, modifier = Modifier
+                            .size(30.dp)
+                            .clip(
+                                CircleShape
+                            )
+                    )
                     Spacer(modifier = Modifier.width(SpaceMedium))
                     Text(text = remoteUserName)
                 },
