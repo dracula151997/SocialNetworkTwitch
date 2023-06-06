@@ -81,7 +81,7 @@ fun MessagesScreen(
                     Text(text = remoteUserName)
                 }, navController = navController
             )
-            Column(modifier = Modifier) {
+            Column {
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(SpaceMedium),
@@ -115,7 +115,8 @@ fun MessagesScreen(
                     },
                     onSend = { viewModel.onEvent(MessageEvent.SendMessage) },
                     enabled = messageState.hasText && !messageState.hasError,
-                )
+
+                    )
 
             }
         }

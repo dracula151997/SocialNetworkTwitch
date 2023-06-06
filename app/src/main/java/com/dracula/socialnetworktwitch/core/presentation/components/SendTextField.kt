@@ -67,7 +67,7 @@ fun SendTextField(
             Icon(
                 imageVector = Icons.Default.Send,
                 contentDescription = Semantics.ContentDescriptions.POST_PHOTO,
-                tint = if (!error.isNullOrEmpty()) MaterialTheme.colors.background else MaterialTheme.colors.primary
+                tint = if (!enabled) MaterialTheme.colors.background else MaterialTheme.colors.primary
             )
         }
     }
