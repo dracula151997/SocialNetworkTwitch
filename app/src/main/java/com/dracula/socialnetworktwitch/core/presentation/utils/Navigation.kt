@@ -74,10 +74,13 @@ fun Navigation(
                     .orEmpty()
             val remoteUserId =
                 it.arguments?.getString(Constants.NavArguments.NAV_REMOTE_USER_ID).orEmpty()
+            val remoteUserName =
+                it.arguments?.getString(Constants.NavArguments.NAV_REMOTE_USER_NAME).orEmpty()
             MessagesScreen(
                 encodedRemoteUserProfilePic = remoteUserProfilePic,
                 navController = navController,
-                remoteUserId = remoteUserId
+                remoteUserId = remoteUserId,
+                remoteUserName = remoteUserName
             )
         }
 

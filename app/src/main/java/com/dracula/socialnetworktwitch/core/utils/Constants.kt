@@ -22,7 +22,7 @@ object Constants {
         const val NAV_PARENT_ID = "parent_id"
         const val NAV_SHOW_KEYBOARD = "show_keyboard"
         const val NAV_REMOTE_USER_ID = "remote_user_id"
-        const val NAV_CHAT_ID = "chat_id"
+        const val NAV_CHAT_ID = "chatId"
         const val NAV_REMOTE_USER_PROFILE_PICTURE = "remote_user_profile_pic"
         const val NAV_REMOTE_USER_NAME = "remote_user_name"
 

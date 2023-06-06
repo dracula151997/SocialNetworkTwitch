@@ -19,11 +19,7 @@ sealed class Screens(val route: String, @StringRes val title: Int? = null) {
     object ChatListScreen : Screens("chats_screen")
     object MessageScreen :
         Screens(
-            "message_screen" +
-                    "/{${Constants.NavArguments.NAV_REMOTE_USER_NAME}}" +
-                    "/{${Constants.NavArguments.NAV_REMOTE_USER_PROFILE_PICTURE}}" +
-                    "/{${Constants.NavArguments.NAV_REMOTE_USER_ID}}" +
-                    "?chatId={${Constants.NavArguments.NAV_CHAT_ID}}"
+            "message_screen/{${Constants.NavArguments.NAV_REMOTE_USER_ID}}/{${Constants.NavArguments.NAV_REMOTE_USER_PROFILE_PICTURE}}/{${Constants.NavArguments.NAV_REMOTE_USER_NAME}}?chatId={${Constants.NavArguments.NAV_CHAT_ID}}",
         ) {
         fun createRoute(
             remoteUserName: String,
@@ -31,11 +27,7 @@ sealed class Screens(val route: String, @StringRes val title: Int? = null) {
             remoteUserId: String,
             chatId: String? = null
         ): String {
-            return "message_screen" +
-                    "/${remoteUserName}" +
-                    "/${remoteUserProfilePic}" +
-                    "/${remoteUserId}" +
-                    "?chatId=${chatId}"
+            return "message_screen/$remoteUserId/$remoteUserProfilePic/$remoteUserName?chatId=$chatId"
         }
 
         val navArgs

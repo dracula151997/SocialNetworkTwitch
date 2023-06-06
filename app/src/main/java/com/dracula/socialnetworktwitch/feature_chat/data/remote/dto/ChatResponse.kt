@@ -8,7 +8,7 @@ data class ChatResponse(
     val chatId: String,
     val remoteUserId: String?,
     val remoteUsername: String?,
-    val remoteUserProfilePicture: String?,
+    val remoteUserProfilePictureUrl: String?,
     val lastMessage: String?,
     val timestamp: Long?,
 ) {
@@ -17,7 +17,7 @@ data class ChatResponse(
             chatId = chatId,
             remoteUserId = remoteUserId.orEmpty(),
             remoteUsername = remoteUsername.orEmpty(),
-            remoteUserProfilePicture = remoteUserProfilePicture.orEmpty(),
+            remoteUserProfilePictureUrl = remoteUserProfilePictureUrl.orEmpty(),
             lastMessage = lastMessage.orEmpty(),
             formattedTimestamp = SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss",

@@ -53,7 +53,7 @@ fun ChatUserProfileItem(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             StandardAsyncImage(
-                url = chat.remoteUserProfilePicture,
+                url = chat.remoteUserProfilePictureUrl,
                 contentDescription = null,
                 modifier = Modifier
                     .size(ProfilePictureSizeSmall)

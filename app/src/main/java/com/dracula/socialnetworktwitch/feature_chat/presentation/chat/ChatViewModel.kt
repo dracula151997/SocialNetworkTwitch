@@ -9,6 +9,7 @@ import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.GetChatsForUserUseCase
+import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.InitializeRepositoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -17,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val getChatsForUserUseCase: GetChatsForUserUseCase
+    private val getChatsForUserUseCase: GetChatsForUserUseCase,
+    private val initializeRepositoryUseCase: InitializeRepositoryUseCase,
 ) : ViewModel() {
     var state by mutableStateOf(ChatState())
         private set
@@ -27,6 +29,7 @@ class ChatViewModel @Inject constructor(
 
     init {
         getChatsForUser()
+        initializeRepositoryUseCase()
     }
 
 

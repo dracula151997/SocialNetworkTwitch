@@ -4,7 +4,7 @@ data class Chat(
     val chatId: String,
     val remoteUserId: String,
     val remoteUsername: String,
-    val remoteUserProfilePicture: String,
+    val remoteUserProfilePictureUrl: String,
     val lastMessage: String,
     val formattedTimestamp: String,
 )

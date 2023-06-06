@@ -66,14 +66,14 @@ fun ChatScreen(
                     items(state.chats) { chat ->
                         ChatItem(
                             chat = chat,
-                            onItemClick = {
+                            onItemClick = { chat ->
                                 navController.navigate(
                                     Screens.MessageScreen.createRoute(
                                         remoteUserId = chat.remoteUserId,
                                         chatId = chat.chatId,
                                         remoteUserName = chat.remoteUsername,
                                         remoteUserProfilePic = Base64.encodeToString(
-                                            chat.remoteUserProfilePicture.encodeToByteArray(),
+                                            chat.remoteUserProfilePictureUrl.encodeToByteArray(),
                                             0
                                         )
                                     )
