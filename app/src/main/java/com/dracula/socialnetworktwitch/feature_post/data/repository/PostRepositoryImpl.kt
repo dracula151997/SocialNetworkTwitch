@@ -169,4 +169,22 @@ class PostRepositoryImpl(
             ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
         }
     }
+
+    override suspend fun deletePost(postId: String): UnitApiResult {
+        return try {
+            val response = api.deletePost(postId)
+            if (response.successful)
+                ApiResult.Success(Unit)
+            else {
+                response.message?.let { msg ->
+                    ApiResult.Error(UiText.DynamicString(msg))
+                } ?: ApiResult.Error(UiText.unknownError())
+            }
+        } catch (e: IOException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_couldnot_reach_server))
+
+        } catch (e: HttpException) {
+            ApiResult.Error(UiText.StringResource(R.string.error_something_went_wrong))
+        }
+    }
 }

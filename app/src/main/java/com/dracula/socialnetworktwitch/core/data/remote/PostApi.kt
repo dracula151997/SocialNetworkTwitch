@@ -29,7 +29,7 @@ interface PostApi {
     suspend fun createPost(
         @Part postData: MultipartBody.Part,
         @Part postImage: MultipartBody.Part
-    ): BasicApiResponse<Unit>
+    ): UnitApiResponse
 
     @GET("/api/user/posts")
     suspend fun getUserPosts(
@@ -68,6 +68,11 @@ interface PostApi {
     suspend fun getLikesForParent(
         @Query("parentId") parentId: String,
     ): BasicApiResponse<List<UserItemResponse>>
+
+    @DELETE("/api/post/delete")
+    suspend fun deletePost(
+        @Query("postId") postId: String,
+    ): UnitApiResponse
 
 
     companion object {

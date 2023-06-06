@@ -12,4 +12,7 @@ sealed interface ProfileScreenAction {
 
     object ShowMorePopupMenu : ProfileScreenAction
 
+    data class DeletePost(val postId: String) : ProfileScreenAction
+
+    data class ToggleFollowStateForUser(val userId: String) : ProfileScreenAction
 }

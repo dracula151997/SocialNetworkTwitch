@@ -31,4 +31,6 @@ interface PostRepository {
     suspend fun unlikeParent(parentId: String, parentType: Int): UnitApiResult
 
     suspend fun getLikesForParent(parentId: String): ApiResult<List<UserItem>>
+
+    suspend fun deletePost(postId: String): UnitApiResult
 }

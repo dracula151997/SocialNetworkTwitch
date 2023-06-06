@@ -43,7 +43,8 @@ fun ProfileHeaderSection(
     isFollowing: Boolean = false,
     onLogoutClicked: () -> Unit = {},
     onEditClick: () -> Unit,
-    onMessageClicked: () -> Unit
+    onMessageClicked: () -> Unit,
+    onFollowClicked: () -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -100,9 +101,12 @@ fun ProfileHeaderSection(
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(SpaceMedium))
-        ProfileStats(user = user, isFollowing = isFollowing, isOwnProfile = isOwnProfile) {
-
-        }
+        ProfileStats(
+            user = user,
+            isFollowing = isFollowing,
+            isOwnProfile = isOwnProfile,
+            onFollowClick = onFollowClicked
+        )
     }
 
 }

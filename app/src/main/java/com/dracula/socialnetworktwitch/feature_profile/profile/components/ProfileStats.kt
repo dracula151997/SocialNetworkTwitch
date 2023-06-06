@@ -36,18 +36,12 @@ fun ProfileStats(
         Spacer(modifier = Modifier.width(SpaceMedium))
         ProfileNumber(
             number = user.followerCount,
-            text = pluralStringResource(
-                id = R.plurals.x_follower,
-                count = user.followerCount
-            )
+            text = pluralStringResource(id = R.plurals.x_follower, count = user.followerCount)
         )
         Spacer(modifier = Modifier.width(SpaceMedium))
         ProfileNumber(
             number = user.postCount,
-            text = pluralStringResource(
-                id = R.plurals.x_post,
-                count = user.postCount
-            )
+            text = pluralStringResource(id = R.plurals.x_post, count = user.postCount)
         )
         Spacer(modifier = Modifier.width(SpaceMedium))
         if (!isOwnProfile)

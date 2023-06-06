@@ -43,9 +43,7 @@ fun BannerSection(
     instagramUrl: String? = null,
     linkedinUrl: String? = null,
     bannerUrl: String? = null,
-    onInstagramClick: () -> Unit = {},
-    onGithubClick: () -> Unit = {},
-    onLinkedinClick: () -> Unit = {},
+    onLinkClicked: (url: String) -> Unit = {},
 ) {
     BoxWithConstraints(modifier = modifier) {
         StandardAsyncImage(
@@ -86,9 +84,13 @@ fun BannerSection(
             githubUrl = githubUrl,
             instagramUrl = instagramUrl,
             linkedinUrl = linkedinUrl,
-            onGithubClick = onGithubClick,
-            onInstagramClick = onInstagramClick,
-            onLinkedinClick = onLinkedinClick
+            onGithubClick = {
+                onLinkClicked(githubUrl.orEmpty())
+            },
+            onInstagramClick = {
+                onLinkClicked(instagramUrl.orEmpty())
+            },
+            onLinkedinClick = { onLinkClicked(linkedinUrl.orEmpty()) }
         )
     }
 }

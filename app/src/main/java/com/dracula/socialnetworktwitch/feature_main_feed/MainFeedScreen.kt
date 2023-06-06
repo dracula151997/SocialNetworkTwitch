@@ -106,6 +106,9 @@ fun MainFeedScreen(
                                         showKeyboard = true
                                     )
                                 )
+                            },
+                            onDeleteClicked = { postId ->
+                                viewModel.onEvent(MainFeedAction.DeletePost(postId))
                             }
                         )
 

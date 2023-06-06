@@ -2,6 +2,7 @@ package com.dracula.socialnetworktwitch.core.utils
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import com.dracula.socialnetworktwitch.R
 
 fun Context.sendSharePostIntent(postId: String) {
@@ -19,4 +20,14 @@ fun Context.sendSharePostIntent(postId: String) {
         }
     startActivity(Intent.createChooser(intent, "Share via"))
 
+}
+
+fun Context.openUrlInBrowser(url: String) {
+    var urlData = url
+    if (!url.startsWith("http") || !url.startsWith("https"))
+        urlData = "https://$url"
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        data = Uri.parse(urlData)
+    }
+    startActivity(Intent.createChooser(intent, "Select an app"))
 }

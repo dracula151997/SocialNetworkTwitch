@@ -16,8 +16,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +62,7 @@ fun PostItem(
     onShareClicked: () -> Unit = {},
     onUsernameClicked: () -> Unit = {},
     onPostClicked: (Post) -> Unit,
+    onDeleteClicked: (id: String) -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -127,12 +132,8 @@ fun PostItem(
                 ) {
                     Text(
                         text = pluralStringResource(
-                            id = R.plurals.x_likes,
-                            count = post.likeCount,
-                            post.likeCount
-                        ),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.h2.copy(
+                            id = R.plurals.x_likes, count = post.likeCount, post.likeCount
+                        ), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.h2.copy(
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
                         )
@@ -149,24 +150,37 @@ fun PostItem(
             }
         }
 
-        if (showProfileImage)
-            StandardAsyncImage(
-                url = post.profileImageUrl,
-                contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
-                errorPlaceholder = painterResource(id = R.drawable.avatar),
-                placeholder = painterResource(id = R.drawable.avatar),
-                modifier = Modifier
-                    .border(
-                        BorderStroke(
-                            1.dp,
-                            color = MaterialTheme.colors.primary,
-                        ),
-                        shape = CircleShape
-                    )
-                    .size(ProfilePictureSizeMedium)
-                    .background(color = Color.LightGray, shape = CircleShape)
-                    .align(Alignment.TopCenter),
-
+        if (post.isOwnPost) {
+            IconButton(
+                onClick = {
+                    onDeleteClicked(post.id)
+                },
+                modifier = Modifier.align(Alignment.TopEnd)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.error
                 )
+            }
+        }
+
+        if (showProfileImage) StandardAsyncImage(
+            url = post.profileImageUrl,
+            contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
+            errorPlaceholder = painterResource(id = R.drawable.avatar),
+            placeholder = painterResource(id = R.drawable.avatar),
+            modifier = Modifier
+                .border(
+                    BorderStroke(
+                        1.dp,
+                        color = MaterialTheme.colors.primary,
+                    ), shape = CircleShape
+                )
+                .size(ProfilePictureSizeMedium)
+                .background(color = Color.LightGray, shape = CircleShape)
+                .align(Alignment.TopCenter),
+
+            )
     }
 }

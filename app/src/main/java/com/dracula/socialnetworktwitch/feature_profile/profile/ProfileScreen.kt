@@ -34,12 +34,14 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSiz
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.core.utils.openUrlInBrowser
 import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
 import com.dracula.socialnetworktwitch.feature_post.presentation.components.PostItem
 import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
 import com.dracula.socialnetworktwitch.feature_profile.profile.components.BannerSection
 import com.dracula.socialnetworktwitch.feature_profile.profile.components.ProfileHeaderSection
 import kotlinx.coroutines.flow.collectLatest
+import timber.log.Timber
 import java.util.Locale
 
 @Composable
@@ -89,7 +91,11 @@ fun ProfileScreen(
                     githubUrl = profile.gitHubUrl,
                     instagramUrl = profile.instagramUrl,
                     linkedinUrl = profile.linkedinUrl,
-                    bannerUrl = profile.bannerUrl
+                    bannerUrl = profile.bannerUrl,
+                    onLinkClicked = { url ->
+                        Timber.d("onLinkClicked: $url")
+                        context.openUrlInBrowser(url)
+                    }
 
                 )
                 ProfileHeaderSection(
@@ -110,6 +116,9 @@ fun ProfileScreen(
                     },
                     onLogoutClicked = {
                         viewModel.onEvent(ProfileScreenAction.ShowLogoutDialog)
+                    },
+                    onFollowClicked = {
+                        viewModel.onEvent(ProfileScreenAction.ToggleFollowStateForUser(profile.userId))
                     },
                     onMessageClicked = {
                         navController.navigate(
@@ -156,6 +165,10 @@ fun ProfileScreen(
                     },
                     onUsernameClicked = {
                     },
+                    onDeleteClicked = { postId ->
+                        viewModel.onEvent(ProfileScreenAction.DeletePost(postId))
+
+                    }
                 )
             }
 

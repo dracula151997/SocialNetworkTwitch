@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="x_comments">
+        <item quantity="zero">%d تعليق</item>
+        <item quantity="one">%d تعليق</item>
+        <item quantity="two">%d تعليق</item>
+        <item quantity="few">%d تعليقات</item>
+        <item quantity="many">%d تعليق</item>
+    </plurals>
+    <plurals name="x_likes">
+        <item quantity="zero">إعجاب</item>
+        <item quantity="one">إعجاب</item>
+        <item quantity="two">إعجاب</item>
+        <item quantity="few">إعجابات</item>
+        <item quantity="many">إعجاب</item>
+    </plurals>
+    <plurals name="x_post">
+        <item quantity="zero">منشور</item>
+        <item quantity="one">منشور</item>
+        <item quantity="two">منشور</item>
+        <item quantity="few">منشورات</item>
+        <item quantity="many">منشور</item>
+    </plurals>
+
+    <plurals name="x_follower">
+        <item quantity="zero">متابع</item>
+        <item quantity="one">متابع</item>
+        <item quantity="two">متابع</item>
+        <item quantity="few">متابعين</item>
+        <item quantity="many">متابع</item>
+    </plurals>
+
+</resources>

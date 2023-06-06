@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
@@ -16,11 +17,14 @@ import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.core.utils.ParentType
 import com.dracula.socialnetworktwitch.core.utils.PostLiker
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
+import com.dracula.socialnetworktwitch.feature_post.domain.use_case.DeletePostUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.ToggleLikeForParentUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetProfileUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetUserPostsUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.LogoutUseCase
+import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.ToggleFollowStateForUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +40,8 @@ class ProfileViewModel @Inject constructor(
     private val getOwnUserIdUseCase: GetOwnUserIdUseCase,
     private val toggleLikeForParentUseCase: ToggleLikeForParentUseCase,
     private val logoutUseCase: LogoutUseCase,
+    private val deletePostUseCase: DeletePostUseCase,
+    private val toggleFollowStateForUserUseCase: ToggleFollowStateForUserUseCase,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -116,6 +122,26 @@ class ProfileViewModel @Inject constructor(
                 )
                 logoutUseCase()
             }
+
+            is ProfileScreenAction.DeletePost -> deletePost(event.postId)
+            is ProfileScreenAction.ToggleFollowStateForUser -> toggleFollowStateForUser(userId = event.userId)
+        }
+    }
+
+    private fun deletePost(postId: String) {
+        viewModelScope.launch {
+            when (val result = deletePostUseCase(postId)) {
+                is ApiResult.Success -> {
+                    postsPagingState = postsPagingState.copy(
+                        items = postsPagingState.items.filter { it.id != postId }
+                    )
+                    _eventFlow.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.successfully_deleted_post)))
+                }
+
+                is ApiResult.Error -> {
+                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
+                }
+            }
         }
     }
 
@@ -157,5 +183,41 @@ class ProfileViewModel @Inject constructor(
             )
         }
     }
+
+    private fun toggleFollowStateForUser(userId: String) {
+        viewModelScope.launch {
+            val isFollowing = state.value.data?.isFollowing ?: false
+            val followerCount = state.value.data?.followerCount ?: 0
+            _state.value = state.value.copy(
+                data = state.value.data?.copy(isFollowing = !isFollowing)
+            )
+            val result = toggleFollowStateForUserUseCase(
+                userId = userId, isFollowing = isFollowing
+            )
+            when (result) {
+                is ApiResult.Success -> {
+                    _state.value = state.value.copy(
+                        data = state.value.data?.copy(
+                            followerCount = if (isFollowing) followerCount.minus(1) else followerCount.plus(
+                                1
+                            ),
+                        )
+                    )
+                }
+
+                is ApiResult.Error -> {
+                    _state.value = state.value.copy(
+                        data = state.value.data?.copy(
+                            isFollowing = isFollowing,
+                            followerCount = followerCount
+                        )
+                    )
+                    _eventFlow.emit(UiEvent.ShowSnackbar(uiText = result.uiText.orUnknownError()))
+                }
+
+            }
+        }
+    }
+
 
 }

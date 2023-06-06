@@ -5,13 +5,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.model.Post
+import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.BaseUiEvent
 import com.dracula.socialnetworktwitch.core.utils.DefaultPaginator
 import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.core.utils.ParentType
 import com.dracula.socialnetworktwitch.core.utils.PostLiker
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.core.utils.UiText
+import com.dracula.socialnetworktwitch.core.utils.orUnknownError
+import com.dracula.socialnetworktwitch.feature_post.domain.use_case.DeletePostUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.GetPostsForFollowsUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.ToggleLikeForParentUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,6 +29,7 @@ import javax.inject.Inject
 class MainFeedViewModel @Inject constructor(
     private val getPostsForFollowsUseCase: GetPostsForFollowsUseCase,
     private val toggleLikeForParentUseCase: ToggleLikeForParentUseCase,
+    private val deletePostUseCase: DeletePostUseCase,
 ) : ViewModel() {
 
     var state by mutableStateOf(MainFeedState())
@@ -36,7 +42,7 @@ class MainFeedViewModel @Inject constructor(
     var postsPagingState by mutableStateOf(PagingState<Post>())
         private set
 
-    private val paginator = DefaultPaginator<Post>(
+    private val paginator = DefaultPaginator(
         onLoad = { isLoading ->
             postsPagingState = postsPagingState.copy(isLoading = isLoading)
         },
@@ -73,6 +79,25 @@ class MainFeedViewModel @Inject constructor(
             is MainFeedAction.LikePost -> toggleLikeForPost(
                 postId = event.postId
             )
+
+            is MainFeedAction.DeletePost -> deletePost(event.postId)
+        }
+    }
+
+    private fun deletePost(postId: String) {
+        viewModelScope.launch {
+            when (val result = deletePostUseCase(postId)) {
+                is ApiResult.Success -> {
+                    postsPagingState = postsPagingState.copy(
+                        items = postsPagingState.items.filter { it.id != postId }
+                    )
+                    _eventFlow.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.successfully_deleted_post)))
+                }
+
+                is ApiResult.Error -> {
+                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
+                }
+            }
         }
     }
 
