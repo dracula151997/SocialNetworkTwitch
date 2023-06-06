@@ -46,6 +46,9 @@ class MessageViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+    private val _messageReceived = MutableSharedFlow<Unit>(replay = 1)
+    val messageReceived = _messageReceived.asSharedFlow()
+
     private val paginator = DefaultPaginator(
         onLoad = { isLoading ->
             pagingState = pagingState.copy(isLoading = isLoading)
@@ -68,7 +71,6 @@ class MessageViewModel @Inject constructor(
         loadNextMessages()
         observeChatEvents()
         observeChatMessages()
-        Timber.d("${savedStateHandle.keys()}")
     }
 
     fun onEvent(event: MessageEvent) {
@@ -86,6 +88,7 @@ class MessageViewModel @Inject constructor(
     private fun loadNextMessages() {
         viewModelScope.launch {
             paginator.loadNextItems()
+            _messageReceived.emit(Unit)
         }
 
     }
@@ -99,7 +102,11 @@ class MessageViewModel @Inject constructor(
                         Timber.d("OnConnectionOpened")
                     }
 
-                    is WebSocket.Event.OnMessageReceived -> Timber.d("OnMessageReceived: ${it.message}")
+                    is WebSocket.Event.OnMessageReceived -> {
+                        Timber.d("OnMessageReceived: ${it.message}")
+                        _messageReceived.emit(Unit)
+                    }
+
                     is WebSocket.Event.OnConnectionClosing -> Timber.d("OnConnectionClosing: ${it.shutdownReason}")
                     is WebSocket.Event.OnConnectionClosed -> Timber.d("OnConnectionClosed: ${it.shutdownReason}")
                     is WebSocket.Event.OnConnectionFailed -> Timber.e("OnConnectionFailed: ${it.throwable}")

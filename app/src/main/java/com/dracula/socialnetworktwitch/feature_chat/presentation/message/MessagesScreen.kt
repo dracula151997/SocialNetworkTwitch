@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +29,7 @@ import com.dracula.socialnetworktwitch.core.presentation.components.SendTextFiel
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
+import kotlinx.coroutines.flow.collectLatest
 import okio.ByteString.Companion.decodeBase64
 import java.nio.charset.Charset
 
@@ -43,6 +46,13 @@ fun MessagesScreen(
     }
     val messageState = viewModel.messageFieldState
     val pagingState = viewModel.pagingState
+    val scrollState = rememberLazyListState()
+    LaunchedEffect(key1 = pagingState) {
+        viewModel.messageReceived.collectLatest {
+            if (pagingState.items.isNotEmpty())
+                scrollState.animateScrollToItem(index = pagingState.items.size - 1)
+        }
+    }
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Column(
             Modifier.fillMaxSize()
@@ -65,7 +75,8 @@ fun MessagesScreen(
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(SpaceMedium),
-                    verticalArrangement = Arrangement.spacedBy(SpaceMedium)
+                    verticalArrangement = Arrangement.spacedBy(SpaceMedium),
+                    state = scrollState
                 ) {
                     items(pagingState.items.size) { index ->
                         val message = pagingState.items[index]
