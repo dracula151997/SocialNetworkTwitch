@@ -22,10 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
@@ -62,7 +64,9 @@ fun ProfileHeaderSection(
                     color = LightGray,
                     shape = CircleShape
                 ),
-            contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE
+            contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
+            placeholder = painterResource(id = R.drawable.avatar_placeholder),
+            errorPlaceholder = painterResource(id = R.drawable.avatar_placeholder)
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,

@@ -58,8 +58,8 @@ class ProfileViewModel @Inject constructor(
     lateinit var postLiker: PostLiker
 
     private val paginator = DefaultPaginator(
-        onLoad = { isLoading ->
-            postsPagingState = postsPagingState.copy(isLoading = isLoading)
+        onLoad = { isLoading, refreshing ->
+            postsPagingState = postsPagingState.copy(isLoading = isLoading, refreshing = refreshing)
         },
         onRequest = { page ->
             getUserPostsUseCase(

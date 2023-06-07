@@ -49,7 +49,7 @@ class MessageViewModel @Inject constructor(
     val messageReceived = _messageReceived.asSharedFlow()
 
     private val paginator = DefaultPaginator(
-        onLoad = { isLoading ->
+        onLoad = { isLoading, refreshing ->
             pagingState = pagingState.copy(isLoading = isLoading)
         },
         onRequest = { nextPage ->

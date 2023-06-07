@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -12,6 +13,8 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment.Companion.Center
@@ -23,12 +26,14 @@ import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
+import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
 import com.dracula.socialnetworktwitch.feature_post.presentation.components.PostItem
 import kotlinx.coroutines.flow.collectLatest
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainFeedScreen(
     navController: NavController,
@@ -38,6 +43,10 @@ fun MainFeedScreen(
     val postsPagingState = viewModel.postsPagingState
     val posts = postsPagingState.items
     val context = LocalContext.current
+    val pullToRefreshState =
+        rememberPullRefreshState(
+            refreshing = postsPagingState.refreshing,
+            onRefresh = { viewModel.onEvent(MainFeedAction.Refresh) })
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -72,10 +81,14 @@ fun MainFeedScreen(
                 Text(
                     text = stringResource(id = R.string.msg_no_posts_to_display),
                     modifier = Modifier.align(Center),
-                    style = MaterialTheme.typography.h2
+                    style = MaterialTheme.typography.h2.copy(
+                        fontFamily = appFontFamily
+                    )
                 )
             } else {
-                LazyColumn {
+                LazyColumn(
+                    modifier = Modifier.pullRefresh(state = pullToRefreshState)
+                ) {
                     items(posts.size) { index ->
                         val post = posts[index]
                         if (index > posts.size - 1 && !postsPagingState.endReached && !postsPagingState.isLoading) {

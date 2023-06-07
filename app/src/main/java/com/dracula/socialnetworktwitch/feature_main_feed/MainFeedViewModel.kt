@@ -32,9 +32,6 @@ class MainFeedViewModel @Inject constructor(
     private val deletePostUseCase: DeletePostUseCase,
 ) : ViewModel() {
 
-    var state by mutableStateOf(MainFeedState())
-        private set
-
 
     private val _eventFlow = MutableSharedFlow<BaseUiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -43,8 +40,8 @@ class MainFeedViewModel @Inject constructor(
         private set
 
     private val paginator = DefaultPaginator(
-        onLoad = { isLoading ->
-            postsPagingState = postsPagingState.copy(isLoading = isLoading)
+        onLoad = { isLoading, refreshing ->
+            postsPagingState = postsPagingState.copy(isLoading = isLoading, refreshing = refreshing)
         },
         onRequest = { page ->
             getPostsForFollowsUseCase(page = page)
@@ -68,19 +65,12 @@ class MainFeedViewModel @Inject constructor(
 
     fun onEvent(event: MainFeedAction) {
         when (event) {
-            MainFeedAction.LoadMorePosts -> state = state.copy(
-                isLoadingNewPost = true
-            )
-
-            MainFeedAction.LoadedPage -> state = state.copy(
-                isLoadingFirstTime = false, isLoadingNewPost = false
-            )
-
             is MainFeedAction.LikePost -> toggleLikeForPost(
                 postId = event.postId
             )
 
             is MainFeedAction.DeletePost -> deletePost(event.postId)
+            MainFeedAction.Refresh -> loadNextPost(refreshing = true)
         }
     }
 
@@ -105,9 +95,9 @@ class MainFeedViewModel @Inject constructor(
         loadNextPost()
     }
 
-    fun loadNextPost() {
+    fun loadNextPost(refreshing: Boolean = false) {
         viewModelScope.launch {
-            paginator.loadNextItems()
+            paginator.loadNextItems(refreshing)
         }
     }
 

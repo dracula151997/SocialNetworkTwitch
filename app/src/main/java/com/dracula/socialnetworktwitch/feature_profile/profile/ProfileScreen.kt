@@ -13,17 +13,28 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -53,9 +64,11 @@ fun ProfileScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val userPosts = viewModel.postsPagingState
-    val profile = state.data
-        ?: Profile.empty()
+    val profile = state.data ?: Profile.empty()
     val context = LocalContext.current
+    var showPopupMenu by remember {
+        mutableStateOf(false)
+    }
 
     LaunchedEffect(key1 = true) {
         viewModel.onEvent(ProfileScreenAction.GetProfile(userId))
@@ -73,11 +86,28 @@ fun ProfileScreen(
         }
     }
     Column(modifier = Modifier.fillMaxSize()) {
-        StandardTopBar(
-            title = stringResource(id = R.string.x_profile,
-                profile.username.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }),
-            navController = navController
-        )
+        StandardTopBar(title = stringResource(
+            id = R.string.x_profile,
+            profile.username.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() },
+        ), navController = navController, navActions = {
+            if (profile.isOwnProfile) {
+                IconButton(onClick = { showPopupMenu = !showPopupMenu }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = null,
+                        tint = Color.White,
+
+                        )
+                }
+                DropdownMenu(expanded = showPopupMenu,
+                    onDismissRequest = { showPopupMenu = !showPopupMenu }) {
+                    DropdownMenuItem(onClick = { viewModel.onEvent(ProfileScreenAction.ShowLogoutDialog) }) {
+                        Text(text = stringResource(id = R.string.logout))
+                    }
+
+                }
+            }
+        })
         if (state.isLoading) CircularProgressIndicator(
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
@@ -85,8 +115,7 @@ fun ProfileScreen(
             Modifier.fillMaxSize()
         ) {
             item {
-                BannerSection(
-                    modifier = Modifier.aspectRatio(2.5f),
+                BannerSection(modifier = Modifier.aspectRatio(2.5f),
                     topSkillUrls = profile.topSkills,
                     githubUrl = profile.gitHubUrl,
                     instagramUrl = profile.instagramUrl,
@@ -98,16 +127,15 @@ fun ProfileScreen(
                     }
 
                 )
-                ProfileHeaderSection(
-                    user = User(
-                        userId = profile.userId,
-                        profilePictureUrl = profile.profilePictureUrl,
-                        username = profile.username,
-                        bio = profile.bio,
-                        followingCount = profile.followingCount,
-                        followerCount = profile.followerCount,
-                        postCount = profile.postCount,
-                    ),
+                ProfileHeaderSection(user = User(
+                    userId = profile.userId,
+                    profilePictureUrl = profile.profilePictureUrl,
+                    username = profile.username,
+                    bio = profile.bio,
+                    followingCount = profile.followingCount,
+                    followerCount = profile.followerCount,
+                    postCount = profile.postCount,
+                ),
                     isOwnProfile = profile.isOwnProfile,
                     isFollowing = profile.isFollowing,
                     modifier = Modifier.padding(SpaceMedium),
@@ -126,15 +154,13 @@ fun ProfileScreen(
                                 chatId = null,
                                 remoteUserName = profile.username,
                                 remoteUserProfilePic = Base64.encodeToString(
-                                    profile.profilePictureUrl.encodeToByteArray(),
-                                    0
+                                    profile.profilePictureUrl.encodeToByteArray(), 0
                                 ),
                                 remoteUserId = profile.userId,
 
                                 )
                         )
-                    }
-                )
+                    })
             }
 
             items(userPosts.items.size) { index ->
@@ -142,8 +168,7 @@ fun ProfileScreen(
                 if (index > userPosts.items.size - 1 && !userPosts.endReached && !userPosts.isLoading) {
                     viewModel.loadNextPost()
                 }
-                PostItem(
-                    post = post,
+                PostItem(post = post,
                     onPostClicked = {
                         navController.navigate(Screens.PostDetailsScreen.createRoute(postId = post.id))
                     },
@@ -152,8 +177,7 @@ fun ProfileScreen(
                     onCommentClicked = {
                         navController.navigate(
                             Screens.PostDetailsScreen.createRoute(
-                                postId = post.id,
-                                showKeyboard = true
+                                postId = post.id, showKeyboard = true
                             )
                         )
                     },
@@ -163,36 +187,37 @@ fun ProfileScreen(
                     onShareClicked = {
                         context.sendSharePostIntent(postId = post.id)
                     },
-                    onUsernameClicked = {
-                    },
+                    onUsernameClicked = {},
                     onDeleteClicked = { postId ->
                         viewModel.onEvent(ProfileScreenAction.DeletePost(postId))
 
-                    }
-                )
+                    })
             }
-
-
         }
 
         if (state.showLogoutDialog) {
             AlertDialog(onDismissRequest = { viewModel.onEvent(ProfileScreenAction.HideLogoutDialog) },
                 title = {
-                    Text(text = stringResource(id = R.string.logout))
+                    Text(
+                        text = stringResource(id = R.string.logout),
+                        style = MaterialTheme.typography.body1
+                    )
                 },
                 text = {
-                    Text(text = stringResource(id = R.string.are_you_sure_to_logout))
+                    Text(
+                        text = stringResource(id = R.string.are_you_sure_to_logout),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 },
                 buttons = {
                     Row(
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.fillMaxWidth()
+                        horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()
                     ) {
                         TextButton(
                             onClick = {
                                 viewModel.onEvent(ProfileScreenAction.HideLogoutDialog)
-                            },
-                            colors = ButtonDefaults.textButtonColors(
+                            }, colors = ButtonDefaults.textButtonColors(
                                 contentColor = MaterialTheme.colors.primary
                             )
                         ) {
