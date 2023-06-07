@@ -37,9 +37,11 @@ class LoginViewModel @Inject constructor(
 
     fun onEvent(event: LoginAction) {
         when (event) {
-            is LoginAction.EmailEntered -> emailState = emailState.copy(text = event.email)
+            is LoginAction.EmailEntered -> emailState =
+                emailState.copy(text = event.email, error = null)
+
             is LoginAction.PasswordEntered -> passwordState =
-                passwordState.copy(text = event.password)
+                passwordState.copy(text = event.password, error = null)
 
             LoginAction.TogglePasswordVisibility -> passwordState = passwordState.copy(
                 isPasswordToggleVisible = !passwordState.isPasswordToggleVisible

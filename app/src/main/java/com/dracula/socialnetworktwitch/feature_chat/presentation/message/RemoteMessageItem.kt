@@ -12,12 +12,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 
@@ -43,22 +41,6 @@ fun RemoteMessageItem(
                     shape = MaterialTheme.shapes.medium
                 )
                 .padding(PaddingMedium)
-                .drawBehind {
-                    val path = Path().apply {
-                        moveTo(
-                            0f,
-                            size.height - bottomStartCornerRadius.toPx(
-                                shapeSize = size,
-                                density = Density(density)
-                            )
-                        )
-                        lineTo(
-                            triangleWidth.toPx(), size.height + triangleHeight.toPx()
-                        )
-                        close()
-                    }
-                    drawPath(path = path, color = color)
-                }
         ) {
             Text(text = message)
 
@@ -66,8 +48,11 @@ fun RemoteMessageItem(
         Spacer(modifier = Modifier.width(SpaceLarge))
         Text(
             text = formattedTime,
-            color = MaterialTheme.colors.surface,
-            modifier = Modifier.align(Alignment.Bottom)
+            modifier = Modifier.align(Alignment.Bottom),
+            style = MaterialTheme.typography.body1.copy(
+                color = MaterialTheme.colors.surface,
+                fontSize = 12.sp
+            )
         )
     }
 

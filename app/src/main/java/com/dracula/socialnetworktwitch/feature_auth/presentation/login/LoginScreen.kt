@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
+import com.dracula.socialnetworktwitch.core.presentation.components.StandardButton
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTextField
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
@@ -40,7 +40,6 @@ import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.feature_auth.domain.utils.AuthValidationError
 import kotlinx.coroutines.flow.collectLatest
-import timber.log.Timber
 
 @Composable
 fun LoginScreen(
@@ -84,7 +83,10 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(
-                start = PaddingMedium, end = PaddingMedium, top = PaddingLarge, bottom = 50.dp
+                start = PaddingMedium,
+                end = PaddingMedium,
+                top = PaddingLarge,
+                bottom = 50.dp
             )
     ) {
         Column(
@@ -107,7 +109,8 @@ fun LoginScreen(
                 }, keyboardType = KeyboardType.Email
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
-            StandardTextField(text = passwordState.text,
+            StandardTextField(
+                text = passwordState.text,
                 onValueChanged = {
                     viewModel.onEvent(LoginAction.PasswordEntered(it))
                 },
@@ -128,18 +131,18 @@ fun LoginScreen(
                 })
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
-            Button(
+            StandardButton(
+                text = stringResource(id = R.string.login),
                 onClick = {
                     focusManager.clearFocus()
                     viewModel.onEvent(LoginAction.Login)
-                }, modifier = Modifier.align(Alignment.End), enabled = !state.isLoading
-            ) {
-                Text(
-                    text = stringResource(id = R.string.login),
-                    color = MaterialTheme.colors.onPrimary
-                )
-            }
-            if (state.isLoading) CircularProgressIndicator()
+                },
+                modifier = Modifier.align(Alignment.End),
+                enabled = !state.isLoading
+            )
+            if (state.isLoading) CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
         }
         ClickableText(text = signUpAnnotatedString,
             modifier = Modifier
@@ -150,8 +153,7 @@ fun LoginScreen(
             ),
             onClick = { offset ->
                 signUpAnnotatedString.getStringAnnotations(offset, offset).firstOrNull()
-                    ?.let { span ->
-                        Timber.d("Clicked on: ${span.item}")
+                    ?.let { _ ->
                         navController.navigate(Screens.RegisterScreen.route)
                     }
             })

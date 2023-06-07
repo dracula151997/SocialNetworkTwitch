@@ -49,9 +49,6 @@ class PostDetailsViewModel @Inject constructor(
     var ownUserId: String = ""
         private set
 
-    var shouldShowKeyboard by mutableStateOf(false)
-        private set
-
     init {
         savedStateHandle.postIdArgs?.let { postId ->
             getPostDetails(postId = postId)
