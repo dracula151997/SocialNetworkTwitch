@@ -13,7 +13,7 @@
     <string name="register">تسجيل حساب جديد</string>
     <string name="read_more">اقرأ المزيد</string>
     <string name="x_likes">%d إعجاب</string>
-    <string name="your_feed">منشورات المتابعين</string>
+    <string name="your_feed">مشاركات المتابعين</string>
     <string name="your_activity">الإشعارات</string>
     <string name="commented_on">تم التعليق علي</string>
     <string name="liked">تم الإعجاب ب</string>
@@ -39,8 +39,8 @@
     <string name="error_couldnot_reach_server">عذرًا! لم يتمكن من الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت.</string>
     <string name="error_something_went_wrong">عذرًا! حدث خطأ ما. يرجى المحاولة مرة أخرى.</string>
     <string name="success_registeration">تم تسجيل حسابك بنجاح. يمكنك تسجيل الدخول الآن.</string>
-    <string name="msg_no_posts_to_display">لا توجد منشورات لعرضها</string>
-    <string name="create_a_new_post">"أنشئ بوست جديدة  "</string>
+    <string name="msg_no_posts_to_display">لا توجد مشاركات لعرضها</string>
+    <string name="create_a_new_post">مشاركة جديدة</string>
     <string name="choose_image">اختر صورة</string>
     <string name="post">بوست</string>
     <string name="description">الوصف</string>
@@ -72,4 +72,6 @@
     <string name="instagram_profile_url">رابط ملفك الشخصي على Instagram</string>
     <string name="linked_in_profile_url">رابط ملفك الشخصي على LinkedIn</string>
     <string name="share_intent_text">مرحبًا، وجدت مشاركة رائعة، تفضل بالتحقق منها :) %s</string>
+    <string name="edit_btn">تعديل</string>
+    <string name="send_a_message">إرسال رسالة</string>
 </resources>

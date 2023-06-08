@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.dracula.socialnetworktwitch.core.presentation.utils.autoMirror
 
 @Composable
 fun BackIcon(
@@ -18,7 +19,7 @@ fun BackIcon(
     tint: Color = MaterialTheme.colors.onBackground,
     onBackClicked: () -> Unit,
 ) {
-    IconButton(onClick = onBackClicked, modifier = modifier) {
+    IconButton(onClick = onBackClicked, modifier = modifier.autoMirror()) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,

@@ -34,7 +34,7 @@ data class Profile(
                 gitHubUrl = null,
                 instagramUrl = null,
                 linkedinUrl = null,
-                isOwnProfile = false,
+                isOwnProfile = true,
                 isFollowing = false
             )
         }

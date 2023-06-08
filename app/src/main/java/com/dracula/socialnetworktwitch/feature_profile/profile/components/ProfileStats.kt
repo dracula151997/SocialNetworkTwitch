@@ -1,5 +1,8 @@
 package com.dracula.socialnetworktwitch.feature_profile.profile.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -16,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
+import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
 
 @Composable
 fun ProfileStats(
@@ -43,8 +47,12 @@ fun ProfileStats(
             number = user.postCount,
             text = pluralStringResource(id = R.plurals.x_post, count = user.postCount)
         )
-        Spacer(modifier = Modifier.width(SpaceMedium))
-        if (!isOwnProfile)
+        AnimatedVisibility(
+            visible = !isOwnProfile,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Spacer(modifier = Modifier.width(SpaceSmall))
             Button(
                 onClick = onFollowClick,
                 colors = ButtonDefaults.buttonColors(
@@ -59,6 +67,8 @@ fun ProfileStats(
                     color = if (isFollowing) Color.White else MaterialTheme.colors.onPrimary
                 )
             }
+
+        }
 
     }
 }

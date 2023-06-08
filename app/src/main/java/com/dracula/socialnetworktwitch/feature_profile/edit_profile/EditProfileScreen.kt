@@ -119,7 +119,8 @@ fun EditProfileScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         StandardTopBar(
-            title = stringResource(id = R.string.edit_your_profile), navActions = {
+            title = stringResource(id = R.string.edit_your_profile),
+            navActions = {
                 IconButton(onClick = { viewModel.onEvent(EditProfileAction.UpdateProfile) }) {
                     Icon(
                         imageVector = Icons.Default.Check,
@@ -127,7 +128,9 @@ fun EditProfileScreen(
                         tint = MaterialTheme.colors.onBackground
                     )
                 }
-            }, showBackButton = true, navController = navController
+            },
+            showBackButton = true,
+            navController = navController
         )
         Column(
             modifier = Modifier
