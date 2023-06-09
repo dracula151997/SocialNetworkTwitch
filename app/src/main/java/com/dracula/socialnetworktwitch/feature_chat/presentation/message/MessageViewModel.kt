@@ -15,6 +15,7 @@ import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.feature_chat.domain.model.Message
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.GetMessagesForChatUseCase
+import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.InitializeRepositoryUseCase
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.ObserveChatEventUseCase
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.ObserveMessagesUseCase
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.SendMessageUseCase
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,9 +35,10 @@ class MessageViewModel @Inject constructor(
     private val getMessagesForChatUseCase: GetMessagesForChatUseCase,
     private val observeChatEventUseCase: ObserveChatEventUseCase,
     private val observeMessagesUseCase: ObserveMessagesUseCase,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val initializeRepositoryUseCase: InitializeRepositoryUseCase,
 
-) : ViewModel() {
+    ) : ViewModel() {
     var messageFieldState by mutableStateOf(StandardTextFieldState())
         private set
 
@@ -49,7 +52,8 @@ class MessageViewModel @Inject constructor(
     val messageReceived = _messageReceived.asSharedFlow()
 
     private val paginator = DefaultPaginator(
-        onLoad = { isLoading, refreshing ->
+        onLoad = { isLoading, _ ->
+            Timber.d("isLoading: $isLoading")
             pagingState = pagingState.copy(isLoading = isLoading)
         },
         onRequest = { nextPage ->
@@ -67,6 +71,7 @@ class MessageViewModel @Inject constructor(
     )
 
     init {
+        initializeRepositoryUseCase()
         loadNextMessages()
         observeChatEvents()
         observeChatMessages()

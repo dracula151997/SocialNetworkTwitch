@@ -17,15 +17,20 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import okhttp3.OkHttpClient
 import okio.IOException
 import retrofit2.HttpException
+import timber.log.Timber
 
 class ChatRepositoryImpl(
     private val chatApi: ChatApi,
-    private val okHttpClient: OkHttpClient,
+    private val okHttpClient: OkHttpClient
 ) : ChatRepository {
 
     private lateinit var chatService: ChatWebSocketService
     override fun initialize() {
-        chatService = ScarletInstance.getInstance(client = okHttpClient)
+        if (!::chatService.isInitialized) {
+            chatService = ScarletInstance.getInstance(client = okHttpClient)
+            Timber.d("$chatService")
+        }
+
     }
 
     override suspend fun getChatsForUser(): ApiResult<List<Chat>> {

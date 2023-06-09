@@ -47,12 +47,12 @@ fun ProfileStats(
             number = user.postCount,
             text = pluralStringResource(id = R.plurals.x_post, count = user.postCount)
         )
+        Spacer(modifier = Modifier.width(SpaceSmall))
         AnimatedVisibility(
             visible = !isOwnProfile,
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            Spacer(modifier = Modifier.width(SpaceSmall))
             Button(
                 onClick = onFollowClick,
                 colors = ButtonDefaults.buttonColors(

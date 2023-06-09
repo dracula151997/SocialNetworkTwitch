@@ -8,14 +8,26 @@ import com.tinder.streamadapter.coroutines.CoroutinesStreamAdapterFactory
 import okhttp3.OkHttpClient
 import kotlin.time.Duration.Companion.seconds
 
-object ScarletInstance {
-    fun getInstance(client: OkHttpClient): ChatWebSocketService {
-        return Scarlet.Builder()
-            .addStreamAdapterFactory(CoroutinesStreamAdapterFactory())
-            .addMessageAdapterFactory(CustomGsonMessageAdapter.Factory())
-            .webSocketFactory(client.newWebSocketFactory("ws://10.0.2.2:8080/api/chat/websocket"))
-            .backoffStrategy(LinearBackoffStrategy(5.seconds.inWholeMilliseconds))
-            .build()
-            .create()
+class ScarletInstance private constructor() {
+    companion object {
+        @Volatile
+        private lateinit var instance: ChatWebSocketService
+
+        fun getInstance(client: OkHttpClient): ChatWebSocketService {
+            synchronized(this) {
+                if (!::instance.isInitialized) {
+                    instance = Scarlet.Builder()
+                        .addStreamAdapterFactory(CoroutinesStreamAdapterFactory())
+                        .addMessageAdapterFactory(CustomGsonMessageAdapter.Factory())
+                        .webSocketFactory(client.newWebSocketFactory("ws://10.0.2.2:8080/api/chat/websocket"))
+                        .backoffStrategy(LinearBackoffStrategy(5.seconds.inWholeMilliseconds))
+                        .build()
+                        .create()
+                }
+                return instance
+            }
+        }
+
     }
+
 }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
@@ -22,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -85,66 +83,64 @@ fun ProfileScreen(
             ),
             navController = navController,
             navActions = {
-                if (profile.isOwnProfile) {
-                    IconButton(onClick = { showPopupMenu = !showPopupMenu }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = null,
-                            tint = Color.White,
+                IconButton(onClick = { showPopupMenu = !showPopupMenu }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = null,
+                        tint = Color.White,
 
-                            )
-                    }
-                    DropdownMenu(
-                        expanded = showPopupMenu,
-                        onDismissRequest = { showPopupMenu = !showPopupMenu },
-                    ) {
-                        if (profile.isOwnProfile) {
-                            DropdownMenuItem(
-                                onClick = {
-                                    navController.navigate(
-                                        Screens.EditProfileScreen.createRoute(
-                                            userId = userId,
-                                        ),
-                                    )
-                                    showPopupMenu = false
-                                },
-                            ) {
-                                Text(text = stringResource(id = R.string.edit_your_profile))
-                            }
-                            DropdownMenuItem(onClick = {
-                                viewModel.onEvent(ProfileScreenAction.ShowLogoutDialog)
+                        )
+                }
+                DropdownMenu(
+                    expanded = showPopupMenu,
+                    onDismissRequest = { showPopupMenu = !showPopupMenu },
+                ) {
+                    if (profile.isOwnProfile) {
+                        DropdownMenuItem(
+                            onClick = {
+                                navController.navigate(
+                                    Screens.EditProfileScreen.createRoute(
+                                        userId = userId,
+                                    ),
+                                )
                                 showPopupMenu = false
-                            }) {
-                                Text(text = stringResource(id = R.string.logout))
-                            }
-                        } else {
-                            DropdownMenuItem(
-                                onClick = {
-                                    navController.navigate(
-                                        Screens.MessageScreen.createRoute(
-                                            chatId = null,
-                                            remoteUserName = profile.username,
-                                            remoteUserProfilePic = Base64.encodeToString(
-                                                profile.profilePictureUrl.encodeToByteArray(), 0,
-                                            ),
-                                            remoteUserId = profile.userId,
+                            },
+                        ) {
+                            Text(text = stringResource(id = R.string.edit_your_profile))
+                        }
+                        DropdownMenuItem(onClick = {
+                            viewModel.onEvent(ProfileScreenAction.ShowLogoutDialog)
+                            showPopupMenu = false
+                        }) {
+                            Text(text = stringResource(id = R.string.logout))
+                        }
+                    } else {
+                        DropdownMenuItem(
+                            onClick = {
+                                navController.navigate(
+                                    Screens.MessageScreen.createRoute(
+                                        chatId = null,
+                                        remoteUserName = profile.username,
+                                        remoteUserProfilePic = Base64.encodeToString(
+                                            profile.profilePictureUrl.encodeToByteArray(), 0,
+                                        ),
+                                        remoteUserId = profile.userId,
 
-                                            ),
-                                    )
-                                    showPopupMenu = false
+                                        ),
+                                )
+                                showPopupMenu = false
 
-                                },
-                            ) {
-                                Text(text = stringResource(id = R.string.send_a_message))
-                            }
+                            },
+                        ) {
+                            Text(text = stringResource(id = R.string.send_a_message))
                         }
                     }
                 }
             },
         )
-        if (state.isLoading) CircularProgressIndicator(
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
+        /*   if (state.isLoading) CircularProgressIndicator(
+               modifier = Modifier.align(Alignment.CenterHorizontally)
+           )*/
         LazyColumn(
             Modifier.fillMaxSize()
         ) {
@@ -172,10 +168,11 @@ fun ProfileScreen(
                     ),
                     modifier = Modifier.padding(SpaceMedium),
                     isOwnProfile = profile.isOwnProfile,
-                    isFollowing = profile.isFollowing
-                ) {
-                    viewModel.onEvent(ProfileScreenAction.ToggleFollowStateForUser(profile.userId))
-                }
+                    isFollowing = profile.isFollowing,
+                    onFollowClicked = {
+                        viewModel.onEvent(ProfileScreenAction.ToggleFollowStateForUser(profile.userId))
+                    }
+                )
             }
 
             items(userPosts.items.size) { index ->
@@ -218,7 +215,11 @@ fun ProfileScreen(
                 title = stringResource(id = R.string.logout),
                 onPositiveButtonClicked = {
                     viewModel.onEvent(ProfileScreenAction.Logout)
-                    navController.navigate(Screens.LoginScreen.route)
+                    navController.navigate(Screens.LoginScreen.route) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
                     navController.graph.clear()
                 },
                 onNegativeButtonClicked = {

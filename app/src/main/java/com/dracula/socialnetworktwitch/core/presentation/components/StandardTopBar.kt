@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
-import com.dracula.socialnetworktwitch.core.presentation.utils.autoMirror
 
 @Composable
 fun StandardTopBar(
@@ -68,7 +67,6 @@ fun StandardTopBar(
             val backIcon: @Composable () -> Unit = {
                 BackIcon(
                     onBackClicked = { navController.navigateUp() },
-                    modifier = Modifier.autoMirror()
                 )
             }
             backIcon

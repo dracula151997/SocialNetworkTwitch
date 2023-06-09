@@ -20,6 +20,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.ImeAction
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
+import com.dracula.socialnetworktwitch.core.presentation.utils.autoMirror
 import com.dracula.socialnetworktwitch.core.presentation.utils.clearFocusOnKeyboardDismiss
 
 @Composable
@@ -67,6 +68,7 @@ fun SendTextField(
             Icon(
                 imageVector = Icons.Default.Send,
                 contentDescription = Semantics.ContentDescriptions.POST_PHOTO,
+                modifier = Modifier.autoMirror(),
                 tint = if (!enabled) MaterialTheme.colors.background else MaterialTheme.colors.primary
             )
         }

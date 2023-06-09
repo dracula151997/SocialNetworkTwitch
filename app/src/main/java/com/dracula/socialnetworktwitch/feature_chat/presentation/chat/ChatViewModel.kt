@@ -19,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val getChatsForUserUseCase: GetChatsForUserUseCase,
-    private val initializeRepositoryUseCase: InitializeRepositoryUseCase,
+    initializeRepositoryUseCase: InitializeRepositoryUseCase,
 ) : ViewModel() {
     var state by mutableStateOf(ChatState())
         private set
@@ -28,8 +28,8 @@ class ChatViewModel @Inject constructor(
     val eventFlow = _eventFlow.asSharedFlow()
 
     init {
-        getChatsForUser()
         initializeRepositoryUseCase()
+        getChatsForUser()
     }
 
 
