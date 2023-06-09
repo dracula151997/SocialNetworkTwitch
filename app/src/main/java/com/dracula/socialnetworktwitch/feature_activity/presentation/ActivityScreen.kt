@@ -25,7 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
@@ -59,11 +60,17 @@ fun ActivityScreen(
                     navController = navController
                 )
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
                         horizontal = PaddingMedium, vertical = PaddingMedium
-                    ), verticalArrangement = Arrangement.spacedBy(SpaceMedium)
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(SpaceMedium)
                 ) {
-                    items(activities) { activity ->
+                    items(
+                        count = activities.itemCount,
+                        key = activities.itemKey { it.parentId },
+                        contentType = activities.itemContentType { "contentType" }) { index ->
+                        val activity = activities[index]
                         activity?.let {
                             ActivityItem(activity = activity, onNavigate = onNavigate)
                         }

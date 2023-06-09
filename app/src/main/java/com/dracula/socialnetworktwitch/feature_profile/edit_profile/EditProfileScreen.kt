@@ -4,7 +4,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.border
@@ -38,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -65,7 +65,6 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun EditProfileScreen(
     navController: NavController,
@@ -80,11 +79,11 @@ fun EditProfileScreen(
     val skillsState = viewModel.skillsState
 
     val cropProfileImageLauncher =
-        rememberLauncherForActivityResult(CropActivityResultContract(5f, 2f)) {
+        rememberLauncherForActivityResult(CropActivityResultContract(1f, 1f)) {
             viewModel.onEvent(EditProfileAction.CropProfileImage(it))
         }
     val cropBannerImageLauncher =
-        rememberLauncherForActivityResult(CropActivityResultContract(1f, 1f)) {
+        rememberLauncherForActivityResult(CropActivityResultContract(4f, 1f)) {
             viewModel.onEvent(EditProfileAction.CropBannerImage(it))
         }
 
@@ -137,7 +136,8 @@ fun EditProfileScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            BannerEditSection(bannerImageUrl = if (viewModel.bannerImageUri == null) profile.bannerUrl else viewModel.bannerImageUri,
+            BannerEditSection(
+                bannerImageUrl = if (viewModel.bannerImageUri == null) profile.bannerUrl else viewModel.bannerImageUri,
                 profileImageUrl = if (viewModel.profileImageUri == null) profile.profilePictureUrl else viewModel.profileImageUri,
                 profilePictureSize = profilePictureSize,
                 onBannerClick = {
@@ -145,7 +145,8 @@ fun EditProfileScreen(
                 },
                 onProfileImageClick = {
                     pickProfileImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                })
+                },
+            )
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -335,7 +336,8 @@ fun BannerEditSection(
                 .height(bannerHeight)
                 .clickable { onBannerClick() },
             contentDescription = null,
-        )
+
+            )
         StandardAsyncImage(
             url = profileImageUrl,
             modifier = Modifier
@@ -346,7 +348,9 @@ fun BannerEditSection(
                     width = 1.dp, color = MaterialTheme.colors.onSurface, shape = CircleShape
                 )
                 .clickable { onProfileImageClick() },
-            contentDescription = null
+            contentDescription = null,
+            placeholder = painterResource(id = R.drawable.avatar_placeholder),
+            errorPlaceholder = painterResource(id = R.drawable.avatar_placeholder)
 
         )
     }
