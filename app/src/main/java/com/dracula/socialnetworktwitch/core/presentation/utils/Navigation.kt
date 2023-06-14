@@ -8,10 +8,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.dracula.socialnetworktwitch.core.utils.Constants
-import com.dracula.socialnetworktwitch.feature_activity.presentation.ActivityScreen
+import com.dracula.socialnetworktwitch.feature_activity.presentation.ActivityRoute
 import com.dracula.socialnetworktwitch.feature_auth.presentation.login.LoginRoute
 import com.dracula.socialnetworktwitch.feature_auth.presentation.register.RegisterRoute
-import com.dracula.socialnetworktwitch.feature_chat.presentation.chat.ChatScreen
+import com.dracula.socialnetworktwitch.feature_chat.presentation.chat.ChatRoute
 import com.dracula.socialnetworktwitch.feature_chat.presentation.message.MessagesScreen
 import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedRoute
 import com.dracula.socialnetworktwitch.feature_post.presentation.create_post.CreatePostScreen
@@ -75,9 +75,14 @@ fun Navigation(
             )
         }
         composable(route = Screens.ChatListScreen.route) {
-            ChatScreen(
-                navController = navController,
-                scaffoldState = scaffoldState
+            ChatRoute(
+                onNavigate = navController::navigate,
+                onNavUp = navController::navigateUp,
+                showSnackbar = {
+                    scope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(message = it)
+                    }
+                }
             )
 
         }
@@ -101,9 +106,16 @@ fun Navigation(
         }
 
         composable(route = Screens.NotificationsScreen.route) {
-            ActivityScreen(
-                navController = navController,
-                onNavigate = { navController.navigate(it) })
+            ActivityRoute(
+                onNavigate = {
+                    navController.navigate(it)
+                },
+                showSnackbar = {
+                    scope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(message = it)
+                    }
+                }
+            )
         }
         composable(
             route = Screens.ProfileScreen.route,

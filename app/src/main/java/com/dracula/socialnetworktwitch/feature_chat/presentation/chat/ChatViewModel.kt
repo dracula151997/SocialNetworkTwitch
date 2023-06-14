@@ -27,6 +27,17 @@ class ChatViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+    fun onEvent(event: ChatScreenAction) {
+        when (event) {
+            ChatScreenAction.Refreshing -> {
+                state = state.copy(
+                    refreshing = true
+                )
+                getChatsForUser()
+            }
+        }
+    }
+
     init {
         initializeRepositoryUseCase()
         getChatsForUser()
@@ -36,11 +47,13 @@ class ChatViewModel @Inject constructor(
     private fun getChatsForUser() {
         viewModelScope.launch {
             state = state.copy(
-                isLoading = true
+                isLoading = !state.refreshing,
+                refreshing = state.refreshing
             )
             val response = getChatsForUserUseCase()
             state = state.copy(
-                isLoading = false
+                isLoading = false,
+                refreshing = false
             )
             when (response) {
                 is ApiResult.Success -> state = state.copy(
@@ -55,4 +68,8 @@ class ChatViewModel @Inject constructor(
             }
         }
     }
+}
+
+sealed interface ChatScreenAction {
+    object Refreshing : ChatScreenAction
 }

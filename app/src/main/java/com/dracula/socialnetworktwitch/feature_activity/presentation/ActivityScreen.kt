@@ -8,79 +8,122 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import com.dracula.socialnetworktwitch.R
+import com.dracula.socialnetworktwitch.core.presentation.components.PullToRefreshBox
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.StandardElevation
+import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.ActivityType
 import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.feature_activity.domain.model.Activity
+import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 
 @Composable
-fun ActivityScreen(
-    navController: NavController,
-    viewModel: ActivityViewModel = hiltViewModel(),
+fun ActivityRoute(
     onNavigate: (route: String) -> Unit,
+    showSnackbar: (message: String) -> Unit,
 ) {
-    val state = viewModel.state
-    val activities = viewModel.activities.collectAsLazyPagingItems()
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (activities.itemCount == 0) {
-            Text(
-                text = stringResource(id = R.string.msg_no_activities_right_now),
-                modifier = Modifier.align(Alignment.Center),
-                style = MaterialTheme.typography.h2
-            )
-        } else {
-            Column(modifier = Modifier) {
-                StandardTopBar(
-                    title = stringResource(id = R.string.your_activity),
-                    navController = navController
-                )
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        horizontal = PaddingMedium, vertical = PaddingMedium
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(SpaceMedium)
-                ) {
-                    items(
-                        count = activities.itemCount,
-                        key = activities.itemKey { it.parentId },
-                        contentType = activities.itemContentType { "contentType" }) { index ->
-                        val activity = activities[index]
-                        activity?.let {
-                            ActivityItem(activity = activity, onNavigate = onNavigate)
-                        }
-                    }
-                }
+    val viewModel: ActivityViewModel = hiltViewModel()
+    ActivityScreen(viewModel = viewModel, onNavigate = onNavigate, showSnackbar = showSnackbar)
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ActivityScreen(
+    viewModel: ActivityViewModel,
+    onNavigate: (route: String) -> Unit,
+    showSnackbar: (message: String) -> Unit,
+) {
+
+    val activitiesPagingState = viewModel.activitiesPagingState
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = activitiesPagingState.refreshing,
+        onRefresh = { viewModel.onEvent(ActivityAction.Refreshing) })
+    val activities = activitiesPagingState.items
+    val context = LocalContext.current
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is UiEvent.Navigate -> onNavigate(event.route)
+                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
+                else -> Unit
             }
         }
-        if (state.isLoading) CircularProgressIndicator(
-            modifier = Modifier.align(Alignment.Center)
+    }
+    Column(modifier = Modifier) {
+        StandardTopBar(
+            title = stringResource(id = R.string.your_activity),
         )
+        PullToRefreshBox(
+            state = pullRefreshState,
+            refreshing = activitiesPagingState.refreshing
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    horizontal = PaddingMedium, vertical = PaddingMedium
+                ),
+                verticalArrangement = Arrangement.spacedBy(SpaceMedium)
+            ) {
+                when {
+                    activitiesPagingState.isLoading -> item {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+
+                    activities.isEmpty() -> item {
+                        Box(
+                            modifier = Modifier.fillParentMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.msg_no_activities_right_now),
+                                style = MaterialTheme.typography.h6.copy(
+                                    fontFamily = appFontFamily
+                                ),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                    }
+
+                    else -> items(
+                        activities,
+                        key = { it.parentId }) { activity ->
+                        ActivityItem(activity = activity, onNavigate = onNavigate)
+                    }
+
+                }
+
+            }
+        }
     }
 
 }

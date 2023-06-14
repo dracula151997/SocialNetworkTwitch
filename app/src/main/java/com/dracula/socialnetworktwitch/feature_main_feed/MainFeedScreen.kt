@@ -13,7 +13,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
+import com.dracula.socialnetworktwitch.core.presentation.components.PullToRefreshBox
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
@@ -90,13 +90,10 @@ private fun MainFeedScreen(
                 )
             }
         }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .pullRefresh(state = pullToRefreshState)
-
+        PullToRefreshBox(
+            state = pullToRefreshState,
+            refreshing = postsPagingState.refreshing,
         ) {
-
             LazyColumn {
                 when {
                     postsPagingState.isLoading -> item {

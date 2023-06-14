@@ -46,12 +46,7 @@ class MainFeedViewModel @Inject constructor(
             getPostsForFollowsUseCase(page = page)
         },
         onSuccess = { result ->
-            postsPagingState = postsPagingState.copy(
-                isLoading = false,
-                items = postsPagingState.items + result,
-                endReached = result.isEmpty()
-
-            )
+            postsPagingState = postsPagingState.addNewItems(result)
         },
         onError = { message ->
             viewModelScope.launch { _eventFlow.emit(UiEvent.ShowSnackbar(message)) }

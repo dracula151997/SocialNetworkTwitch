@@ -76,4 +76,6 @@
     <string name="send_a_message">إرسال رسالة</string>
     <string name="hide_password">Hide password</string>
     <string name="show_password">Show Password</string>
+    <string name="msg_no_chats_to_display">لا توجد محادثات لعرضها</string>
+
 </resources>
