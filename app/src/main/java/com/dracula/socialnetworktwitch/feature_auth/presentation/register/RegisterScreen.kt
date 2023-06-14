@@ -12,7 +12,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,27 +27,38 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
+import com.dracula.socialnetworktwitch.core.presentation.components.PasswordTextField
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTextField
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
-import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
-import com.dracula.socialnetworktwitch.feature_auth.domain.utils.AuthValidationError
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun RegisterScreen(
-    viewModel: RegisterViewModel = hiltViewModel(),
-    navController: NavController,
-    scaffoldState: ScaffoldState,
+fun RegisterRoute(
+    showSnackbar: (message: String) -> Unit,
+    onNavUp: () -> Unit,
+    onNavigate: (route: String) -> Unit
 ) {
-    val usernameState = viewModel.usernameState
-    val emailState = viewModel.emailState
-    val passwordState = viewModel.passwordState
-    val (isLoading, successful, message) = viewModel.registerState
+    val viewModel: RegisterViewModel = hiltViewModel()
+    RegisterScreen(
+        onNavigate = onNavigate,
+        onNavUp = onNavUp,
+        showSnackbar = showSnackbar,
+        viewModel = viewModel
+    )
+}
+
+@Composable
+fun RegisterScreen(
+    viewModel: RegisterViewModel,
+    onNavigate: (route: String) -> Unit,
+    onNavUp: () -> Unit,
+    showSnackbar: (message: String) -> Unit
+) {
+    val state = viewModel.registerState
     val context = LocalContext.current
     val signInText = stringResource(id = R.string.sign_in)
     val annotatedString = buildAnnotatedString {
@@ -67,11 +77,9 @@ fun RegisterScreen(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
-                    message = event.uiText.asString(context)
-                )
-
-                else -> {}
+                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
+                is UiEvent.Navigate -> onNavigate(event.route)
+                UiEvent.NavigateUp -> onNavUp()
             }
 
         }
@@ -94,54 +102,23 @@ fun RegisterScreen(
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(
-                text = emailState.text,
-                onValueChanged = { viewModel.onEvent(RegisterAction.OnEmailEntered(it)) },
+                state = viewModel.emailState,
                 hint = stringResource(
                     id = R.string.email_hint
                 ),
                 keyboardType = KeyboardType.Email,
-                error = when (emailState.error) {
-                    AuthValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
-                    AuthValidationError.InvalidEmail -> stringResource(id = R.string.error_not_a_valid_email)
-                    else -> ""
-                },
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(
-                text = usernameState.text,
-                onValueChanged = { viewModel.onEvent(RegisterAction.OnUserNameEntered(it)) },
+                state = viewModel.usernameState,
                 hint = stringResource(
                     id = R.string.username_hint
                 ),
-                error = when (usernameState.error) {
-                    AuthValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
-                    AuthValidationError.InputTooShort -> stringResource(
-                        id = R.string.input_to_short, Constants.MIN_USERNAME_LENGTH
-                    )
-
-                    else -> ""
-                }
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
-            StandardTextField(
-                text = passwordState.text,
-                onValueChanged = { viewModel.onEvent(RegisterAction.OnPasswordEntered(it)) },
-                keyboardType = KeyboardType.Password,
+            PasswordTextField(
+                state = viewModel.passwordState,
                 hint = stringResource(id = R.string.password_hint),
-                error = when (passwordState.error) {
-                    AuthValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
-                    AuthValidationError.InputTooShort -> stringResource(
-                        id = R.string.input_to_short,
-                        Constants.MIN_PASSWORD_LENGTH,
-                    )
-
-                    AuthValidationError.InvalidPassword -> stringResource(id = R.string.error_invalid_password)
-                    else -> ""
-                },
-                showPasswordToggle = passwordState.isPasswordToggleVisible,
-                onPasswordToggleClicked = {
-                    viewModel.onEvent(RegisterAction.TogglePasswordVisibility)
-                },
                 imeAction = ImeAction.Done,
                 keyboardActions = KeyboardActions(
                     onDone = { viewModel.onEvent(RegisterAction.Register) },
@@ -151,7 +128,7 @@ fun RegisterScreen(
             Button(
                 onClick = { viewModel.onEvent(RegisterAction.Register) },
                 modifier = Modifier.align(Alignment.End),
-                enabled = !isLoading
+                enabled = viewModel.enableRegisterButton
             ) {
                 Text(
                     text = stringResource(id = R.string.register),
@@ -159,18 +136,21 @@ fun RegisterScreen(
                 )
             }
 
-            if (isLoading) CircularProgressIndicator()
+            if (state.isLoading) CircularProgressIndicator()
 
         }
         ClickableText(
-            text = annotatedString, onClick = { offset ->
+            text = annotatedString,
+            onClick = { offset ->
                 annotatedString.getStringAnnotations(offset, offset).firstOrNull()?.let {
-                    navController.navigateUp()
+                    onNavUp()
                 }
 
-            }, style = MaterialTheme.typography.body1.copy(
+            },
+            style = MaterialTheme.typography.body1.copy(
                 textAlign = TextAlign.Center
-            ), modifier = Modifier
+            ),
+            modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
         )

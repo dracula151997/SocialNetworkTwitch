@@ -9,11 +9,13 @@ import com.dracula.socialnetworktwitch.R
 sealed class UiText {
     data class DynamicString(val value: String) : UiText()
     data class StringResource(@StringRes val id: Int) : UiText()
+    class StringResourceWithArgs(@StringRes val id: Int, vararg val formatArgs: Any) : UiText()
 
     fun asString(context: Context): String {
         return when (this) {
             is DynamicString -> value
             is StringResource -> context.getString(id)
+            is StringResourceWithArgs -> context.getString(id, *formatArgs)
         }
     }
 
@@ -22,6 +24,7 @@ sealed class UiText {
         return when (this) {
             is DynamicString -> value
             is StringResource -> stringResource(id = id)
+            is StringResourceWithArgs -> stringResource(id = id, *formatArgs)
         }
     }
 

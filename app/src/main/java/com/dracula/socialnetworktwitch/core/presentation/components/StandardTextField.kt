@@ -38,7 +38,7 @@ import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.theme.IconSizeMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.LightGray
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.TextFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 
 @Composable
 fun StandardTextField(

@@ -33,7 +33,7 @@
     <string name="followed_you">قام بمتابعتك</string>
     <string name="error_this_field_cannot_be_empty">هذا الحقل لا يمكن أن يكون فارغًا</string>
     <string name="error_not_a_valid_email">بريد إلكتروني غير صالح</string>
-    <string name="input_to_short">الحد الأدنى للطول هو %d</string>
+    <string name="error_input_to_short">الحد الأدنى للطول هو %d</string>
     <string name="error_invalid_password">يجب أن تحتوي كلمة المرور على حرف كبير ورقم واحد على الأقل</string>
     <string name="error_unknown">خطأ غير معروف</string>
     <string name="error_couldnot_reach_server">عذرًا! لم يتمكن من الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت.</string>

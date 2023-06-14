@@ -1,4 +1,4 @@
-package com.dracula.socialnetworktwitch.core.presentation.utils.states
+package com.dracula.socialnetworktwitch.core.presentation.utils.states.validator
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

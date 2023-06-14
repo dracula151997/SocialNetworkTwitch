@@ -1,13 +1,15 @@
 package com.dracula.socialnetworktwitch.feature_auth.presentation.register
 
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.R
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.PasswordTextFieldState
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.EmailFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NotEmptyFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.PasswordFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.UiText
@@ -24,12 +26,16 @@ class RegisterViewModel @Inject constructor(
     private val registerUseCase: RegisterUseCase
 ) : ViewModel() {
 
-    var usernameState by mutableStateOf(StandardTextFieldState())
+    var usernameState by mutableStateOf(NotEmptyFieldState())
         private set
-    var emailState by mutableStateOf(StandardTextFieldState())
+    var emailState by mutableStateOf(EmailFieldState())
         private set
-    var passwordState by mutableStateOf(PasswordTextFieldState())
+    var passwordState by mutableStateOf(PasswordFieldState())
         private set
+
+    val enableRegisterButton by derivedStateOf {
+        (usernameState.isValid && emailState.isValid && passwordState.isValid) && !registerState.isLoading
+    }
 
     var registerState by mutableStateOf(RegisterState())
         private set
@@ -40,22 +46,6 @@ class RegisterViewModel @Inject constructor(
 
     fun onEvent(event: RegisterAction) {
         when (event) {
-            is RegisterAction.OnEmailEntered -> emailState = emailState.copy(
-                text = event.value,
-            )
-
-            is RegisterAction.OnPasswordEntered -> passwordState = passwordState.copy(
-                text = event.value,
-            )
-
-            is RegisterAction.OnUserNameEntered -> usernameState = usernameState.copy(
-                text = event.value
-            )
-
-            RegisterAction.TogglePasswordVisibility -> passwordState = passwordState.copy(
-                isPasswordToggleVisible = !passwordState.isPasswordToggleVisible
-            )
-
             RegisterAction.Register -> {
                 register()
             }
@@ -65,53 +55,24 @@ class RegisterViewModel @Inject constructor(
 
     private fun register() {
         viewModelScope.launch {
-            clearTextFieldErrorState()
-            registerState = RegisterState.loading()
+            registerState = registerState.copy(isLoading = true)
             val registerResult = registerUseCase(
                 email = emailState.text,
                 username = usernameState.text,
                 password = passwordState.text
             )
-            if (registerResult.hasEmailError)
-                emailState = emailState.copy(
-                    error = registerResult.emailError
-                )
-            if (registerResult.hasUsernameError)
-                usernameState = usernameState.copy(
-                    error = registerResult.usernameError
-                )
-            if (registerResult.hasPasswordError)
-                passwordState = passwordState.copy(
-                    error = registerResult.passwordError
-                )
-            when (val result = registerResult.result) {
+            registerState = registerState.copy(isLoading = false)
+            when (registerResult) {
                 is ApiResult.Success -> {
                     _eventFlow.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.success_registeration)))
-                    registerState = RegisterState.success()
-                    clearTextFieldStates()
+                    _eventFlow.emit(UiEvent.NavigateUp)
                 }
 
                 is ApiResult.Error -> {
-                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
-                    registerState = RegisterState.error(result.uiText.orUnknownError())
-                }
-
-                else -> {
-                    registerState = RegisterState.idle()
+                    _eventFlow.emit(UiEvent.ShowSnackbar(registerResult.uiText.orUnknownError()))
                 }
             }
         }
     }
-
-    private fun clearTextFieldStates() {
-        usernameState = StandardTextFieldState()
-        emailState = StandardTextFieldState()
-        passwordState = PasswordTextFieldState()
-    }
-
-    private fun clearTextFieldErrorState() {
-        usernameState = usernameState.copy(error = null)
-        emailState = emailState.copy(error = null)
-        passwordState = passwordState.copy(error = null)
-    }
 }
+

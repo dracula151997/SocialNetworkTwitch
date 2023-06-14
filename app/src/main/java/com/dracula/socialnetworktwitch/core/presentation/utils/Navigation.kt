@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.feature_activity.presentation.ActivityScreen
 import com.dracula.socialnetworktwitch.feature_auth.presentation.login.LoginRoute
-import com.dracula.socialnetworktwitch.feature_auth.presentation.register.RegisterScreen
+import com.dracula.socialnetworktwitch.feature_auth.presentation.register.RegisterRoute
 import com.dracula.socialnetworktwitch.feature_chat.presentation.chat.ChatScreen
 import com.dracula.socialnetworktwitch.feature_chat.presentation.message.MessagesScreen
 import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedScreen
@@ -22,8 +22,6 @@ import com.dracula.socialnetworktwitch.feature_profile.profile.ProfileScreen
 import com.dracula.socialnetworktwitch.feature_search.presentation.SearchScreen
 import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashScreen
 import kotlinx.coroutines.launch
-
-private const val TAG = "Navigation"
 
 @Composable
 fun Navigation(
@@ -54,9 +52,14 @@ fun Navigation(
             )
         }
         composable(route = Screens.RegisterScreen.route) {
-            RegisterScreen(
-                navController = navController,
-                scaffoldState = scaffoldState
+            RegisterRoute(
+                showSnackbar = {
+                    scope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(message = it)
+                    }
+                },
+                onNavigate = { navController.navigate(it) },
+                onNavUp = { navController.navigateUp() }
             )
         }
 
