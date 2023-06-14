@@ -13,8 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
@@ -25,13 +23,10 @@ fun OwnMessageItem(
     formattedTime: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.primary,
-    triangleWidth: Dp = 30.dp,
-    triangleHeight: Dp = 30.dp
 ) {
     Row(
         modifier = modifier.fillMaxWidth()
     ) {
-        val bottomStartCornerRadius = MaterialTheme.shapes.medium.bottomEnd
         Text(
             text = formattedTime,
             modifier = Modifier.align(Alignment.Bottom),

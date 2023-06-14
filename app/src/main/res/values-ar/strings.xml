@@ -74,4 +74,6 @@
     <string name="share_intent_text">مرحبًا، وجدت مشاركة رائعة، تفضل بالتحقق منها :) %s</string>
     <string name="edit_btn">تعديل</string>
     <string name="send_a_message">إرسال رسالة</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show Password</string>
 </resources>

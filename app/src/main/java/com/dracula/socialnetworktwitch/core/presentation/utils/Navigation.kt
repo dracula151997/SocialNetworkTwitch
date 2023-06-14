@@ -2,13 +2,14 @@ package com.dracula.socialnetworktwitch.core.presentation.utils
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.feature_activity.presentation.ActivityScreen
-import com.dracula.socialnetworktwitch.feature_auth.presentation.login.LoginScreen
+import com.dracula.socialnetworktwitch.feature_auth.presentation.login.LoginRoute
 import com.dracula.socialnetworktwitch.feature_auth.presentation.register.RegisterScreen
 import com.dracula.socialnetworktwitch.feature_chat.presentation.chat.ChatScreen
 import com.dracula.socialnetworktwitch.feature_chat.presentation.message.MessagesScreen
@@ -20,6 +21,7 @@ import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileS
 import com.dracula.socialnetworktwitch.feature_profile.profile.ProfileScreen
 import com.dracula.socialnetworktwitch.feature_search.presentation.SearchScreen
 import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashScreen
+import kotlinx.coroutines.launch
 
 private const val TAG = "Navigation"
 
@@ -29,6 +31,7 @@ fun Navigation(
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
 ) {
+    val scope = rememberCoroutineScope()
     NavHost(
         navController = navController,
         startDestination = Screens.SplashScreen.route,
@@ -40,9 +43,14 @@ fun Navigation(
         composable(
             route = Screens.LoginScreen.route
         ) {
-            LoginScreen(
-                navController = navController,
-                scaffoldState = scaffoldState
+            LoginRoute(
+                onNavigate = navController::navigate,
+                onNavigateUp = navController::navigateUp,
+                showSnackbar = { message ->
+                    scope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(message = message)
+                    }
+                }
             )
         }
         composable(route = Screens.RegisterScreen.route) {

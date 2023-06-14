@@ -138,9 +138,6 @@ fun ProfileScreen(
                 }
             },
         )
-        /*   if (state.isLoading) CircularProgressIndicator(
-               modifier = Modifier.align(Alignment.CenterHorizontally)
-           )*/
         LazyColumn(
             Modifier.fillMaxSize()
         ) {
@@ -220,7 +217,6 @@ fun ProfileScreen(
                             inclusive = true
                         }
                     }
-                    navController.graph.clear()
                 },
                 onNegativeButtonClicked = {
                     viewModel.onEvent(ProfileScreenAction.HideLogoutDialog)

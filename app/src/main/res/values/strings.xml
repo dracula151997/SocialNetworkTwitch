@@ -73,4 +73,6 @@
     <string name="successfully_deleted_post">Successfully deleted the post</string>
     <string name="edit_btn">Edit</string>
     <string name="send_a_message">Send Message</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show Password</string>
 </resources>
