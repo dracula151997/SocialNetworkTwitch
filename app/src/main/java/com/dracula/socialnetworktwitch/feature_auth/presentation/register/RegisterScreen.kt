@@ -52,7 +52,7 @@ fun RegisterRoute(
 }
 
 @Composable
-fun RegisterScreen(
+private fun RegisterScreen(
     viewModel: RegisterViewModel,
     onNavigate: (route: String) -> Unit,
     onNavUp: () -> Unit,

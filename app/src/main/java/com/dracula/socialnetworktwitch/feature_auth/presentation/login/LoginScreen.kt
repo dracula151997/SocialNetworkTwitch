@@ -55,7 +55,7 @@ fun LoginRoute(
 }
 
 @Composable
-fun LoginScreen(
+private fun LoginScreen(
     viewModel: LoginViewModel,
     onNavigate: (route: String) -> Unit,
     showSnackbar: (message: String) -> Unit,

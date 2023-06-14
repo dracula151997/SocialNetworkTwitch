@@ -9,20 +9,20 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
@@ -33,12 +33,28 @@ import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
 import com.dracula.socialnetworktwitch.feature_post.presentation.components.PostItem
 import kotlinx.coroutines.flow.collectLatest
 
+@Composable
+fun MainFeedRoute(
+    onNavigate: (route: String) -> Unit,
+    onNavUp: () -> Unit,
+    showSnackbar: (message: String) -> Unit,
+) {
+    val viewModel: MainFeedViewModel = hiltViewModel()
+    MainFeedScreen(
+        onNavigate = onNavigate,
+        onNavUp = onNavUp,
+        showSnackbar = showSnackbar,
+        viewModel = viewModel
+    )
+}
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun MainFeedScreen(
-    navController: NavController,
-    scaffoldState: ScaffoldState,
-    viewModel: MainFeedViewModel = hiltViewModel()
+private fun MainFeedScreen(
+    onNavigate: (route: String) -> Unit,
+    onNavUp: () -> Unit,
+    showSnackbar: (message: String) -> Unit,
+    viewModel: MainFeedViewModel
 ) {
     val postsPagingState = viewModel.postsPagingState
     val posts = postsPagingState.items
@@ -51,24 +67,22 @@ fun MainFeedScreen(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                MainFeedUiEvent.LikedPost -> {
-                }
-
-                is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
-                    message = event.uiText.asString(
-                        context
-                    )
-                )
+                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
+                is UiEvent.Navigate -> onNavigate(event.route)
+                UiEvent.NavigateUp -> onNavUp()
             }
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+
+    ) {
         StandardTopBar(
             title = stringResource(id = R.string.your_feed),
-            navController = navController
         ) {
-            IconButton(onClick = { navController.navigate(Screens.SearchScreen.route) }) {
+            IconButton(onClick = { onNavigate(Screens.SearchScreen.route) }) {
                 Icon(
                     imageVector = Icons.Outlined.Search,
                     contentDescription = Semantics.ContentDescriptions.MAKE_POST,
@@ -76,35 +90,52 @@ fun MainFeedScreen(
                 )
             }
         }
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (posts.isEmpty()) {
-                Text(
-                    text = stringResource(id = R.string.msg_no_posts_to_display),
-                    modifier = Modifier.align(Center),
-                    style = MaterialTheme.typography.h2.copy(
-                        fontFamily = appFontFamily
-                    )
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.pullRefresh(state = pullToRefreshState)
-                ) {
-                    items(posts.size) { index ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pullRefresh(state = pullToRefreshState)
+
+        ) {
+
+            LazyColumn {
+                when {
+                    postsPagingState.isLoading -> item {
+                        CircularProgressIndicator(
+                            modifier = Modifier.fillParentMaxWidth()
+                        )
+                    }
+
+                    posts.isEmpty() -> item {
+                        Box(
+                            modifier = Modifier.fillParentMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.msg_no_posts_to_display),
+                                style = MaterialTheme.typography.h6.copy(
+                                    fontFamily = appFontFamily
+                                ),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+
+                    else -> items(posts.size) { index ->
                         val post = posts[index]
-                        if (index > posts.size - 1 && !postsPagingState.endReached && !postsPagingState.isLoading) {
+                        if (index > posts.size - 1 && !postsPagingState.endReached) {
                             viewModel.loadNextPost()
                         }
                         PostItem(
                             post = post,
                             onPostClicked = {
-                                navController.navigate(
+                                onNavigate(
                                     Screens.PostDetailsScreen.createRoute(
-                                        postId = post.id
-                                    )
+                                        postId = post.id,
+                                    ),
                                 )
                             },
                             onUsernameClicked = {
-                                navController.navigate(
+                                onNavigate(
                                     Screens.ProfileScreen.createRoute(
                                         userId = post.userId
                                     )
@@ -113,7 +144,7 @@ fun MainFeedScreen(
                             onShareClicked = { context.sendSharePostIntent(postId = post.id) },
                             onLikeClicked = { viewModel.onEvent(MainFeedAction.LikePost(post.id)) },
                             onCommentClicked = {
-                                navController.navigate(
+                                onNavigate(
                                     Screens.PostDetailsScreen.createRoute(
                                         postId = post.id,
                                         showKeyboard = true
@@ -126,13 +157,16 @@ fun MainFeedScreen(
                         )
 
                     }
+
+
                 }
-                if (postsPagingState.isLoading) CircularProgressIndicator(
-                    modifier = Modifier.align(
-                        Center
-                    )
-                )
             }
+
+            PullRefreshIndicator(
+                refreshing = postsPagingState.refreshing,
+                state = pullToRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
         }
     }
 }

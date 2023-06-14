@@ -13,7 +13,7 @@ import com.dracula.socialnetworktwitch.feature_auth.presentation.login.LoginRout
 import com.dracula.socialnetworktwitch.feature_auth.presentation.register.RegisterRoute
 import com.dracula.socialnetworktwitch.feature_chat.presentation.chat.ChatScreen
 import com.dracula.socialnetworktwitch.feature_chat.presentation.message.MessagesScreen
-import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedScreen
+import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedRoute
 import com.dracula.socialnetworktwitch.feature_post.presentation.create_post.CreatePostScreen
 import com.dracula.socialnetworktwitch.feature_post.presentation.person_list.PersonListScreen
 import com.dracula.socialnetworktwitch.feature_post.presentation.post_details.PostDetailsScreen
@@ -64,9 +64,14 @@ fun Navigation(
         }
 
         composable(route = Screens.MainFeedScreen.route) {
-            MainFeedScreen(
-                navController = navController,
-                scaffoldState = scaffoldState
+            MainFeedRoute(
+                onNavigate = { navController.navigate(it) },
+                onNavUp = { navController.navigateUp() },
+                showSnackbar = {
+                    scope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(message = it)
+                    }
+                }
             )
         }
         composable(route = Screens.ChatListScreen.route) {

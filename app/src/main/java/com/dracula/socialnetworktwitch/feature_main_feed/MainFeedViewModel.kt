@@ -32,7 +32,6 @@ class MainFeedViewModel @Inject constructor(
     private val deletePostUseCase: DeletePostUseCase,
 ) : ViewModel() {
 
-
     private val _eventFlow = MutableSharedFlow<BaseUiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
@@ -56,7 +55,6 @@ class MainFeedViewModel @Inject constructor(
         },
         onError = { message ->
             viewModelScope.launch { _eventFlow.emit(UiEvent.ShowSnackbar(message)) }
-
         }
     )
 

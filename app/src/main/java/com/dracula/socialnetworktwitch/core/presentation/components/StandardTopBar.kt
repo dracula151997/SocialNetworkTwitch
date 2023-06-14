@@ -50,6 +50,41 @@ fun StandardTopBar(
 
 @Composable
 fun StandardTopBar(
+    title: String?,
+    modifier: Modifier = Modifier,
+    navigationIcon: @Composable (() -> Unit)? = null,
+    showBackButton: Boolean = false,
+    onBack: () -> Unit = {},
+    navActions: @Composable (RowScope.() -> Unit) = {},
+) {
+
+    TopAppBar(
+        title = {
+            Text(
+                text = title.orEmpty(),
+                style = MaterialTheme.typography.h6.copy(
+                    fontFamily = appFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+            )
+        },
+        modifier = modifier,
+        backgroundColor = MaterialTheme.colors.surface,
+        elevation = 0.dp,
+        navigationIcon = if (showBackButton) {
+            val backIcon: @Composable () -> Unit = {
+                BackIcon(onBackClicked = { onBack() })
+            }
+            backIcon
+        } else navigationIcon,
+        actions = navActions
+    )
+}
+
+@Composable
+fun StandardTopBar(
     title: @Composable () -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
