@@ -25,6 +25,14 @@ open class TextFieldState(
         text = newText
     }
 
+    fun clearText() {
+        text = ""
+    }
+
+    fun isEmpty(): Boolean {
+        return text.isEmpty()
+    }
+
     fun enableShowErrors() {
         if (isFocusedDirty)
             displayErrors = true

@@ -30,6 +30,18 @@ fun String.isValidPassword(): Boolean {
     return matchesMinLength(minLength = Constants.MIN_PASSWORD_LENGTH) && atLeastOneDigits() && atLeastOneUppercaseLetter()
 }
 
+fun String.isValidGithubUrl(): Boolean {
+    return "^(https?://)?github.com/([A-Za-z0-9_-]+)/?\$".toRegex().matches(this)
+}
+
+fun String.isValidLinkedinUrl(): Boolean {
+    return "http(s)?://(\\w+\\.)?linkedin\\.com/in/[A-z0-9_-]+/?".toRegex().matches(this)
+}
+
+fun String.isValidInstagramUrl(): Boolean {
+    return "^(http://)?instagram\\.com/[a-z\\d-_]{1,255}\\s*\$".toRegex().matches(this)
+}
+
 object ValidationUtil {
     private val githubProfileUrlRegex = "^(https?://)?github.com/([A-Za-z0-9_-]+)/?\$".toRegex()
     private val linkedinProfileUrlRegex =
@@ -80,7 +92,6 @@ object ValidationUtil {
 
     fun isGithubLinkValid(link: String?): Boolean {
         if (!link.isNullOrEmpty()) return githubProfileUrlRegex.matches(link)
-
         return true
 
     }

@@ -55,6 +55,8 @@
     <string name="profile_updated_success">The profile has been updated</string>
     <string name="error_skill_max_skills">You must select only 3 skills</string>
     <string name="invalid_github_link">Invalid github link</string>
+    <string name="invalid_instagram_link">Invalid Instagram link</string>
+    <string name="invalid_linkedin_link">Invalid Linkedin link</string>
     <string name="read_less">Read less</string>
     <string name="on_your_comment">on your comment</string>
     <string name="msg_no_activities_right_now">No activities right now</string>

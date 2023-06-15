@@ -8,7 +8,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.GithubFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.InstagramFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.LinkedinFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NotEmptyFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.UiText
@@ -38,19 +42,19 @@ class EditProfileViewModel @Inject constructor(
     var state by mutableStateOf(EditProfileState())
         private set
 
-    var usernameState by mutableStateOf(StandardTextFieldState())
+    var usernameState by mutableStateOf(NotEmptyFieldState())
         private set
 
-    var githubTextFieldState by mutableStateOf(StandardTextFieldState())
+    var githubTextFieldState by mutableStateOf(GithubFieldState())
         private set
 
-    var instagramTextFieldState by mutableStateOf(StandardTextFieldState())
+    var instagramTextFieldState by mutableStateOf(InstagramFieldState())
         private set
 
-    var linkedInTextFieldState by mutableStateOf(StandardTextFieldState())
+    var linkedInTextFieldState by mutableStateOf(LinkedinFieldState())
         private set
 
-    var bioState by mutableStateOf(StandardTextFieldState())
+    var bioState by mutableStateOf(TextFieldState())
         private set
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
@@ -66,9 +70,6 @@ class EditProfileViewModel @Inject constructor(
 
     fun onEvent(event: EditProfileAction) {
         when (event) {
-            is EditProfileAction.BioEntered -> bioState = bioState.copy(
-                text = event.bio
-            )
 
             is EditProfileAction.CropBannerImage -> {
                 bannerImageUri = event.uri
@@ -78,41 +79,16 @@ class EditProfileViewModel @Inject constructor(
                 profileImageUri = event.uri
             }
 
-            is EditProfileAction.GithubUrlEntered -> githubTextFieldState =
-                githubTextFieldState.copy(
-                    text = event.githubUrl
-                )
-
-            is EditProfileAction.InstagramUrlEntered -> instagramTextFieldState =
-                instagramTextFieldState.copy(
-                    text = event.instagramUrl
-                )
-
-            is EditProfileAction.LinkedinUrlEntered -> linkedInTextFieldState =
-                linkedInTextFieldState.copy(
-                    text = event.linkedinUrl
-                )
 
             is EditProfileAction.SkillSelected -> {
                 setSkillSelected(skillsState.selectedSkills, event.skill)
             }
 
-            is EditProfileAction.UsernameEntered -> usernameState = usernameState.copy(
-                text = event.username
-            )
-
             is EditProfileAction.GetProfile -> getProfile(event.userId ?: getOwnUserIdUseCase())
             EditProfileAction.GetSkills -> getSkills()
             EditProfileAction.UpdateProfile -> updateProfile()
-            EditProfileAction.ClearGithubUrlText -> githubTextFieldState =
-                githubTextFieldState.copy(text = "")
 
-            EditProfileAction.ClearBio -> bioState = bioState.copy(text = "")
-            EditProfileAction.ClearInstagramUrlText -> instagramTextFieldState =
-                instagramTextFieldState.copy(text = "")
-
-            EditProfileAction.ClearLinkedinUrlText -> linkedInTextFieldState =
-                linkedInTextFieldState.copy(text = "")
+            else -> {}
         }
     }
 
@@ -132,18 +108,7 @@ class EditProfileViewModel @Inject constructor(
                 bannerImage = bannerImageUri,
                 profilePicture = profileImageUri
             )
-            if (uiResult.hasUsernameError)
-                usernameState = usernameState.copy(error = uiResult.usernameError)
 
-            if (uiResult.hasGithubError)
-                githubTextFieldState = githubTextFieldState.copy(error = uiResult.githubError)
-
-            if (uiResult.hasInstagramError)
-                instagramTextFieldState =
-                    instagramTextFieldState.copy(error = uiResult.instagramError)
-
-            if (uiResult.hasLinkedinError)
-                linkedInTextFieldState = linkedInTextFieldState.copy(error = uiResult.linkedinError)
 
             when (val result = uiResult.result) {
                 is ApiResult.Success -> {
@@ -226,12 +191,11 @@ class EditProfileViewModel @Inject constructor(
     }
 
     private fun fillProfileData(profile: Profile) {
-        usernameState = usernameState.copy(text = profile.username)
-        githubTextFieldState = githubTextFieldState.copy(text = profile.gitHubUrl.orEmpty())
-        instagramTextFieldState =
-            instagramTextFieldState.copy(text = profile.instagramUrl.orEmpty())
-        linkedInTextFieldState = linkedInTextFieldState.copy(text = profile.linkedinUrl.orEmpty())
-        bioState = bioState.copy(text = profile.bio)
+        usernameState.text = profile.username
+        githubTextFieldState.text = profile.gitHubUrl.orEmpty()
+        instagramTextFieldState.text = profile.instagramUrl.orEmpty()
+        linkedInTextFieldState.text = profile.linkedinUrl.orEmpty()
+        bioState.text = profile.bio
         skillsState = skillsState.copy(selectedSkills = profile.topSkills)
     }
 }

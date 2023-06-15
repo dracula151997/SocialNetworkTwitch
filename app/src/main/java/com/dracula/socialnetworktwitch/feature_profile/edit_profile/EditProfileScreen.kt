@@ -22,7 +22,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -44,7 +43,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.components.ClearButton
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
@@ -59,19 +57,33 @@ import com.dracula.socialnetworktwitch.core.utils.CropActivityResultContract
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
 import com.dracula.socialnetworktwitch.feature_profile.domain.model.Skill
-import com.dracula.socialnetworktwitch.feature_profile.domain.utils.EditProfileValidationError
 import com.dracula.socialnetworktwitch.feature_profile.edit_profile.components.Chip
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun EditProfileScreen(
-    navController: NavController,
-    scaffoldState: ScaffoldState,
+fun EditProfileRoute(
+    userId: String?,
+    showSnackbar: (message: String) -> Unit,
+    onNavUp: () -> Unit,
+) {
+    val viewModel: EditProfileViewModel = hiltViewModel()
+    EditProfileScreen(
+        userId = userId,
+        showSnackbar = showSnackbar,
+        onNavUp = onNavUp,
+        viewModel = viewModel
+    )
+}
+
+@Composable
+private fun EditProfileScreen(
+    viewModel: EditProfileViewModel,
     userId: String? = null,
-    viewModel: EditProfileViewModel = hiltViewModel(),
-    profilePictureSize: Dp = ProfilePictureSizeLarge
+    profilePictureSize: Dp = ProfilePictureSizeLarge,
+    showSnackbar: (message: String) -> Unit,
+    onNavUp: () -> Unit
 ) {
     val context = LocalContext.current
     val state = viewModel.state
@@ -102,13 +114,9 @@ fun EditProfileScreen(
         viewModel.onEvent(EditProfileAction.GetSkills)
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
-                    message = event.uiText.asString(
-                        context
-                    )
-                )
+                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
 
-                is UiEvent.NavigateUp -> navController.navigateUp()
+                is UiEvent.NavigateUp -> onNavUp()
 
                 else -> Unit
             }
@@ -129,7 +137,7 @@ fun EditProfileScreen(
                 }
             },
             showBackButton = true,
-            navController = navController
+            onBack = onNavUp
         )
         Column(
             modifier = Modifier
@@ -154,130 +162,85 @@ fun EditProfileScreen(
             ) {
                 Spacer(modifier = Modifier.height(PaddingMedium))
                 StandardTextField(
-                    text = viewModel.usernameState.text,
+                    state = viewModel.usernameState,
                     hint = stringResource(id = R.string.username),
-                    error = when (viewModel.usernameState.error) {
-                        EditProfileValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
-                        else -> ""
-                    },
                     leadingIcon = Icons.Default.Person,
-                    onValueChanged = {
-                        viewModel.onEvent(EditProfileAction.UsernameEntered(it))
-                    },
-
-                    )
+                )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    text = viewModel.githubTextFieldState.text,
+                    state = viewModel.githubTextFieldState,
                     hint = stringResource(id = R.string.github_profile_url),
-                    error = when (viewModel.githubTextFieldState.error) {
-                        EditProfileValidationError.InvalidLink -> stringResource(id = R.string.invalid_github_link)
-                        else -> ""
-                    },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_github_icon_1),
-                    onValueChanged = {
-                        viewModel.onEvent(EditProfileAction.GithubUrlEntered(it))
-                    },
                     trailingIcon = {
                         AnimatedVisibility(
-                            visible = viewModel.githubTextFieldState.text.isNotEmpty(),
+                            visible = !viewModel.githubTextFieldState.isEmpty(),
                             enter = scaleIn(),
                             exit = scaleOut()
                         ) {
-                            ClearButton {
-                                viewModel.onEvent(EditProfileAction.ClearGithubUrlText)
-                            }
+                            ClearButton(
+                                onClick = {
+                                    viewModel.githubTextFieldState.clearText()
+                                }
+                            )
                         }
-                    }
+                    },
+                    singleLine = false
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    text = viewModel.instagramTextFieldState.text,
+                    state = viewModel.instagramTextFieldState,
                     hint = stringResource(id = R.string.instagram_profile_url),
-                    error = when (viewModel.instagramTextFieldState.error) {
-                        EditProfileValidationError.FieldEmpty -> stringResource(
-                            id = R.string.error_this_field_cannot_be_empty
-                        )
-
-                        else -> ""
-                    },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_instagram_glyph_1),
-                    onValueChanged = {
-                        viewModel.onEvent(EditProfileAction.InstagramUrlEntered(it))
-
-                    },
                     trailingIcon = {
                         AnimatedVisibility(
-                            visible = viewModel.instagramTextFieldState.text.isNotEmpty(),
+                            visible = !viewModel.instagramTextFieldState.isEmpty(),
                             enter = scaleIn(),
                             exit = scaleOut()
                         ) {
-                            ClearButton {
-                                viewModel.onEvent(EditProfileAction.ClearInstagramUrlText)
-                            }
+                            ClearButton(
+                                onClick = { viewModel.instagramTextFieldState.clearText() },
+                            )
                         }
 
                     }
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    text = viewModel.linkedInTextFieldState.text,
+                    state = viewModel.linkedInTextFieldState,
                     hint = stringResource(id = R.string.linked_in_profile_url),
-                    error = when (viewModel.linkedInTextFieldState.error) {
-                        EditProfileValidationError.FieldEmpty -> stringResource(
-                            id = R.string.error_this_field_cannot_be_empty
-
-                        )
-
-                        else -> ""
-                    },
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_linkedin_icon_1),
-                    onValueChanged = {
-                        viewModel.onEvent(EditProfileAction.LinkedinUrlEntered(it))
-
-                    },
                     trailingIcon = {
                         AnimatedVisibility(
-                            viewModel.linkedInTextFieldState.text.isNotEmpty(),
+                            visible = !viewModel.linkedInTextFieldState.isEmpty(),
                             enter = scaleIn(),
                             exit = scaleOut()
                         ) {
-                            ClearButton {
-                                viewModel.onEvent(EditProfileAction.ClearLinkedinUrlText)
-                            }
+                            ClearButton(
+                                onClick = { viewModel.linkedInTextFieldState.clearText() }
+                            )
                         }
 
-                    }
+                    },
+                    singleLine = false
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    text = viewModel.bioState.text,
+                    state = viewModel.bioState,
                     hint = stringResource(id = R.string.your_bio),
-                    error = when (viewModel.bioState.error) {
-                        EditProfileValidationError.FieldEmpty -> stringResource(
-                            id = R.string.error_this_field_cannot_be_empty
-                        )
-
-                        else -> ""
-                    },
                     singleLine = false,
                     maxLines = 3,
                     leadingIcon = Icons.Default.Description,
-                    onValueChanged = {
-                        viewModel.onEvent(EditProfileAction.BioEntered(it))
-
-                    },
                     trailingIcon = {
                         AnimatedVisibility(
-                            visible = viewModel.bioState.text.isNotEmpty(),
+                            visible = !viewModel.bioState.isEmpty(),
                             enter = scaleIn(),
                             exit = scaleOut()
                         ) {
-                            ClearButton {
-                                viewModel.onEvent(EditProfileAction.ClearBio)
-                            }
+                            ClearButton(
+                                onClick = { viewModel.bioState.clearText() }
+                            )
                         }
-                    }
+                    },
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 Text(
@@ -287,9 +250,12 @@ fun EditProfileScreen(
                     modifier = Modifier.align(CenterHorizontally)
                 )
                 Spacer(modifier = Modifier.height(SpaceLarge))
-                SkillsFlowRow(skillsState, modifier = Modifier.fillMaxWidth()) {
-                    viewModel.onEvent(EditProfileAction.SkillSelected(skill = it))
-                }
+                SkillsFlowRow(
+                    skillsState, modifier = Modifier.fillMaxWidth(),
+                    onSkillClicked = {
+                        viewModel.onEvent(EditProfileAction.SkillSelected(skill = it))
+                    },
+                )
             }
 
         }

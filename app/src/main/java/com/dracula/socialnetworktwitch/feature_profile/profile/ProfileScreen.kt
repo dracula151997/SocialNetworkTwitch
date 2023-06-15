@@ -214,39 +214,37 @@ private fun ProfileScreen(
                         )
                     }
 
-                    userPosts.items.isNotEmpty() -> items(userPosts.items.size) { index ->
-                        val post = userPosts.items[index]
-                        if (index > userPosts.items.size - 1 && !userPosts.endReached && !userPosts.isLoading) {
-                            viewModel.loadNextPost()
-                        }
-                        PostItem(
-                            post = post,
-                            onPostClicked = {
-                                onNavigate(Screens.PostDetailsScreen.createRoute(postId = it.id))
-                            },
-                            showProfileImage = false,
-                            modifier = Modifier.offset(y = -ProfilePictureSizeLarge / 2f),
-                            onCommentClicked = {
-                                onNavigate(
-                                    Screens.PostDetailsScreen.createRoute(
-                                        postId = post.id, showKeyboard = true,
-                                    ),
-                                )
-                            },
-                            onLikeClicked = {
-                                viewModel.onEvent(ProfileScreenAction.LikePost(post.id))
-                            },
-                            onShareClicked = {
-                                context.sendSharePostIntent(postId = post.id)
-                            },
-                            onUsernameClicked = {},
-                            onDeleteClicked = { postId ->
-                                viewModel.onEvent(ProfileScreenAction.DeletePost(postId))
-                            },
-                        )
+                }
+                items(userPosts.items.size) { index ->
+                    val post = userPosts.items[index]
+                    if (index > userPosts.items.size - 1 && !userPosts.endReached && !userPosts.isLoading) {
+                        viewModel.loadNextPost()
                     }
-
-
+                    PostItem(
+                        post = post,
+                        onPostClicked = {
+                            onNavigate(Screens.PostDetailsScreen.createRoute(postId = it.id))
+                        },
+                        showProfileImage = false,
+                        modifier = Modifier.offset(y = -ProfilePictureSizeLarge / 2f),
+                        onCommentClicked = {
+                            onNavigate(
+                                Screens.PostDetailsScreen.createRoute(
+                                    postId = post.id, showKeyboard = true,
+                                ),
+                            )
+                        },
+                        onLikeClicked = {
+                            viewModel.onEvent(ProfileScreenAction.LikePost(post.id))
+                        },
+                        onShareClicked = {
+                            context.sendSharePostIntent(postId = post.id)
+                        },
+                        onUsernameClicked = {},
+                        onDeleteClicked = { postId ->
+                            viewModel.onEvent(ProfileScreenAction.DeletePost(postId))
+                        },
+                    )
                 }
 
             }

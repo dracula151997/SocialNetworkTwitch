@@ -17,7 +17,7 @@ import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedRoute
 import com.dracula.socialnetworktwitch.feature_post.presentation.create_post.CreatePostRoute
 import com.dracula.socialnetworktwitch.feature_post.presentation.person_list.PersonListScreen
 import com.dracula.socialnetworktwitch.feature_post.presentation.post_details.PostDetailsScreen
-import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileScreen
+import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileRoute
 import com.dracula.socialnetworktwitch.feature_profile.profile.ProfileRoute
 import com.dracula.socialnetworktwitch.feature_search.presentation.SearchScreen
 import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashScreen
@@ -167,9 +167,13 @@ fun Navigation(
             arguments = Screens.EditProfileScreen.navArgs
         ) {
             val userId = it.arguments?.getString(Constants.NavArguments.NAV_USER_ID)
-            EditProfileScreen(
-                navController = navController,
-                scaffoldState = scaffoldState,
+            EditProfileRoute(
+                showSnackbar = {
+                    scope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(message = it)
+                    }
+                },
+                onNavUp = navController::navigateUp,
                 userId = userId
             )
         }
