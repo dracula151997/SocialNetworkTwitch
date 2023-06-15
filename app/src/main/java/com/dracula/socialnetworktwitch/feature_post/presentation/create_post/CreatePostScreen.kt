@@ -20,7 +20,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -35,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.dracula.socialnetworktwitch.R
@@ -48,17 +46,28 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
 import com.dracula.socialnetworktwitch.core.utils.CropActivityResultContract
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
-import com.dracula.socialnetworktwitch.feature_post.domain.util.CreatePostValidationError
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun CreatePostScreen(
-    navController: NavController,
-    scaffoldState: ScaffoldState,
-    viewModel: CreatePostViewModel = hiltViewModel()
+fun CreatePostRoute(
+    showSnackbar: (message: String) -> Unit,
+    onNavUp: () -> Unit,
+) {
+    val viewModel: CreatePostViewModel = hiltViewModel()
+    CreatePostScreen(
+        viewModel = viewModel,
+        showSnackbar = showSnackbar,
+        onNavUp = onNavUp
+    )
+}
+
+@Composable
+private fun CreatePostScreen(
+    viewModel: CreatePostViewModel,
+    showSnackbar: (message: String) -> Unit,
+    onNavUp: () -> Unit,
 ) {
     val imageUri = viewModel.chosenImageUri
-    val descriptionState = viewModel.description
     val state = viewModel.state
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -77,13 +86,8 @@ fun CreatePostScreen(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
-                    message = event.uiText.asString(
-                        context
-                    )
-                )
-
-                UiEvent.NavigateUp -> navController.navigateUp()
+                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
+                UiEvent.NavigateUp -> onNavUp()
                 else -> Unit
             }
         }
@@ -96,9 +100,9 @@ fun CreatePostScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             StandardTopBar(
-                navController = navController,
                 showBackButton = true,
                 title = stringResource(id = R.string.create_a_new_post),
+                onBack = onNavUp
             )
             Column(
                 modifier = Modifier
@@ -142,17 +146,9 @@ fun CreatePostScreen(
                 }
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    text = viewModel.description.text,
+                    state = viewModel.description,
                     hint = stringResource(id = R.string.description),
                     singleLine = false,
-                    error = when (descriptionState.error) {
-                        is CreatePostValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
-                        else -> ""
-                    },
-                    maxLines = 5,
-                    onValueChanged = {
-                        viewModel.onEvent(CreatePostAction.DescriptionEntered(it))
-                    },
                     imeAction = ImeAction.Done,
                     keyboardActions = KeyboardActions(
                         onDone = {
@@ -168,7 +164,7 @@ fun CreatePostScreen(
                         focusManager.clearFocus()
                     },
                     modifier = Modifier.align(Alignment.End),
-                    enabled = !state.isLoading
+                    enabled = viewModel.enablePostButton
                 ) {
                     Text(
                         text = stringResource(id = R.string.post),

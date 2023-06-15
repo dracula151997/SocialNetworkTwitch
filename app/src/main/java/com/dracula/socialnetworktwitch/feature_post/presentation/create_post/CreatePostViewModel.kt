@@ -1,16 +1,18 @@
 package com.dracula.socialnetworktwitch.feature_post.presentation.create_post
 
 import android.net.Uri
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.R
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NotEmptyFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.UiText
+import com.dracula.socialnetworktwitch.core.utils.isNotNull
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.CreatePostUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +25,7 @@ import javax.inject.Inject
 class CreatePostViewModel @Inject constructor(
     private val createPostUseCase: CreatePostUseCase
 ) : ViewModel() {
-    var description by mutableStateOf(StandardTextFieldState())
+    var description by mutableStateOf(NotEmptyFieldState())
         private set
 
     var chosenImageUri: Uri? by mutableStateOf(null)
@@ -35,12 +37,12 @@ class CreatePostViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+    val enablePostButton by derivedStateOf {
+        description.isValid && chosenImageUri.isNotNull() && !state.isLoading
+    }
+
     fun onEvent(event: CreatePostAction) {
         when (event) {
-            is CreatePostAction.DescriptionEntered -> description = description.copy(
-                text = event.text
-            )
-
             is CreatePostAction.PickImage -> chosenImageUri = event.uri
             CreatePostAction.CreatePost -> createPost()
             is CreatePostAction.CropImage -> chosenImageUri = event.uri
@@ -48,24 +50,18 @@ class CreatePostViewModel @Inject constructor(
     }
 
     private fun createPost() {
-
         viewModelScope.launch {
-            clearAllFieldErrorState()
             state = CreatePostState.loading()
             val apiResult = createPostUseCase(
                 description = description.text,
                 imageUri = chosenImageUri
             )
-            if (apiResult.hasDescriptionError)
-                description =
-                    description.copy(error = apiResult.descriptionError)
 
             if (apiResult.hasImageError)
                 _eventFlow.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.error_no_image_picked)))
 
             when (val result = apiResult.result) {
                 is ApiResult.Success -> {
-                    clearAllFieldState()
                     state = CreatePostState.success()
                     _eventFlow.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.post_created)))
                     _eventFlow.emit(UiEvent.NavigateUp)
@@ -84,16 +80,5 @@ class CreatePostViewModel @Inject constructor(
             }
         }
     }
-
-    private fun clearAllFieldState() {
-        description = description.defaultState()
-    }
-
-    private fun clearAllFieldErrorState() {
-        description = description.copy(
-            error = null
-        )
-    }
-
 
 }

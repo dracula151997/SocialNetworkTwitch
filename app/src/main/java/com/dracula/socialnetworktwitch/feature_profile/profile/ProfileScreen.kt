@@ -47,7 +47,6 @@ import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
 import com.dracula.socialnetworktwitch.feature_profile.profile.components.BannerSection
 import com.dracula.socialnetworktwitch.feature_profile.profile.components.ProfileHeaderSection
 import kotlinx.coroutines.flow.collectLatest
-import timber.log.Timber
 import java.util.Locale
 
 @Composable
@@ -161,7 +160,6 @@ private fun ProfileScreen(
                 }
             },
         )
-        Timber.d("ProfileScreen: $state, $userPosts")
         PullToRefreshBox(
             state = pullToRefreshState,
             refreshing = state.refreshing
