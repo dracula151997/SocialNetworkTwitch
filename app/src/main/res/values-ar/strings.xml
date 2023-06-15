@@ -77,5 +77,9 @@
     <string name="hide_password">Hide password</string>
     <string name="show_password">Show Password</string>
     <string name="msg_no_chats_to_display">لا توجد محادثات لعرضها</string>
+    <string name="msg_no_username_found">لم يتم العثور على اسم المستخدم. حاول مرة أخري</string>
+    <string name="invalid_instagram_link">رابط Instagram غير صالح</string>
+    <string name="invalid_linkedin_link">رابط لينكد إن غير صالح</string>
+    <string name="msg_try_to_enter_the_username">حاول إدخال اسم المستخدم</string>
 
 </resources>

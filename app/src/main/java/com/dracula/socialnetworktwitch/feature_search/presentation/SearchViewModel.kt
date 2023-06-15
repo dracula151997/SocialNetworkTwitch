@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
@@ -26,7 +26,7 @@ class SearchViewModel @Inject constructor(
     private val toggleFollowStateForUserUseCase: ToggleFollowStateForUserUseCase
 ) : ViewModel() {
 
-    var searchFieldState by mutableStateOf(StandardTextFieldState())
+    var searchFieldState by mutableStateOf(TextFieldState())
         private set
 
     var state by mutableStateOf(SearchState())
@@ -40,18 +40,21 @@ class SearchViewModel @Inject constructor(
     fun onEvent(event: SearchAction) {
         when (event) {
             is SearchAction.OnSearch -> {
-                searchFieldState = searchFieldState.copy(text = event.query)
                 search(event.query)
             }
 
             is SearchAction.ToggleFollowState -> toggleFollowStateForUser(userId = event.userId)
+            SearchAction.Refreshing -> search(
+                query = searchFieldState.text,
+                refreshing = true
+            )
         }
     }
 
     private fun toggleFollowStateForUser(userId: String) {
         viewModelScope.launch {
-            val isFollowing = state.userItems.find { it.userId == userId }?.isFollowing == true
-            state = state.copy(userItems = state.userItems.map {
+            val isFollowing = state.userItems?.find { it.userId == userId }?.isFollowing == true
+            state = state.copy(userItems = state.userItems?.map {
                 if (it.userId == userId) it.copy(isFollowing = !it.isFollowing)
                 else it
             })
@@ -62,7 +65,7 @@ class SearchViewModel @Inject constructor(
                 is ApiResult.Success -> Unit
 
                 is ApiResult.Error -> {
-                    state = state.copy(userItems = state.userItems.map {
+                    state = state.copy(userItems = state.userItems?.map {
                         if (it.userId == userId) it.copy(isFollowing = isFollowing)
                         else it
                     })
@@ -73,17 +76,25 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private fun search(query: String) {
+    private fun search(query: String, refreshing: Boolean = false) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             delay(Constants.SEARCH_DELAY)
-            val response = searchUserUseCase(searchFieldState.text)
-            state = state.copy(isLoading = true)
+            state = state.copy(
+                isLoading = !refreshing,
+                refreshing = refreshing
+            )
+
+            val response = searchUserUseCase(query)
+
+            state = state.copy(
+                isLoading = false,
+                refreshing = false
+            )
             when (response) {
                 is ApiResult.Success -> {
                     state = state.copy(
-                        isLoading = false,
-                        userItems = response.data ?: emptyList(),
+                        userItems = response.data.orEmpty()
                     )
                 }
 
@@ -92,9 +103,6 @@ class SearchViewModel @Inject constructor(
                         UiEvent.ShowSnackbar(
                             uiText = response.uiText.orUnknownError()
                         )
-                    )
-                    state = state.copy(
-                        isLoading = false,
                     )
                 }
             }

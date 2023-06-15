@@ -19,7 +19,7 @@ import com.dracula.socialnetworktwitch.feature_post.presentation.person_list.Per
 import com.dracula.socialnetworktwitch.feature_post.presentation.post_details.PostDetailsScreen
 import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileRoute
 import com.dracula.socialnetworktwitch.feature_profile.profile.ProfileRoute
-import com.dracula.socialnetworktwitch.feature_search.presentation.SearchScreen
+import com.dracula.socialnetworktwitch.feature_search.presentation.SearchRoute
 import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashScreen
 import kotlinx.coroutines.launch
 
@@ -179,9 +179,14 @@ fun Navigation(
         }
 
         composable(route = Screens.SearchScreen.route) {
-            SearchScreen(
-                navController = navController,
-                scaffoldState = scaffoldState
+            SearchRoute(
+                showSnackbar = {
+                    scope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(message = it)
+                    }
+                },
+                onNavUp = navController::navigateUp,
+                onNavigate = navController::navigate
             )
         }
         composable(

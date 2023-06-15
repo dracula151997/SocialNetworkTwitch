@@ -4,5 +4,6 @@ import com.dracula.socialnetworktwitch.core.domain.model.UserItem
 
 data class SearchState(
     val isLoading: Boolean = false,
-    val userItems: List<UserItem> = emptyList(),
+    val refreshing: Boolean = false,
+    val userItems: List<UserItem>? = null,
 )

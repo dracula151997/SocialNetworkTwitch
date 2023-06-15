@@ -78,4 +78,6 @@
     <string name="send_a_message">Send Message</string>
     <string name="hide_password">Hide password</string>
     <string name="show_password">Show Password</string>
+    <string name="msg_no_username_found">No username found. Please try another username</string>
+    <string name="msg_try_to_enter_the_username">Try to enter the username</string>
 </resources>

@@ -130,6 +130,7 @@ fun StandardTextField(
 fun StandardTextField(
     state: TextFieldState,
     hint: String = "",
+    doOnValueChanged: (newValue: String) -> Unit = {},
     maxLength: Int = Int.MAX_VALUE,
     maxLines: Int = Int.MAX_VALUE,
     singleLine: Boolean = true,
@@ -143,6 +144,7 @@ fun StandardTextField(
         value = state.text,
         onValueChange = {
             state.onValueChange(it.take(maxLength))
+            doOnValueChanged(it)
         },
         singleLine = singleLine,
         maxLines = maxLines,
