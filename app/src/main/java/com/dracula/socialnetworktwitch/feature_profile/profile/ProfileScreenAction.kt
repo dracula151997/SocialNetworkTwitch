@@ -10,6 +10,8 @@ sealed interface ProfileScreenAction {
 
     object Logout : ProfileScreenAction
 
+    data class Refreshing(val userId: String?) : ProfileScreenAction
+
     object ShowMorePopupMenu : ProfileScreenAction
 
     data class DeletePost(val postId: String) : ProfileScreenAction

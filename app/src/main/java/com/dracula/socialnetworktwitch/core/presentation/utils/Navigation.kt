@@ -18,7 +18,7 @@ import com.dracula.socialnetworktwitch.feature_post.presentation.create_post.Cre
 import com.dracula.socialnetworktwitch.feature_post.presentation.person_list.PersonListScreen
 import com.dracula.socialnetworktwitch.feature_post.presentation.post_details.PostDetailsScreen
 import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileScreen
-import com.dracula.socialnetworktwitch.feature_profile.profile.ProfileScreen
+import com.dracula.socialnetworktwitch.feature_profile.profile.ProfileRoute
 import com.dracula.socialnetworktwitch.feature_search.presentation.SearchScreen
 import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashScreen
 import kotlinx.coroutines.launch
@@ -58,8 +58,8 @@ fun Navigation(
                         scaffoldState.snackbarHostState.showSnackbar(message = it)
                     }
                 },
-                onNavigate = { navController.navigate(it) },
-                onNavUp = { navController.navigateUp() }
+                onNavigate = navController::navigate,
+                onNavUp = navController::navigateUp
             )
         }
 
@@ -107,9 +107,7 @@ fun Navigation(
 
         composable(route = Screens.NotificationsScreen.route) {
             ActivityRoute(
-                onNavigate = {
-                    navController.navigate(it)
-                },
+                onNavigate = navController::navigate,
                 showSnackbar = {
                     scope.launch {
                         scaffoldState.snackbarHostState.showSnackbar(message = it)
@@ -122,10 +120,21 @@ fun Navigation(
             arguments = Screens.ProfileScreen.navArgs,
         ) {
             val userId = it.arguments?.getString(Constants.NavArguments.NAV_USER_ID)
-            ProfileScreen(
-                navController = navController,
-                scaffoldState = scaffoldState,
-                userId = userId
+            ProfileRoute(
+                userId = userId,
+                onNavigate = navController::navigate,
+                showSnackbar = {
+                    scope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(message = it)
+                    }
+                },
+                navigateToLogin = {
+                    navController.navigate(Screens.LoginScreen.route) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
         composable(route = Screens.CreatePostScreen.route) {

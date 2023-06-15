@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -125,6 +126,10 @@ class ProfileViewModel @Inject constructor(
 
             is ProfileScreenAction.DeletePost -> deletePost(event.postId)
             is ProfileScreenAction.ToggleFollowStateForUser -> toggleFollowStateForUser(userId = event.userId)
+            is ProfileScreenAction.Refreshing -> {
+                getProfile(userId = event.userId, refreshing = true)
+                loadNextPost(refreshing = true)
+            }
         }
     }
 
@@ -145,22 +150,34 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun loadNextPost() {
+    fun loadNextPost(refreshing: Boolean = false) {
         viewModelScope.launch {
-            paginator.loadNextItems()
+            paginator.loadNextItems(refreshing = refreshing)
         }
     }
 
-    private fun getProfile(userId: String?) {
+    private fun getProfile(userId: String?, refreshing: Boolean = false) {
+        Timber.d("getProfile: $refreshing")
         viewModelScope.launch {
-            _state.value = ProfileState.loading()
+            _state.value = state.value.copy(
+                isLoading = !refreshing,
+                refreshing = refreshing,
+            )
             when (val result = getProfileUseCase(userId ?: getOwnUserIdUseCase())) {
                 is ApiResult.Success -> {
-                    _state.value = ProfileState.success(result.data)
+                    _state.value = state.value.copy(
+                        isLoading = false,
+                        refreshing = false,
+                        data = result.data
+                    )
                 }
 
                 is ApiResult.Error -> {
-                    _state.value = ProfileState.error()
+                    _state.value = state.value.copy(
+                        isLoading = false,
+                        refreshing = false,
+                        data = result.data
+                    )
                     _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
                 }
             }
