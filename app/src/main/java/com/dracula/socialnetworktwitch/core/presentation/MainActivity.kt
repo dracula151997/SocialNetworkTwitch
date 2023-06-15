@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.rememberScaffoldState
@@ -40,15 +39,15 @@ class MainActivity : ComponentActivity() {
                         showBottomBar = showBottomBar(route = route),
                         onFabClicked = {
                             navController.navigate(Screens.CreatePostScreen.route)
-                        }) { innerPadding ->
+                        },
+                    ) { innerPadding ->
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(innerPadding)
                         ) {
                             Navigation(
                                 navController = navController,
-                                scaffoldState = scaffoldState
+                                scaffoldState = scaffoldState,
                             )
                         }
                     }

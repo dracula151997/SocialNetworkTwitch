@@ -1,5 +1,10 @@
 package com.dracula.socialnetworktwitch.core.presentation.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.CircleShape
@@ -63,7 +68,11 @@ fun StandardScaffold(
         modifier = modifier,
         scaffoldState = state,
         bottomBar = {
-            if (showBottomBar)
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
                 BottomAppBar(
                     backgroundColor = MaterialTheme.colors.surface,
                     cutoutShape = CircleShape,
@@ -83,15 +92,25 @@ fun StandardScaffold(
                                 enabled = navItem.enabled
                             ) {
                                 navController.navigate(navItem.route) {
+                                    popUpTo(Screens.MainFeedScreen.route) {
+                                        saveState = true
+                                    }
                                     launchSingleTop = true
                                 }
                             }
                         }
                     }
                 }
+
+            }
         },
         floatingActionButton = {
-            if (showBottomBar)
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = scaleIn(),
+                exit = scaleOut()
+            )
+            {
                 FloatingActionButton(
                     onClick = onFabClicked,
                     backgroundColor = MaterialTheme.colors.primary
@@ -101,6 +120,7 @@ fun StandardScaffold(
                         contentDescription = Semantics.ContentDescriptions.MAKE_POST
                     )
                 }
+            }
         },
         isFloatingActionButtonDocked = true,
         floatingActionButtonPosition = FabPosition.Center,
@@ -108,10 +128,6 @@ fun StandardScaffold(
         content(paddingValues)
     }
 
-}
-
-fun shouldNavigate(currentRoute: String, navRoute: String): Boolean {
-    return currentRoute != navRoute
 }
 
 private fun isNavItemSelected(currentRoute: String, navRoute: String) = currentRoute == navRoute
