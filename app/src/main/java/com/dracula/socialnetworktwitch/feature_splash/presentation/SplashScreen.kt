@@ -14,10 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
-import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -25,10 +23,18 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 
 @Composable
-fun SplashScreen(
-    navController: NavController,
+fun SplashRoute(
+    onNavigate: (route: String) -> Unit
+) {
+    val viewModel: SplashViewModel = hiltViewModel()
+    SplashScreen(viewModel = viewModel, onNavigate = onNavigate)
+}
+
+@Composable
+private fun SplashScreen(
     dispatcher: CoroutineDispatcher = Dispatchers.Main,
-    viewModel: SplashViewModel = hiltViewModel()
+    viewModel: SplashViewModel,
+    onNavigate: (route: String) -> Unit,
 ) {
     val scaleAnimation = remember {
         Animatable(0f)
@@ -55,20 +61,16 @@ fun SplashScreen(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.Navigate -> {
-                    navController.navigate(event.route) {
-                        popUpTo(route = Screens.SplashScreen.route) {
-                            inclusive = true
-                        }
-                    }
-                }
-
+                is UiEvent.Navigate -> onNavigate(event.route)
                 else -> Unit
             }
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         Image(
             painter = painterResource(id = R.drawable.ic_logo),
             contentDescription = Semantics.ContentDescriptions.SPLASH_LOGO,

@@ -108,20 +108,14 @@ class EditProfileViewModel @Inject constructor(
                 bannerImage = bannerImageUri,
                 profilePicture = profileImageUri
             )
-
-
-            when (val result = uiResult.result) {
+            when (uiResult) {
                 is ApiResult.Success -> {
                     _eventFlow.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.profile_updated_success)))
                     _eventFlow.emit(UiEvent.NavigateUp)
                 }
 
                 is ApiResult.Error -> {
-                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
-                }
-
-                null -> {
-
+                    _eventFlow.emit(UiEvent.ShowSnackbar(uiResult.uiText.orUnknownError()))
                 }
             }
         }

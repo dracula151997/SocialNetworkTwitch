@@ -130,6 +130,7 @@ fun StandardTextField(
 fun StandardTextField(
     state: TextFieldState,
     hint: String = "",
+    modifier: Modifier = Modifier,
     doOnValueChanged: (newValue: String) -> Unit = {},
     maxLength: Int = Int.MAX_VALUE,
     maxLines: Int = Int.MAX_VALUE,
@@ -173,7 +174,7 @@ fun StandardTextField(
             keyboardType = keyboardType,
             imeAction = imeAction
         ),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .onFocusChanged { focusState ->
                 state.onFocusChange(focusState.isFocused)

@@ -80,4 +80,6 @@
     <string name="show_password">Show Password</string>
     <string name="msg_no_username_found">No username found. Please try another username</string>
     <string name="msg_try_to_enter_the_username">Try to enter the username</string>
+    <string name="msg_no_messages_found">No messages found</string>
+    <string name="error_input_too_long">The maximum length is %d</string>
 </resources>

@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.CommentFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.ParentType
@@ -43,7 +43,7 @@ class PostDetailsViewModel @Inject constructor(
     private val _event = MutableSharedFlow<UiEvent>()
     val event = _event.asSharedFlow()
 
-    var commentFieldState by mutableStateOf(StandardTextFieldState())
+    var commentFieldState by mutableStateOf(CommentFieldState())
         private set
 
     var ownUserId: String = ""
@@ -58,13 +58,14 @@ class PostDetailsViewModel @Inject constructor(
 
     }
 
-    fun onEvent(event: PostDetailsAction) {
+    fun onEvent(event: PostDetailsEvent) {
         when (event) {
-            PostDetailsAction.Comment -> createComment(
-                postId = savedStateHandle.postIdArgs.orEmpty(), comment = commentFieldState.text
+            PostDetailsEvent.Comment -> createComment(
+                postId = savedStateHandle.postIdArgs.orEmpty(),
+                comment = commentFieldState.text
             )
 
-            is PostDetailsAction.LikeComment -> {
+            is PostDetailsEvent.LikeComment -> {
                 val isLiked = state.comments.find { it.id == event.commentId }?.isLiked == true
                 toggleLikeForParent(
                     parentId = event.commentId,
@@ -73,7 +74,7 @@ class PostDetailsViewModel @Inject constructor(
                 )
             }
 
-            PostDetailsAction.LikePost -> {
+            PostDetailsEvent.LikePost -> {
                 val isLiked = state.post?.isLiked == true
                 toggleLikeForParent(
                     parentId = state.post?.id ?: return,
@@ -82,12 +83,7 @@ class PostDetailsViewModel @Inject constructor(
                 )
             }
 
-            PostDetailsAction.SharePost -> TODO()
-            is PostDetailsAction.CommentEntered -> {
-                commentFieldState = StandardTextFieldState(
-                    text = event.commentText,
-                )
-            }
+            PostDetailsEvent.SharePost -> TODO()
         }
     }
 
@@ -97,15 +93,10 @@ class PostDetailsViewModel @Inject constructor(
             val result = createCommentUseCase(
                 postId = postId, comment = comment
             )
-            if (result.hasCommentError) commentFieldState = commentFieldState.copy(
-                error = result.commentError
-            )
-            if (result.hasPostIdError) _event.emit(UiEvent.ShowSnackbar(UiText.unknownError()))
 
             commentState = commentState.copy(isLoading = false)
-            when (val result = result.result) {
+            when (val result = result) {
                 is ApiResult.Success -> {
-                    commentFieldState.defaultState()
                     _event.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.comment_posted_successfully)))
                     getCommentsForPost(postId)
                 }
@@ -113,8 +104,6 @@ class PostDetailsViewModel @Inject constructor(
                 is ApiResult.Error -> {
                     _event.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
                 }
-
-                null -> Unit
             }
         }
     }

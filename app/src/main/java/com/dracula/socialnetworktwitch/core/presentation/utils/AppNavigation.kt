@@ -12,19 +12,19 @@ import com.dracula.socialnetworktwitch.feature_activity.presentation.ActivityRou
 import com.dracula.socialnetworktwitch.feature_auth.presentation.login.LoginRoute
 import com.dracula.socialnetworktwitch.feature_auth.presentation.register.RegisterRoute
 import com.dracula.socialnetworktwitch.feature_chat.presentation.chat.ChatRoute
-import com.dracula.socialnetworktwitch.feature_chat.presentation.message.MessagesScreen
+import com.dracula.socialnetworktwitch.feature_chat.presentation.message.MessageRoute
 import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedRoute
 import com.dracula.socialnetworktwitch.feature_post.presentation.create_post.CreatePostRoute
 import com.dracula.socialnetworktwitch.feature_post.presentation.person_list.PersonListScreen
-import com.dracula.socialnetworktwitch.feature_post.presentation.post_details.PostDetailsScreen
+import com.dracula.socialnetworktwitch.feature_post.presentation.post_details.PostDetailsRoute
 import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileRoute
 import com.dracula.socialnetworktwitch.feature_profile.profile.ProfileRoute
 import com.dracula.socialnetworktwitch.feature_search.presentation.SearchRoute
-import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashScreen
+import com.dracula.socialnetworktwitch.feature_splash.presentation.SplashRoute
 import kotlinx.coroutines.launch
 
 @Composable
-fun Navigation(
+fun AppNavigation(
     navController: NavHostController,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
@@ -36,7 +36,15 @@ fun Navigation(
         modifier = modifier
     ) {
         composable(route = Screens.SplashScreen.route) {
-            SplashScreen(navController)
+            SplashRoute(
+                onNavigate = {
+                    navController.navigate(it) {
+                        popUpTo(Screens.SplashScreen.route) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
         composable(
             route = Screens.LoginScreen.route
@@ -97,11 +105,11 @@ fun Navigation(
                 it.arguments?.getString(Constants.NavArguments.NAV_REMOTE_USER_ID).orEmpty()
             val remoteUserName =
                 it.arguments?.getString(Constants.NavArguments.NAV_REMOTE_USER_NAME).orEmpty()
-            MessagesScreen(
+            MessageRoute(
                 encodedRemoteUserProfilePic = remoteUserProfilePic,
-                navController = navController,
+                onNavUp = navController::navigateUp,
                 remoteUserId = remoteUserId,
-                remoteUserName = remoteUserName
+                remoteUsername = remoteUserName
             )
         }
 
@@ -155,10 +163,15 @@ fun Navigation(
         ) {
             val showKeyboard =
                 it.arguments?.getBoolean(Constants.NavArguments.NAV_SHOW_KEYBOARD) ?: false
-            PostDetailsScreen(
-                navController = navController,
-                scaffoldState = scaffoldState,
-                showKeyboard = showKeyboard
+            PostDetailsRoute(
+                showSnackbar = {
+                    scope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(message = it)
+                    }
+                },
+                onNavigate = navController::navigate,
+                onNavUp = navController::navigateUp,
+                showKeyboard = { showKeyboard }
             )
         }
 

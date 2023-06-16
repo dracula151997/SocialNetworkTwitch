@@ -86,11 +86,11 @@ fun StandardTopBar(
 @Composable
 fun StandardTopBar(
     title: @Composable () -> Unit,
-    navController: NavController,
     modifier: Modifier = Modifier,
     navigationIcon: @Composable (() -> Unit)? = null,
     showBackButton: Boolean = false,
     navActions: @Composable() (RowScope.() -> Unit) = {},
+    onBack: () -> Unit = {}
 ) {
 
     TopAppBar(
@@ -101,7 +101,7 @@ fun StandardTopBar(
         navigationIcon = if (showBackButton) {
             val backIcon: @Composable () -> Unit = {
                 BackIcon(
-                    onBackClicked = { navController.navigateUp() },
+                    onBackClicked = onBack,
                 )
             }
             backIcon

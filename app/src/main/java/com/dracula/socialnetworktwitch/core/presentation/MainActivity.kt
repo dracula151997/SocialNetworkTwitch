@@ -14,7 +14,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardScaffold
 import com.dracula.socialnetworktwitch.core.presentation.theme.SocialNetworkTwitchTheme
-import com.dracula.socialnetworktwitch.core.presentation.utils.Navigation
+import com.dracula.socialnetworktwitch.core.presentation.utils.AppNavigation
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier
                                 .fillMaxSize()
                         ) {
-                            Navigation(
+                            AppNavigation(
                                 navController = navController,
                                 scaffoldState = scaffoldState,
                             )

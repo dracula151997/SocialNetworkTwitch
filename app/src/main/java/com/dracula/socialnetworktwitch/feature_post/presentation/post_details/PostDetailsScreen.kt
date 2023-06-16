@@ -18,13 +18,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
@@ -32,15 +30,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
+import com.dracula.socialnetworktwitch.core.presentation.components.LoadingContent
 import com.dracula.socialnetworktwitch.core.presentation.components.PostActionRow
 import com.dracula.socialnetworktwitch.core.presentation.components.SendTextField
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
@@ -53,46 +50,66 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSiz
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.CommentFieldState
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
-import com.dracula.socialnetworktwitch.feature_post.domain.model.CreateCommentValidationError
 import com.dracula.socialnetworktwitch.feature_post.presentation.comment.CommentItem
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun PostDetailsScreen(
-    navController: NavController,
-    scaffoldState: ScaffoldState,
-    viewModel: PostDetailsViewModel = hiltViewModel(),
-    showKeyboard: Boolean = false,
-
-    ) {
-    val state = viewModel.state
-    val post = state.post
-    val comments = state.comments
+fun PostDetailsRoute(
+    showKeyboard: () -> Boolean = { true },
+    showSnackbar: (message: String) -> Unit,
+    onNavigate: (route: String) -> Unit,
+    onNavUp: () -> Unit
+) {
+    val viewModel: PostDetailsViewModel = hiltViewModel()
     val context = LocalContext.current
-    val commentFieldState = viewModel.commentFieldState
-    val commentState = viewModel.commentState
-    val focusManager = LocalFocusManager.current
-    val focusRequester = remember {
-        FocusRequester()
-    }
-    val keyboardController = LocalSoftwareKeyboardController.current
-
     LaunchedEffect(key1 = true) {
         viewModel.event.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> scaffoldState.snackbarHostState.showSnackbar(
-                    message = event.uiText.asString(
-                        context
-                    )
-                )
-
+                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
                 else -> Unit
             }
         }
     }
+
+    PostDetailsScreen(
+        onNavigate = onNavigate,
+        onNavUp = onNavUp,
+        showKeyboard = showKeyboard(),
+        commentFieldState = viewModel.commentFieldState,
+        screenState = viewModel.state,
+        screenAction = PostDetailsAction(
+            onLikeCommentClicked = {
+                viewModel.onEvent(PostDetailsEvent.LikeComment(it))
+            },
+            onLikePostClicked = { viewModel.onEvent(PostDetailsEvent.LikePost) },
+            onSendClicked = { viewModel.onEvent(PostDetailsEvent.Comment) }
+        ),
+        ownUserID = viewModel.ownUserId
+    )
+
+}
+
+@Composable
+private fun PostDetailsScreen(
+    screenState: PostDetailsState,
+    commentFieldState: CommentFieldState,
+    screenAction: PostDetailsAction = PostDetailsAction(),
+    onNavigate: (route: String) -> Unit,
+    onNavUp: () -> Unit,
+    showKeyboard: Boolean = false,
+    ownUserID: String = ""
+) {
+    val post = screenState.post
+    val comments = screenState.comments
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val focusRequester = remember {
+        FocusRequester()
+    }
+
 
     Box(modifier = Modifier) {
         Column(
@@ -103,7 +120,7 @@ fun PostDetailsScreen(
             StandardTopBar(
                 title = stringResource(id = R.string.post_details),
                 showBackButton = true,
-                navController = navController
+                onBack = onNavUp
             )
             LazyColumn(
                 modifier = Modifier
@@ -112,181 +129,134 @@ fun PostDetailsScreen(
                     .background(MaterialTheme.colors.surface),
             ) {
                 item {
-                    Column(
-                        Modifier
+                    LoadingContent(
+                        isLoading = screenState.isPostLoading,
+                        modifier = Modifier
                             .fillMaxSize()
-                            .background(MaterialTheme.colors.background)
+                            .padding(bottom = SpaceLarge)
                     ) {
-                        Spacer(modifier = Modifier.height(PaddingLarge))
-                        Box(Modifier.fillMaxSize()) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .offset(y = ProfilePictureSizeMedium / 2)
-                                    .background(MediumGray)
-
-                            ) {
-                                StandardAsyncImage(
-                                    url = post?.imageUrl.orEmpty(),
-                                    contentDescription = Semantics.ContentDescriptions.POST_PHOTO,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-
+                        Column(
+                            Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colors.background)
+                        ) {
+                            Spacer(modifier = Modifier.height(PaddingLarge))
+                            Box(Modifier.fillMaxSize()) {
                                 Column(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(PaddingMedium)
+                                        .fillMaxSize()
+                                        .offset(y = ProfilePictureSizeMedium / 2)
+                                        .background(MediumGray)
+
                                 ) {
-                                    PostActionRow(
-                                        username = state.post?.username.orEmpty(),
-                                        modifier = Modifier.fillMaxWidth(),
-                                        onLikeClicked = { isLiked ->
-                                            viewModel.onEvent(PostDetailsAction.LikePost)
-                                        },
-                                        onShareClicked = {
-                                            context.sendSharePostIntent(postId = post?.id.orEmpty())
-                                        },
-                                        onCommentClicked = {
-                                            focusRequester.requestFocus()
-                                        },
-                                        onUsernameClicked = { username ->
-                                            navController.navigate(
-                                                Screens.ProfileScreen.createRoute(
-                                                    userId = post?.userId
+                                    StandardAsyncImage(
+                                        url = post?.imageUrl.orEmpty(),
+                                        contentDescription = Semantics.ContentDescriptions.POST_PHOTO,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(PaddingMedium)
+                                    ) {
+                                        PostActionRow(
+                                            username = screenState.post?.username.orEmpty(),
+                                            modifier = Modifier.fillMaxWidth(),
+                                            onLikeClicked = { isLiked ->
+                                                screenAction.onLikePostClicked()
+                                            },
+                                            onShareClicked = {
+                                                context.sendSharePostIntent(postId = post?.id.orEmpty())
+                                            },
+                                            onCommentClicked = {
+                                                focusRequester.requestFocus()
+                                            },
+                                            onUsernameClicked = { username ->
+                                                onNavigate(
+                                                    Screens.ProfileScreen.createRoute(
+                                                        userId = post?.userId,
+                                                    ),
                                                 )
-                                            )
-                                        },
-                                        isLiked = state.post?.isLiked == true,
-                                        isOwnPost = post?.isOwnPost == true || post?.userId == viewModel.ownUserId
-                                    )
-                                    Text(
-                                        text = post?.description.orEmpty(),
-                                        style = MaterialTheme.typography.body2,
-                                    )
-                                    Spacer(modifier = Modifier.height(SpaceSmall))
-                                    Text(
-                                        text = stringResource(
-                                            id = R.string.x_likes, post?.likeCount ?: 0
-                                        ),
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.body2.copy(
+                                            },
+                                            isLiked = screenState.post?.isLiked == true,
+                                            isOwnPost = post?.isOwnPost == true || post?.userId == ownUserID
+                                        )
+                                        Text(
+                                            text = post?.description.orEmpty(),
+                                            style = MaterialTheme.typography.body2,
+                                        )
+                                        Spacer(modifier = Modifier.height(SpaceSmall))
+                                        Text(
+                                            text = stringResource(
+                                                id = R.string.x_likes, post?.likeCount ?: 0
+                                            ),
                                             fontWeight = FontWeight.Bold,
-                                        ),
-                                        modifier = Modifier.clickable {
-                                            navController.navigate(
-                                                Screens.PersonListScreen.createRoute(
-                                                    parentId = post?.id
+                                            style = MaterialTheme.typography.body2.copy(
+                                                fontWeight = FontWeight.Bold,
+                                            ),
+                                            modifier = Modifier.clickable {
+                                                onNavigate(
+                                                    Screens.PersonListScreen.createRoute(
+                                                        parentId = post?.id
+                                                    )
                                                 )
-                                            )
-                                        }
-                                    )
+                                            }
+                                        )
+                                    }
                                 }
+                                StandardAsyncImage(
+                                    url = post?.profileImageUrl,
+                                    contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
+                                    errorPlaceholder = painterResource(id = R.drawable.avatar_placeholder),
+                                    placeholder = painterResource(id = R.drawable.avatar_placeholder),
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .border(
+                                            BorderStroke(
+                                                1.dp,
+                                                color = MaterialTheme.colors.primary,
+                                            ),
+                                            shape = CircleShape
+                                        )
+                                        .clip(CircleShape)
+                                        .size(ProfilePictureSizeMedium)
+                                        .background(color = Color.LightGray, shape = CircleShape)
+                                        .align(Alignment.TopCenter)
+                                )
+
                             }
-                            StandardAsyncImage(
-                                url = post?.profileImageUrl,
-                                contentDescription = Semantics.ContentDescriptions.PROFILE_PICTURE,
-                                errorPlaceholder = painterResource(id = R.drawable.avatar),
-                                placeholder = painterResource(id = R.drawable.avatar),
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .border(
-                                        BorderStroke(
-                                            1.dp,
-                                            color = MaterialTheme.colors.primary,
-                                        ),
-                                        shape = CircleShape
-                                    )
-                                    .clip(CircleShape)
-                                    .size(ProfilePictureSizeMedium)
-                                    .background(color = Color.LightGray, shape = CircleShape)
-                                    .align(Alignment.TopCenter)
-                            )
 
                         }
                     }
-                    Spacer(modifier = Modifier.height(SpaceLarge))
                 }
-                items(comments) { comment ->
+
+                items(comments, key = { it.id }) { comment ->
                     CommentItem(
                         comment = comment,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = PaddingMedium, vertical = PaddingSmall),
                         onLikedByClicked = { commentId ->
-                            navController.navigate(Screens.PersonListScreen.createRoute(parentId = commentId))
+                            onNavigate(Screens.PersonListScreen.createRoute(parentId = commentId))
                         },
                         onLikedClicked = {
-                            viewModel.onEvent(PostDetailsAction.LikeComment(commentId = comment.id))
+                            screenAction.onLikeCommentClicked(comment.id)
                         }
                     )
                 }
             }
             SendTextField(
-                text = commentFieldState.text,
+                state = commentFieldState,
                 hint = stringResource(id = R.string.enter_your_comment),
-                onValueChange = { viewModel.onEvent(PostDetailsAction.CommentEntered(it)) },
                 onSend = {
-                    viewModel.onEvent(PostDetailsAction.Comment)
+                    screenAction.onSendClicked()
                     focusManager.clearFocus()
                 },
                 focusRequester = focusRequester,
-                error = when (commentFieldState.error) {
-                    is CreateCommentValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
-                    else -> ""
-                }
             )
-            /*
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .imePadding()
-                                .padding(PaddingMedium)
-                                .background(color = MaterialTheme.colors.surface),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            StandardTextField(
-                                text = commentFieldState.text,
-                                onValueChanged = {
-                                    viewModel.onEvent(PostDetailsAction.CommentEntered(it))
-                                },
-                                hint = stringResource(id = R.string.enter_your_comment),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .focusRequester(focusRequester)
-                                    .clearFocusOnKeyboardDismiss(),
-                                imeAction = ImeAction.Done,
-                                keyboardActions = KeyboardActions(
-                                    onDone = {
-                                        viewModel.onEvent(PostDetailsAction.Comment)
-                                        focusManager.clearFocus()
-                                    }
-                                ),
-                                error = when (commentFieldState.error) {
-                                    is CreateCommentValidationError.FieldEmpty -> stringResource(id = R.string.error_this_field_cannot_be_empty)
-                                    else -> ""
-                                }
-
-                            )
-                            if (commentState.isLoading)
-                                CircularProgressIndicator()
-                            else
-                                IconButton(
-                                    onClick = {
-                                        focusManager.clearFocus()
-                                        viewModel.onEvent(PostDetailsAction.Comment)
-                                    },
-                                    enabled = viewModel.commentFieldState.hasText
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Send,
-                                        contentDescription = Semantics.ContentDescriptions.POST_PHOTO,
-                                        tint = if (commentFieldState.hasError) MaterialTheme.colors.background else MaterialTheme.colors.primary
-                                    )
-                                }
-                        }
-            */
         }
-        if (state.isPostLoading)
+        if (screenState.isPostLoading)
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -297,3 +267,4 @@ fun PostDetailsScreen(
         }
     }
 }
+

@@ -81,5 +81,7 @@
     <string name="invalid_instagram_link">رابط Instagram غير صالح</string>
     <string name="invalid_linkedin_link">رابط لينكد إن غير صالح</string>
     <string name="msg_try_to_enter_the_username">حاول إدخال اسم المستخدم</string>
+    <string name="msg_no_messages_found">No messages found</string>
+    <string name="error_input_too_long">Input too long</string>
 
 </resources>
