@@ -23,11 +23,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dracula.socialnetworktwitch.R
+import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.PullToRefreshBox
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
+import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
 import com.dracula.socialnetworktwitch.feature_post.presentation.components.PostItem
@@ -40,30 +42,7 @@ fun MainFeedRoute(
     showSnackbar: (message: String) -> Unit,
 ) {
     val viewModel: MainFeedViewModel = hiltViewModel()
-    MainFeedScreen(
-        onNavigate = onNavigate,
-        onNavUp = onNavUp,
-        showSnackbar = showSnackbar,
-        viewModel = viewModel
-    )
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun MainFeedScreen(
-    onNavigate: (route: String) -> Unit,
-    onNavUp: () -> Unit,
-    showSnackbar: (message: String) -> Unit,
-    viewModel: MainFeedViewModel
-) {
-    val postsPagingState = viewModel.postsPagingState
-    val posts = postsPagingState.items
     val context = LocalContext.current
-    val pullToRefreshState =
-        rememberPullRefreshState(
-            refreshing = postsPagingState.refreshing,
-            onRefresh = { viewModel.onEvent(MainFeedAction.Refresh) })
-
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -73,6 +52,30 @@ private fun MainFeedScreen(
             }
         }
     }
+    MainFeedScreen(
+        onNavigate = onNavigate,
+        postsPagingState = viewModel.postsPagingState,
+        onEvent = { event ->
+            viewModel.onEvent(event)
+        }
+
+    )
+
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun MainFeedScreen(
+    postsPagingState: PagingState<Post>,
+    onEvent: (event: MainFeedAction) -> Unit,
+    onNavigate: (route: String) -> Unit,
+) {
+    val posts = postsPagingState.items
+    val context = LocalContext.current
+    val pullToRefreshState =
+        rememberPullRefreshState(
+            refreshing = postsPagingState.refreshing,
+            onRefresh = { onEvent(MainFeedAction.Refresh) })
 
     Column(
         modifier = Modifier
@@ -120,7 +123,8 @@ private fun MainFeedScreen(
                     else -> items(posts.size) { index ->
                         val post = posts[index]
                         if (index > posts.size - 1 && !postsPagingState.endReached) {
-                            viewModel.loadNextPost()
+                            onEvent(MainFeedAction.LoadNextPosts)
+//                            viewModel.loadNextPost()
                         }
                         PostItem(
                             post = post,
@@ -139,7 +143,7 @@ private fun MainFeedScreen(
                                 )
                             },
                             onShareClicked = { context.sendSharePostIntent(postId = post.id) },
-                            onLikeClicked = { viewModel.onEvent(MainFeedAction.LikePost(post.id)) },
+                            onLikeClicked = { onEvent(MainFeedAction.LikePost(post.id)) },
                             onCommentClicked = {
                                 onNavigate(
                                     Screens.PostDetailsScreen.createRoute(
@@ -149,7 +153,7 @@ private fun MainFeedScreen(
                                 )
                             },
                             onDeleteClicked = { postId ->
-                                viewModel.onEvent(MainFeedAction.DeletePost(postId))
+                                onEvent(MainFeedAction.DeletePost(postId))
                             }
                         )
 

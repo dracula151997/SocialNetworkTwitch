@@ -64,6 +64,7 @@ class MainFeedViewModel @Inject constructor(
 
             is MainFeedAction.DeletePost -> deletePost(event.postId)
             MainFeedAction.Refresh -> loadNextPost(refreshing = true)
+            MainFeedAction.LoadNextPosts -> loadNextPost()
         }
     }
 
@@ -85,10 +86,10 @@ class MainFeedViewModel @Inject constructor(
     }
 
     init {
-        loadNextPost()
+        onEvent(MainFeedAction.LoadNextPosts)
     }
 
-    fun loadNextPost(refreshing: Boolean = false) {
+    private fun loadNextPost(refreshing: Boolean = false) {
         viewModelScope.launch {
             paginator.loadNextItems(refreshing)
         }
