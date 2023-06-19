@@ -64,13 +64,13 @@ fun AppNavigation(
         }
         composable(route = Screens.RegisterScreen.route) {
             RegisterRoute(
+                onNavigate = navController::navigate,
+                onNavUp = navController::navigateUp,
                 showSnackbar = {
                     scope.launch {
                         scaffoldState.snackbarHostState.showSnackbar(message = it)
                     }
-                },
-                onNavigate = navController::navigate,
-                onNavUp = navController::navigateUp
+                }
             )
         }
 
