@@ -60,7 +60,7 @@ fun LoginRoute(
 
     LoginScreen(
         onNavigate = onNavigate,
-        state = viewModel.state,
+        state = viewModel.viewState,
         emailFieldState = viewModel.emailState,
         enableLoginButton = viewModel.enableLoginButton,
         onEvent = viewModel::onEvent,

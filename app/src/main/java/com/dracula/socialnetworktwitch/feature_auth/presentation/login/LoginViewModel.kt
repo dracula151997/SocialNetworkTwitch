@@ -30,9 +30,6 @@ class LoginViewModel @Inject constructor(
         emailState.isValid && passwordState.isValid
     }
 
-    var state by mutableStateOf(LoginState())
-        private set
-
     override fun initialState(): LoginState {
         return LoginState()
     }
