@@ -39,6 +39,7 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.ActivityType
 import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.feature_activity.domain.model.Activity
 import kotlinx.coroutines.flow.collectLatest
@@ -50,22 +51,6 @@ fun ActivityRoute(
     showSnackbar: (message: String) -> Unit,
 ) {
     val viewModel: ActivityViewModel = hiltViewModel()
-    ActivityScreen(viewModel = viewModel, onNavigate = onNavigate, showSnackbar = showSnackbar)
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun ActivityScreen(
-    viewModel: ActivityViewModel,
-    onNavigate: (route: String) -> Unit,
-    showSnackbar: (message: String) -> Unit,
-) {
-
-    val activitiesPagingState = viewModel.activitiesPagingState
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = activitiesPagingState.refreshing,
-        onRefresh = { viewModel.onEvent(ActivityAction.Refreshing) })
-    val activities = activitiesPagingState.items
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -76,7 +61,28 @@ private fun ActivityScreen(
             }
         }
     }
-    Column(modifier = Modifier) {
+
+    ActivityScreen(
+        onNavigate = onNavigate,
+        activitiesPagingState = viewModel.activitiesPagingState,
+        onEvent = { viewModel.onEvent(it) },
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ActivityScreen(
+    activitiesPagingState: PagingState<Activity>,
+    modifier: Modifier = Modifier,
+    onEvent: (event: ActivityAction) -> Unit,
+    onNavigate: (route: String) -> Unit,
+) {
+
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = activitiesPagingState.refreshing,
+        onRefresh = { onEvent(ActivityAction.Refreshing) })
+    val activities = activitiesPagingState.items
+    Column(modifier = modifier) {
         StandardTopBar(
             title = stringResource(id = R.string.your_activity),
         )

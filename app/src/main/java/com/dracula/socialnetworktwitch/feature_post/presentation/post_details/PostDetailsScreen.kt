@@ -80,13 +80,9 @@ fun PostDetailsRoute(
         showKeyboard = showKeyboard(),
         commentFieldState = viewModel.commentFieldState,
         screenState = viewModel.state,
-        screenAction = PostDetailsAction(
-            onLikeCommentClicked = {
-                viewModel.onEvent(PostDetailsEvent.LikeComment(it))
-            },
-            onLikePostClicked = { viewModel.onEvent(PostDetailsEvent.LikePost) },
-            onSendClicked = { viewModel.onEvent(PostDetailsEvent.Comment) }
-        ),
+        onEvent = {
+            viewModel.onEvent(it)
+        },
         ownUserID = viewModel.ownUserId
     )
 
@@ -96,7 +92,7 @@ fun PostDetailsRoute(
 private fun PostDetailsScreen(
     screenState: PostDetailsState,
     commentFieldState: CommentFieldState,
-    screenAction: PostDetailsAction = PostDetailsAction(),
+    onEvent: (event: PostDetailsEvent) -> Unit,
     onNavigate: (route: String) -> Unit,
     onNavUp: () -> Unit,
     showKeyboard: Boolean = false,
@@ -164,7 +160,7 @@ private fun PostDetailsScreen(
                                             username = screenState.post?.username.orEmpty(),
                                             modifier = Modifier.fillMaxWidth(),
                                             onLikeClicked = { isLiked ->
-                                                screenAction.onLikePostClicked()
+                                                onEvent(PostDetailsEvent.LikePost)
                                             },
                                             onShareClicked = {
                                                 context.sendSharePostIntent(postId = post?.id.orEmpty())
@@ -241,7 +237,7 @@ private fun PostDetailsScreen(
                             onNavigate(Screens.PersonListScreen.createRoute(parentId = commentId))
                         },
                         onLikedClicked = {
-                            screenAction.onLikeCommentClicked(comment.id)
+                            onEvent(PostDetailsEvent.LikeComment(comment.id))
                         }
                     )
                 }
@@ -250,7 +246,7 @@ private fun PostDetailsScreen(
                 state = commentFieldState,
                 hint = stringResource(id = R.string.enter_your_comment),
                 onSend = {
-                    screenAction.onSendClicked()
+                    onEvent(PostDetailsEvent.Comment)
                     focusManager.clearFocus()
                 },
                 focusRequester = focusRequester,

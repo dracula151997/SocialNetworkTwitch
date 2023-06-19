@@ -1,6 +1,8 @@
 package com.dracula.socialnetworktwitch.feature_post.presentation.create_post
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -44,6 +46,7 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import com.dracula.socialnetworktwitch.core.utils.CropActivityResultContract
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
@@ -54,35 +57,7 @@ fun CreatePostRoute(
     onNavUp: () -> Unit,
 ) {
     val viewModel: CreatePostViewModel = hiltViewModel()
-    CreatePostScreen(
-        viewModel = viewModel,
-        showSnackbar = showSnackbar,
-        onNavUp = onNavUp
-    )
-}
-
-@Composable
-private fun CreatePostScreen(
-    viewModel: CreatePostViewModel,
-    showSnackbar: (message: String) -> Unit,
-    onNavUp: () -> Unit,
-) {
-    val imageUri = viewModel.chosenImageUri
-    val state = viewModel.state
     val context = LocalContext.current
-    val focusManager = LocalFocusManager.current
-
-    val cropActivityLauncher = rememberLauncherForActivityResult(
-        contract = CropActivityResultContract(16f, 9f),
-    ) {
-        viewModel.onEvent(CreatePostAction.CropImage(it))
-    }
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-    ) {
-        cropActivityLauncher.launch(it)
-    }
-
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -92,9 +67,42 @@ private fun CreatePostScreen(
             }
         }
     }
+
+    CreatePostScreen(
+        descriptionFieldState = viewModel.description,
+        state = viewModel.state,
+        enablePostButton = viewModel.enablePostButton,
+        imageUri = viewModel.chosenImageUri,
+        onEvent = viewModel::onEvent,
+        onNavUp = onNavUp,
+    )
+}
+
+@Composable
+private fun CreatePostScreen(
+    state: CreatePostState,
+    descriptionFieldState: TextFieldState,
+    enablePostButton: Boolean,
+    imageUri: Uri?,
+    onEvent: (event: CreatePostAction) -> Unit,
+    onNavUp: () -> Unit,
+) {
+    val focusManager = LocalFocusManager.current
+
+    val cropActivityLauncher = rememberLauncherForActivityResult(
+        contract = CropActivityResultContract(16f, 9f),
+    ) {
+        onEvent(CreatePostAction.CropImage(it))
+    }
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) {
+        cropActivityLauncher.launch(it)
+    }
+
+
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -122,8 +130,7 @@ private fun CreatePostScreen(
                             galleryLauncher.launch(
                                 PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly)
                             )
-                        },
-                    contentAlignment = Alignment.Center
+                        }, contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -133,38 +140,30 @@ private fun CreatePostScreen(
                     imageUri?.let { uri ->
                         Image(
                             painter = rememberAsyncImagePainter(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(uri)
-                                    .build()
+                                model = ImageRequest.Builder(LocalContext.current).data(uri).build()
                             ),
                             contentDescription = Semantics.ContentDescriptions.POST_PHOTO,
-                            modifier = Modifier
-                                .matchParentSize()
+                            modifier = Modifier.matchParentSize()
                         )
                     }
 
                 }
                 Spacer(modifier = Modifier.height(SpaceMedium))
-                StandardTextField(
-                    state = viewModel.description,
+                StandardTextField(state = descriptionFieldState,
                     hint = stringResource(id = R.string.description),
                     singleLine = false,
                     imeAction = ImeAction.Done,
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            viewModel.onEvent(CreatePostAction.CreatePost)
-                            focusManager.clearFocus()
-                        }
-                    )
+                    keyboardActions = KeyboardActions(onDone = {
+                        onEvent(CreatePostAction.CreatePost)
+                        focusManager.clearFocus()
+                    })
                 )
                 Spacer(modifier = Modifier.height(SpaceLarge))
                 Button(
                     onClick = {
-                        viewModel.onEvent(CreatePostAction.CreatePost)
+                        onEvent(CreatePostAction.CreatePost)
                         focusManager.clearFocus()
-                    },
-                    modifier = Modifier.align(Alignment.End),
-                    enabled = viewModel.enablePostButton
+                    }, modifier = Modifier.align(Alignment.End), enabled = enablePostButton
                 ) {
                     Text(
                         text = stringResource(id = R.string.post),
@@ -173,8 +172,7 @@ private fun CreatePostScreen(
                     Spacer(modifier = Modifier.width(SpaceSmall))
                     Icon(imageVector = Icons.Default.Send, contentDescription = null)
                 }
-                if (state.isLoading)
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                if (state.isLoading) CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         }
     }
