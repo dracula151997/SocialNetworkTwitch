@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -85,7 +84,7 @@ class ProfileViewModel @Inject constructor(
     )
 
     init {
-        loadNextPost()
+        onEvent(ProfileScreenAction.LoadNextPosts)
     }
 
 
@@ -130,6 +129,8 @@ class ProfileViewModel @Inject constructor(
                 getProfile(userId = event.userId, refreshing = true)
                 loadNextPost(refreshing = true)
             }
+
+            ProfileScreenAction.LoadNextPosts -> loadNextPost()
         }
     }
 
@@ -150,14 +151,13 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun loadNextPost(refreshing: Boolean = false) {
+    private fun loadNextPost(refreshing: Boolean = false) {
         viewModelScope.launch {
             paginator.loadNextItems(refreshing = refreshing)
         }
     }
 
     private fun getProfile(userId: String?, refreshing: Boolean = false) {
-        Timber.d("getProfile: $refreshing")
         viewModelScope.launch {
             _state.value = state.value.copy(
                 isLoading = !refreshing,

@@ -1,5 +1,7 @@
 package com.dracula.socialnetworktwitch.core.presentation.utils
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,6 +30,7 @@ fun AppNavigation(
     navController: NavHostController,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(),
 ) {
     val scope = rememberCoroutineScope()
     NavHost(
@@ -73,6 +76,7 @@ fun AppNavigation(
 
         composable(route = Screens.MainFeedScreen.route) {
             MainFeedRoute(
+                modifier = Modifier.padding(bottom = contentPadding.calculateBottomPadding()),
                 onNavigate = { navController.navigate(it) },
                 onNavUp = { navController.navigateUp() },
                 showSnackbar = {
@@ -129,6 +133,7 @@ fun AppNavigation(
         ) {
             val userId = it.arguments?.getString(Constants.NavArguments.NAV_USER_ID)
             ProfileRoute(
+                modifier = Modifier.padding(bottom = contentPadding.calculateBottomPadding()),
                 userId = userId,
                 onNavigate = navController::navigate,
                 showSnackbar = {

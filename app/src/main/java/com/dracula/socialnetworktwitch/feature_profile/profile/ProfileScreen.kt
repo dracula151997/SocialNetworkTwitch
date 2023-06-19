@@ -1,14 +1,12 @@
 package com.dracula.socialnetworktwitch.feature_profile.profile
 
 import android.util.Base64
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
@@ -32,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dracula.socialnetworktwitch.R
+import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.core.domain.model.User
 import com.dracula.socialnetworktwitch.core.presentation.components.PullToRefreshBox
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardAlertDialog
@@ -39,6 +38,8 @@ import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopB
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
+import com.dracula.socialnetworktwitch.core.utils.LoadingState
+import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.openUrlInBrowser
 import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
@@ -52,41 +53,14 @@ import java.util.Locale
 @Composable
 fun ProfileRoute(
     userId: String?,
+    modifier: Modifier = Modifier,
     showSnackbar: (message: String) -> Unit,
     onNavigate: (route: String) -> Unit,
     navigateToLogin: () -> Unit,
 ) {
     val viewModel: ProfileViewModel = hiltViewModel()
-    ProfileScreen(
-        userId = userId,
-        viewModel = viewModel,
-        showSnackbar = showSnackbar,
-        onNavigate = onNavigate,
-        navigateToLogin = navigateToLogin
-    )
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun ProfileScreen(
-    userId: String?,
-    viewModel: ProfileViewModel,
-    showSnackbar: (message: String) -> Unit,
-    onNavigate: (route: String) -> Unit,
-    navigateToLogin: () -> Unit,
-) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val userPosts = viewModel.postsPagingState
-    val profile = state.data ?: Profile.empty()
     val context = LocalContext.current
-    var showPopupMenu by remember {
-        mutableStateOf(false)
-    }
-    val pullToRefreshState =
-        rememberPullRefreshState(
-            refreshing = state.refreshing,
-            onRefresh = { viewModel.onEvent(ProfileScreenAction.Refreshing(userId = userId)) })
-
     LaunchedEffect(key1 = true) {
         viewModel.onEvent(ProfileScreenAction.GetProfile(userId))
         viewModel.eventFlow.collectLatest { event ->
@@ -98,7 +72,40 @@ private fun ProfileScreen(
 
         }
     }
-    Column(modifier = Modifier.fillMaxSize()) {
+    ProfileScreen(
+        modifier = modifier,
+        userId = userId,
+        onNavigate = onNavigate,
+        navigateToLogin = navigateToLogin,
+        state = state,
+        onEvent = { viewModel.onEvent(it) },
+        userPosts = viewModel.postsPagingState
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ProfileScreen(
+    state: ProfileState,
+    userPosts: PagingState<Post>,
+    userId: String?,
+    modifier: Modifier = Modifier,
+    onEvent: (event: ProfileScreenAction) -> Unit,
+    onNavigate: (route: String) -> Unit,
+    navigateToLogin: () -> Unit,
+) {
+    val profile = state.data ?: Profile.empty()
+    val context = LocalContext.current
+    var showPopupMenu by remember {
+        mutableStateOf(false)
+    }
+    val pullToRefreshState =
+        rememberPullRefreshState(
+            refreshing = state.refreshing,
+            onRefresh = { onEvent(ProfileScreenAction.Refreshing(userId = userId)) })
+
+
+    Column(modifier = modifier.fillMaxSize()) {
         StandardTopBar(
             title = stringResource(
                 id = R.string.x_profile,
@@ -131,7 +138,7 @@ private fun ProfileScreen(
                             Text(text = stringResource(id = R.string.edit_your_profile))
                         }
                         DropdownMenuItem(onClick = {
-                            viewModel.onEvent(ProfileScreenAction.ShowLogoutDialog)
+                            onEvent(ProfileScreenAction.ShowLogoutDialog)
                             showPopupMenu = false
                         }) {
                             Text(text = stringResource(id = R.string.logout))
@@ -169,14 +176,10 @@ private fun ProfileScreen(
             ) {
                 when {
                     state.isLoading -> item {
-                        Box(
+                        LoadingState(
                             modifier = Modifier.fillParentMaxSize(),
                             contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
+                        )
                     }
 
                     state.data != null -> item {
@@ -205,10 +208,10 @@ private fun ProfileScreen(
                             isOwnProfile = profile.isOwnProfile,
                             isFollowing = profile.isFollowing,
                             onFollowClicked = {
-                                viewModel.onEvent(
+                                onEvent(
                                     ProfileScreenAction.ToggleFollowStateForUser(
-                                        profile.userId
-                                    )
+                                        profile.userId,
+                                    ),
                                 )
                             }
                         )
@@ -218,7 +221,7 @@ private fun ProfileScreen(
                 items(userPosts.items.size) { index ->
                     val post = userPosts.items[index]
                     if (index > userPosts.items.size - 1 && !userPosts.endReached && !userPosts.isLoading) {
-                        viewModel.loadNextPost()
+                        onEvent(ProfileScreenAction.LoadNextPosts)
                     }
                     PostItem(
                         post = post,
@@ -235,14 +238,14 @@ private fun ProfileScreen(
                             )
                         },
                         onLikeClicked = {
-                            viewModel.onEvent(ProfileScreenAction.LikePost(post.id))
+                            onEvent(ProfileScreenAction.LikePost(post.id))
                         },
                         onShareClicked = {
                             context.sendSharePostIntent(postId = post.id)
                         },
                         onUsernameClicked = {},
                         onDeleteClicked = { postId ->
-                            viewModel.onEvent(ProfileScreenAction.DeletePost(postId))
+                            onEvent(ProfileScreenAction.DeletePost(postId))
                         },
                     )
                 }
@@ -257,13 +260,13 @@ private fun ProfileScreen(
                 negativeButtonText = stringResource(id = R.string.dismiss_btn),
                 title = stringResource(id = R.string.logout),
                 onPositiveButtonClicked = {
-                    viewModel.onEvent(ProfileScreenAction.Logout)
+                    onEvent(ProfileScreenAction.Logout)
                     navigateToLogin()
                 },
                 onNegativeButtonClicked = {
-                    viewModel.onEvent(ProfileScreenAction.HideLogoutDialog)
+                    onEvent(ProfileScreenAction.HideLogoutDialog)
                 },
-                onDismissed = { viewModel.onEvent(ProfileScreenAction.HideLogoutDialog) }
+                onDismissed = { onEvent(ProfileScreenAction.HideLogoutDialog) }
             )
         }
 

@@ -48,6 +48,8 @@ class MainActivity : ComponentActivity() {
                             AppNavigation(
                                 navController = navController,
                                 scaffoldState = scaffoldState,
+                                contentPadding = innerPadding
+
                             )
                         }
                     }

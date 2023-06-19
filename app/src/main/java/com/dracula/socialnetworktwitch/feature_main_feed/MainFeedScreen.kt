@@ -1,15 +1,12 @@
 package com.dracula.socialnetworktwitch.feature_main_feed
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -20,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.model.Post
@@ -29,6 +25,8 @@ import com.dracula.socialnetworktwitch.core.presentation.components.PullToRefres
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
+import com.dracula.socialnetworktwitch.core.utils.ErrorView
+import com.dracula.socialnetworktwitch.core.utils.LoadingState
 import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
@@ -37,6 +35,7 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun MainFeedRoute(
+    modifier: Modifier = Modifier,
     onNavigate: (route: String) -> Unit,
     onNavUp: () -> Unit,
     showSnackbar: (message: String) -> Unit,
@@ -53,6 +52,7 @@ fun MainFeedRoute(
         }
     }
     MainFeedScreen(
+        modifier = modifier,
         onNavigate = onNavigate,
         postsPagingState = viewModel.postsPagingState,
         onEvent = { event ->
@@ -66,6 +66,7 @@ fun MainFeedRoute(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun MainFeedScreen(
+    modifier: Modifier = Modifier,
     postsPagingState: PagingState<Post>,
     onEvent: (event: MainFeedAction) -> Unit,
     onNavigate: (route: String) -> Unit,
@@ -78,7 +79,7 @@ private fun MainFeedScreen(
             onRefresh = { onEvent(MainFeedAction.Refresh) })
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
 
     ) {
@@ -100,31 +101,23 @@ private fun MainFeedScreen(
             LazyColumn {
                 when {
                     postsPagingState.isLoading -> item {
-                        CircularProgressIndicator(
-                            modifier = Modifier.fillParentMaxWidth()
-                        )
+                        LoadingState(modifier = Modifier.fillParentMaxSize())
                     }
 
                     posts.isEmpty() -> item {
-                        Box(
+                        ErrorView(
+                            errorMessage = stringResource(id = R.string.msg_no_posts_to_display),
                             modifier = Modifier.fillParentMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.msg_no_posts_to_display),
-                                style = MaterialTheme.typography.h6.copy(
-                                    fontFamily = appFontFamily
-                                ),
-                                textAlign = TextAlign.Center
+                            textStyle = MaterialTheme.typography.h6.copy(
+                                fontFamily = appFontFamily
                             )
-                        }
+                        )
                     }
 
                     else -> items(posts.size) { index ->
                         val post = posts[index]
                         if (index > posts.size - 1 && !postsPagingState.endReached) {
                             onEvent(MainFeedAction.LoadNextPosts)
-//                            viewModel.loadNextPost()
                         }
                         PostItem(
                             post = post,

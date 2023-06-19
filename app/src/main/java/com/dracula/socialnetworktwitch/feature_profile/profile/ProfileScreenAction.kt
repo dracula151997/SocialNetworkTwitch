@@ -17,4 +17,6 @@ sealed interface ProfileScreenAction {
     data class DeletePost(val postId: String) : ProfileScreenAction
 
     data class ToggleFollowStateForUser(val userId: String) : ProfileScreenAction
+
+    object LoadNextPosts : ProfileScreenAction
 }

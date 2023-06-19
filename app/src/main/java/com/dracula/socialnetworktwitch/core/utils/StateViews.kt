@@ -12,7 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
 
 @Composable
-fun LoadingView(
+fun LoadingState(
     modifier: Modifier = Modifier,
     contentAlignment: Alignment = Alignment.Center,
 ) {
@@ -29,7 +29,7 @@ fun ErrorView(
     errorMessage: String,
     modifier: Modifier = Modifier,
     contentAlignment: Alignment = Alignment.Center,
-    style: TextStyle = MaterialTheme.typography.h6.copy(
+    textStyle: TextStyle = MaterialTheme.typography.h6.copy(
         fontFamily = appFontFamily
     ),
     textAlign: TextAlign = TextAlign.Center,
@@ -40,7 +40,7 @@ fun ErrorView(
     ) {
         Text(
             text = errorMessage,
-            style = style,
+            style = textStyle,
             textAlign = textAlign
         )
     }
