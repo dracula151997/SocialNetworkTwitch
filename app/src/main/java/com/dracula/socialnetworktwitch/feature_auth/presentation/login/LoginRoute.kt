@@ -34,8 +34,9 @@ import com.dracula.socialnetworktwitch.core.presentation.components.StandardText
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
+import com.dracula.socialnetworktwitch.core.presentation.utils.CommonUiEffect
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -46,23 +47,37 @@ fun LoginRoute(
 
 ) {
     val viewModel: LoginViewModel = hiltViewModel()
+    val context = LocalContext.current
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is CommonUiEffect.Navigate -> onNavigate(event.route)
+                is CommonUiEffect.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
+                is CommonUiEffect.NavigateUp -> onNavigateUp()
+            }
+        }
+    }
+
     LoginScreen(
-        viewModel = viewModel,
         onNavigate = onNavigate,
-        showSnackbar = showSnackbar,
-        onNavigateUp = onNavigateUp
+        state = viewModel.state,
+        emailFieldState = viewModel.emailState,
+        enableLoginButton = viewModel.enableLoginButton,
+        onEvent = viewModel::onEvent,
+        passwordFieldState = viewModel.passwordState
+
     )
 }
 
 @Composable
 private fun LoginScreen(
-    viewModel: LoginViewModel,
+    state: LoginState,
+    emailFieldState: TextFieldState,
+    passwordFieldState: TextFieldState,
+    enableLoginButton: Boolean,
+    onEvent: (event: LoginEvent) -> Unit,
     onNavigate: (route: String) -> Unit,
-    showSnackbar: (message: String) -> Unit,
-    onNavigateUp: () -> Unit
 ) {
-    val state = viewModel.state
-    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val signUpText = stringResource(id = R.string.sign_up)
     val signUpAnnotatedString = buildAnnotatedString {
@@ -79,15 +94,6 @@ private fun LoginScreen(
 
     }
 
-    LaunchedEffect(key1 = true) {
-        viewModel.eventFlow.collectLatest { event ->
-            when (event) {
-                is UiEvent.Navigate -> onNavigate(event.route)
-                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
-                is UiEvent.NavigateUp -> onNavigateUp()
-            }
-        }
-    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -108,7 +114,7 @@ private fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(
-                state = viewModel.emailState,
+                state = emailFieldState,
                 hint = stringResource(
                     id = R.string.username_or_email_hint
                 ),
@@ -116,13 +122,13 @@ private fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             PasswordTextField(
-                state = viewModel.passwordState,
+                state = passwordFieldState,
                 hint = stringResource(id = R.string.password_hint),
                 imeAction = ImeAction.Done,
                 keyboardActions = KeyboardActions(
                     onDone = {
                         focusManager.clearFocus()
-                        viewModel.onEvent(LoginAction.Login)
+                        onEvent(LoginEvent.Login)
                     },
                 )
             )
@@ -131,10 +137,10 @@ private fun LoginScreen(
                 text = stringResource(id = R.string.login),
                 onClick = {
                     focusManager.clearFocus()
-                    viewModel.onEvent(LoginAction.Login)
+                    onEvent(LoginEvent.Login)
                 },
                 modifier = Modifier.align(Alignment.End),
-                enabled = viewModel.enableLoginButton
+                enabled = enableLoginButton
             )
             if (state.isLoading) CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.CenterHorizontally)

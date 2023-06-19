@@ -5,15 +5,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.core.utils.UiText
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 
 abstract class BaseViewModel<State : UiState, Event : UiEvent> : ViewModel() {
     private val _effectFlow = MutableSharedFlow<UiEffect>()
-    val effectFlow = _effectFlow.asSharedFlow()
+    val eventFlow = _effectFlow.asSharedFlow()
 
     private val initialState: State by lazy { initialState() }
 
@@ -36,14 +34,12 @@ abstract class BaseViewModel<State : UiState, Event : UiEvent> : ViewModel() {
 
 
     protected suspend fun showSnackbar(uiText: UiText) {
-        viewModelScope.launch {
-            setEffect {
-                CommonUiEffect.ShowSnackbar(uiText = uiText)
-            }
+        setEffect {
+            CommonUiEffect.ShowSnackbar(uiText = uiText)
         }
     }
 
-    protected suspend fun showSnackBar(@StringRes messageResId: Int) {
+    protected suspend fun showSnackbar(@StringRes messageResId: Int) {
         _effectFlow.emit(
             CommonUiEffect.ShowSnackbar(
                 UiText.StringResource(messageResId)
