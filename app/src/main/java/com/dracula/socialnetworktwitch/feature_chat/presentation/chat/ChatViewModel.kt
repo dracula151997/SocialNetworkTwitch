@@ -21,7 +21,7 @@ class ChatViewModel @Inject constructor(
     private val getChatsForUserUseCase: GetChatsForUserUseCase,
     initializeRepositoryUseCase: InitializeRepositoryUseCase,
 ) : ViewModel() {
-    var state by mutableStateOf(ChatState())
+    var state by mutableStateOf(ChatScreenState())
         private set
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
@@ -30,10 +30,7 @@ class ChatViewModel @Inject constructor(
     fun onEvent(event: ChatScreenAction) {
         when (event) {
             ChatScreenAction.Refreshing -> {
-                state = state.copy(
-                    refreshing = true
-                )
-                getChatsForUser()
+                getChatsForUser(refreshing = true)
             }
         }
     }
@@ -44,11 +41,11 @@ class ChatViewModel @Inject constructor(
     }
 
 
-    private fun getChatsForUser() {
+    private fun getChatsForUser(refreshing: Boolean = false) {
         viewModelScope.launch {
             state = state.copy(
-                isLoading = !state.refreshing,
-                refreshing = state.refreshing
+                isLoading = !refreshing,
+                refreshing = refreshing
             )
             val response = getChatsForUserUseCase()
             state = state.copy(
