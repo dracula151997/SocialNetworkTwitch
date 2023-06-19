@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.R
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NotEmptyFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NonEmptyFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.UiText
@@ -25,7 +25,7 @@ import javax.inject.Inject
 class CreatePostViewModel @Inject constructor(
     private val createPostUseCase: CreatePostUseCase
 ) : ViewModel() {
-    var description by mutableStateOf(NotEmptyFieldState())
+    var description by mutableStateOf(NonEmptyFieldState())
         private set
 
     var chosenImageUri: Uri? by mutableStateOf(null)

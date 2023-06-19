@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonAdd
@@ -24,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.components.UserProfileItem
@@ -36,35 +34,47 @@ import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun PersonListScreen(
-    scaffoldState: ScaffoldState,
-    onNavigate: (String) -> Unit = {},
-    navController: NavController,
-    viewModel: PersonListViewModel = hiltViewModel()
+fun PersonListRoute(
+    showSnackbar: (message: String) -> Unit,
+    onNavigate: (String) -> Unit,
+    onNavUp: () -> Unit
 ) {
-    val state = viewModel.state
+    val viewModel: PersonListViewModel = hiltViewModel()
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        event.uiText.asString(context)
-                    )
-                }
-
+                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
                 else -> Unit
             }
         }
 
     }
+    PersonListScreen(
+        state = viewModel.state,
+        ownUserId = viewModel.ownUserId,
+        onEvent = viewModel::onEvent,
+        onNavUp = onNavUp,
+        onNavigate = onNavigate
+    )
+
+}
+
+@Composable
+private fun PersonListScreen(
+    state: PersonListState,
+    ownUserId: String?,
+    onEvent: (event: PersonListAction) -> Unit,
+    onNavigate: (String) -> Unit = {},
+    onNavUp: () -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
         StandardTopBar(
             showBackButton = true,
             title = stringResource(id = R.string.liked_by),
-            navController = navController
+            onBack = onNavUp
         )
         Box(
             modifier = Modifier.fillMaxSize()
@@ -97,9 +107,9 @@ fun PersonListScreen(
                                 onNavigate(Screens.ProfileScreen.createRoute(userId = user.userId))
                             },
                             onActionItemClick = {
-                                viewModel.onEvent(PersonListAction.ToggleFollowStateForUser(user.userId))
+                                onEvent(PersonListAction.ToggleFollowStateForUser(user.userId))
                             },
-                            ownUserId = viewModel.ownUserId
+                            ownUserId = ownUserId
                         )
                         Spacer(modifier = Modifier.height(SpaceMedium))
                     }

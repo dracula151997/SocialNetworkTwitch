@@ -1,7 +1,6 @@
 package com.dracula.socialnetworktwitch.feature_chat.presentation.message
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -9,9 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -33,10 +32,16 @@ import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyn
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
+import com.dracula.socialnetworktwitch.core.utils.ErrorState
+import com.dracula.socialnetworktwitch.core.utils.LoadingState
+import com.dracula.socialnetworktwitch.core.utils.PagingState
+import com.dracula.socialnetworktwitch.feature_chat.domain.model.Message
 import kotlinx.coroutines.flow.collectLatest
 import okio.ByteString.Companion.decodeBase64
 import java.nio.charset.Charset
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MessageRoute(
     remoteUserId: String,
@@ -45,31 +50,9 @@ fun MessageRoute(
     onNavUp: () -> Unit
 ) {
     val viewModel: MessageViewModel = hiltViewModel()
-    MessagesScreen(
-        viewModel = viewModel,
-        remoteUserId = remoteUserId,
-        remoteUserName = remoteUsername,
-        onNavUp = onNavUp,
-        encodedRemoteUserProfilePic = encodedRemoteUserProfilePic,
-    )
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-private fun MessagesScreen(
-    viewModel: MessageViewModel,
-    remoteUserId: String,
-    remoteUserName: String,
-    encodedRemoteUserProfilePic: String? = null,
-    onNavUp: () -> Unit,
-) {
-    val remoteUserProfilePic = remember {
-        encodedRemoteUserProfilePic?.decodeBase64()?.string(charset = Charset.defaultCharset())
-    }
-    val messageState = viewModel.messageFieldState
     val pagingState = viewModel.pagingState
-    val scrollState = rememberLazyListState()
     val keyboardController = LocalSoftwareKeyboardController.current
+    val scrollState = rememberLazyListState()
     LaunchedEffect(key1 = pagingState) {
         viewModel.messageReceived.collectLatest {
             when (it) {
@@ -86,6 +69,34 @@ private fun MessagesScreen(
 
         }
     }
+
+    MessagesScreen(
+        remoteUserId = remoteUserId,
+        remoteUserName = remoteUsername,
+        onNavUp = onNavUp,
+        encodedRemoteUserProfilePic = encodedRemoteUserProfilePic,
+        messageFieldState = viewModel.messageFieldState,
+        onEvent = viewModel::onEvent,
+        pagingState = viewModel.pagingState,
+        scrollState = scrollState
+    )
+}
+
+@Composable
+private fun MessagesScreen(
+    messageFieldState: TextFieldState,
+    scrollState: LazyListState,
+    pagingState: PagingState<Message>,
+    remoteUserId: String,
+    remoteUserName: String,
+    encodedRemoteUserProfilePic: String? = null,
+    onEvent: (event: MessageScreenAction) -> Unit,
+    onNavUp: () -> Unit,
+) {
+    val remoteUserProfilePic = remember {
+        encodedRemoteUserProfilePic?.decodeBase64()?.string(charset = Charset.defaultCharset())
+    }
+
     Column(
         Modifier.fillMaxSize()
     ) {
@@ -115,36 +126,27 @@ private fun MessagesScreen(
             ) {
                 when {
                     pagingState.isLoading -> item {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillParentMaxSize()
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
+                        LoadingState(
+                            modifier = Modifier.fillParentMaxSize(),
+                            contentAlignment = Alignment.Center
+                        )
                     }
 
                     pagingState.items.isEmpty() -> item {
-                        Box(
-                            modifier = Modifier.fillParentMaxSize(),
+                        ErrorState(
+                            errorMessage = stringResource(id = R.string.msg_no_messages_found),
+                            textStyle = MaterialTheme.typography.h6.copy(
+                                fontFamily = appFontFamily,
+                            ),
+                            textAlign = TextAlign.Center,
                             contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.msg_no_messages_found),
-                                style = MaterialTheme.typography.h6.copy(
-                                    fontFamily = appFontFamily
-                                ),
-                                textAlign = TextAlign.Center
-                            )
-                        }
-
+                        )
                     }
 
                     else -> items(pagingState.items.size) { index ->
                         val message = pagingState.items[index]
                         if (index >= pagingState.items.size - 1 && !pagingState.endReached) {
-                            viewModel.onEvent(MessageEvent.GetMessagesForChat)
+                            onEvent(MessageScreenAction.GetMessagesForChat)
                         }
 
                         if (message.fromId == remoteUserId) {
@@ -165,13 +167,10 @@ private fun MessagesScreen(
 
             }
             SendTextField(
-                text = messageState.text,
+                state = messageFieldState,
                 hint = stringResource(id = R.string.enter_your_message),
-                onValueChange = {
-                    viewModel.onEvent(MessageEvent.EnteredMessage(it))
-                },
-                onSend = { viewModel.onEvent(MessageEvent.SendMessage) },
-                enabled = messageState.hasText && !messageState.hasError,
+                onSend = { onEvent(MessageScreenAction.SendMessage) },
+                enabled = messageFieldState.isValid,
 
                 )
         }

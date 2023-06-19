@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.EmailFieldState
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NotEmptyFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NonEmptyFieldState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.PasswordFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
@@ -26,7 +26,7 @@ class RegisterViewModel @Inject constructor(
     private val registerUseCase: RegisterUseCase
 ) : ViewModel() {
 
-    var usernameState by mutableStateOf(NotEmptyFieldState())
+    var usernameState by mutableStateOf(NonEmptyFieldState())
         private set
     var emailState by mutableStateOf(EmailFieldState())
         private set

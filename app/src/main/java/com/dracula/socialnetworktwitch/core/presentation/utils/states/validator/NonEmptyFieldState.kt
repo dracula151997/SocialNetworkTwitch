@@ -3,7 +3,7 @@ package com.dracula.socialnetworktwitch.core.presentation.utils.states.validator
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.utils.UiText
 
-class NotEmptyFieldState(
+class NonEmptyFieldState(
     newText: String? = null
 ) : TextFieldState(
     validator = ::isValid,

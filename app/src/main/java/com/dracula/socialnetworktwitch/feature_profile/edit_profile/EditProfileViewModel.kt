@@ -11,7 +11,7 @@ import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.GithubFieldState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.InstagramFieldState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.LinkedinFieldState
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NotEmptyFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NonEmptyFieldState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
@@ -42,7 +42,7 @@ class EditProfileViewModel @Inject constructor(
     var state by mutableStateOf(EditProfileState())
         private set
 
-    var usernameState by mutableStateOf(NotEmptyFieldState())
+    var usernameState by mutableStateOf(NonEmptyFieldState())
         private set
 
     var githubTextFieldState by mutableStateOf(GithubFieldState())

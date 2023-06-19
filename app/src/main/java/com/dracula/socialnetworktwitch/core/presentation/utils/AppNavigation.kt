@@ -17,7 +17,7 @@ import com.dracula.socialnetworktwitch.feature_chat.presentation.chat.ChatRoute
 import com.dracula.socialnetworktwitch.feature_chat.presentation.message.MessageRoute
 import com.dracula.socialnetworktwitch.feature_main_feed.MainFeedRoute
 import com.dracula.socialnetworktwitch.feature_post.presentation.create_post.CreatePostRoute
-import com.dracula.socialnetworktwitch.feature_post.presentation.person_list.PersonListScreen
+import com.dracula.socialnetworktwitch.feature_post.presentation.person_list.PersonListRoute
 import com.dracula.socialnetworktwitch.feature_post.presentation.post_details.PostDetailsRoute
 import com.dracula.socialnetworktwitch.feature_profile.edit_profile.EditProfileRoute
 import com.dracula.socialnetworktwitch.feature_profile.profile.ProfileRoute
@@ -88,6 +88,7 @@ fun AppNavigation(
         }
         composable(route = Screens.ChatListScreen.route) {
             ChatRoute(
+                modifier = Modifier.padding(bottom = contentPadding.calculateBottomPadding()),
                 onNavigate = navController::navigate,
                 onNavUp = navController::navigateUp,
                 showSnackbar = {
@@ -215,9 +216,14 @@ fun AppNavigation(
             requireNotNull(parentId) {
                 "Nav arguments: ${Constants.NavArguments.NAV_PARENT_ID} is null"
             }
-            PersonListScreen(
-                navController = navController,
-                scaffoldState = scaffoldState
+            PersonListRoute(
+                showSnackbar = {
+                    scope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(message = it)
+                    }
+                },
+                onNavUp = navController::navigateUp,
+                onNavigate = navController::navigate
             )
         }
     }

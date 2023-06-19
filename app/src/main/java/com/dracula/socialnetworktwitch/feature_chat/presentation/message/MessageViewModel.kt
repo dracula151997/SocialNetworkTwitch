@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.StandardTextFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NonEmptyFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.DefaultPaginator
@@ -39,7 +39,7 @@ class MessageViewModel @Inject constructor(
     private val initializeRepositoryUseCase: InitializeRepositoryUseCase,
 
     ) : ViewModel() {
-    var messageFieldState by mutableStateOf(StandardTextFieldState())
+    var messageFieldState by mutableStateOf(NonEmptyFieldState())
         private set
 
     var pagingState by mutableStateOf(PagingState<Message>())
@@ -77,15 +77,10 @@ class MessageViewModel @Inject constructor(
         observeChatMessages()
     }
 
-    fun onEvent(event: MessageEvent) {
+    fun onEvent(event: MessageScreenAction) {
         when (event) {
-            is MessageEvent.EnteredMessage -> messageFieldState = messageFieldState.copy(
-                text = event.message
-            )
-
-            MessageEvent.SendMessage -> sendMessage()
-
-            MessageEvent.GetMessagesForChat -> loadNextMessages()
+            MessageScreenAction.SendMessage -> sendMessage()
+            MessageScreenAction.GetMessagesForChat -> loadNextMessages()
         }
     }
 
@@ -131,7 +126,7 @@ class MessageViewModel @Inject constructor(
                     ?: return@launch,
                 chatId = savedStateHandle.get<String>(Constants.NavArguments.NAV_CHAT_ID)
             )
-            messageFieldState = StandardTextFieldState()
+            messageFieldState.clearText()
             _messageReceived.emit(MessageScreenEvent.MessageSent)
         }
     }

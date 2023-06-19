@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ChatRoute(
+    modifier: Modifier = Modifier,
     onNavigate: (route: String) -> Unit,
     onNavUp: () -> Unit,
     showSnackbar: (message: String) -> Unit,
@@ -47,6 +48,7 @@ fun ChatRoute(
         }
     }
     ChatScreen(
+        modifier = modifier,
         onNavigate = onNavigate,
         onEvent = { viewModel.onEvent(it) },
         state = viewModel.state,
@@ -57,6 +59,7 @@ fun ChatRoute(
 @Composable
 private fun ChatScreen(
     state: ChatScreenState,
+    modifier: Modifier = Modifier,
     onEvent: (event: ChatScreenAction) -> Unit,
     onNavigate: (route: String) -> Unit,
 ) {
@@ -65,7 +68,7 @@ private fun ChatScreen(
         onRefresh = { onEvent(ChatScreenAction.Refreshing) })
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         StandardTopBar(title = stringResource(id = R.string.chats))
         PullToRefreshBox(

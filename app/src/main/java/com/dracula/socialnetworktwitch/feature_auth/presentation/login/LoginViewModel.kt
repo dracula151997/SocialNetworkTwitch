@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.EmailFieldState
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NotEmptyFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NonEmptyFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
@@ -26,7 +26,7 @@ class LoginViewModel @Inject constructor(
     var emailState by mutableStateOf(EmailFieldState())
         private set
 
-    var passwordState by mutableStateOf(NotEmptyFieldState())
+    var passwordState by mutableStateOf(NonEmptyFieldState())
         private set
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
