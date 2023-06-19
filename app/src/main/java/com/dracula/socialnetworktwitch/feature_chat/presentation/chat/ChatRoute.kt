@@ -23,7 +23,7 @@ import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopB
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
-import com.dracula.socialnetworktwitch.core.utils.ErrorView
+import com.dracula.socialnetworktwitch.core.utils.ErrorState
 import com.dracula.socialnetworktwitch.core.utils.LoadingState
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
@@ -91,7 +91,7 @@ private fun ChatScreen(
                     }
 
                     state.chats.isEmpty() -> item {
-                        ErrorView(
+                        ErrorState(
                             errorMessage = stringResource(id = R.string.msg_no_chats_to_display),
                             modifier = Modifier.fillParentMaxSize(),
                             contentAlignment = Alignment.Center,

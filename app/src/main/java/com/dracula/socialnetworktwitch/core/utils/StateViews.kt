@@ -25,7 +25,7 @@ fun LoadingState(
 }
 
 @Composable
-fun ErrorView(
+fun ErrorState(
     errorMessage: String,
     modifier: Modifier = Modifier,
     contentAlignment: Alignment = Alignment.Center,

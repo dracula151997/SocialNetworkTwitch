@@ -25,7 +25,7 @@ import com.dracula.socialnetworktwitch.core.presentation.components.PullToRefres
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
-import com.dracula.socialnetworktwitch.core.utils.ErrorView
+import com.dracula.socialnetworktwitch.core.utils.ErrorState
 import com.dracula.socialnetworktwitch.core.utils.LoadingState
 import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
@@ -105,7 +105,7 @@ private fun MainFeedScreen(
                     }
 
                     posts.isEmpty() -> item {
-                        ErrorView(
+                        ErrorState(
                             errorMessage = stringResource(id = R.string.msg_no_posts_to_display),
                             modifier = Modifier.fillParentMaxSize(),
                             textStyle = MaterialTheme.typography.h6.copy(

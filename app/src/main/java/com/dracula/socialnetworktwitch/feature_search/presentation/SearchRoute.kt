@@ -1,6 +1,5 @@
 package com.dracula.socialnetworktwitch.feature_search.presentation
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,12 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PersonRemove
@@ -39,6 +36,9 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
+import com.dracula.socialnetworktwitch.core.utils.ErrorState
+import com.dracula.socialnetworktwitch.core.utils.LoadingState
 import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 
@@ -49,29 +49,7 @@ fun SearchRoute(
     onNavigate: (route: String) -> Unit
 ) {
     val viewModel: SearchViewModel = hiltViewModel()
-    SearchScreen(
-        viewModel = viewModel,
-        showSnackbar = showSnackbar,
-        onNavUp = onNavUp,
-        onNavigate = onNavigate
-    )
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun SearchScreen(
-    viewModel: SearchViewModel,
-    showSnackbar: (message: String) -> Unit,
-    onNavUp: () -> Unit,
-    onNavigate: (route: String) -> Unit
-) {
-    val state = viewModel.state
-    val searchFieldState = viewModel.searchFieldState
     val context = LocalContext.current
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = state.refreshing,
-        onRefresh = { viewModel.onEvent(SearchAction.Refreshing) })
-
     LaunchedEffect(key1 = true) {
         viewModel.event.collectLatest { event ->
             when (event) {
@@ -80,6 +58,28 @@ private fun SearchScreen(
             }
         }
     }
+    SearchScreen(
+        onNavUp = onNavUp,
+        onNavigate = onNavigate,
+        onEvent = viewModel::onEvent,
+        state = viewModel.state,
+        searchFieldState = viewModel.searchFieldState
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun SearchScreen(
+    state: SearchState,
+    searchFieldState: TextFieldState,
+    onEvent: (event: SearchAction) -> Unit,
+    onNavUp: () -> Unit,
+    onNavigate: (route: String) -> Unit
+) {
+    val pullRefreshState = rememberPullRefreshState(refreshing = state.refreshing,
+        onRefresh = { onEvent(SearchAction.Refreshing) })
+
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -98,56 +98,45 @@ private fun SearchScreen(
                 hint = stringResource(id = R.string.search),
                 leadingIcon = Icons.Default.Search,
                 doOnValueChanged = {
-                    viewModel.onEvent(SearchAction.OnSearch(it))
+                    onEvent(SearchAction.OnSearch(it))
                 },
             )
             Spacer(modifier = Modifier.height(SpaceLarge))
             PullToRefreshBox(
-                state = pullRefreshState,
-                refreshing = state.refreshing
+                state = pullRefreshState, refreshing = state.refreshing
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     when {
                         state.isLoading -> item {
-                            Box(
-                                modifier = Modifier.fillParentMaxSize()
-                            ) {
-                                CircularProgressIndicator(modifier = Modifier.align(Center))
-                            }
+                            LoadingState(
+                                modifier = Modifier.fillParentMaxSize(), contentAlignment = Center
+                            )
                         }
 
                         state.userItems == null -> item {
-                            Box(
+                            ErrorState(
+                                errorMessage = stringResource(id = R.string.msg_try_to_enter_the_username),
+                                textStyle = MaterialTheme.typography.h6.copy(
+                                    fontFamily = appFontFamily
+                                ),
+                                textAlign = TextAlign.Center,
                                 modifier = Modifier.fillParentMaxSize(),
                                 contentAlignment = Center
-                            ) {
-                                Text(
-                                    text = stringResource(id = R.string.msg_try_to_enter_the_username),
-                                    style = MaterialTheme.typography.h2.copy(
-                                        fontFamily = appFontFamily
-                                    ),
-                                    textAlign = TextAlign.Center
-                                )
-
-                            }
+                            )
                         }
 
                         state.userItems.isEmpty() -> item {
-                            Box(
+                            ErrorState(
+                                errorMessage = stringResource(id = R.string.msg_no_username_found),
+                                textStyle = MaterialTheme.typography.h6.copy(
+                                    fontFamily = appFontFamily
+                                ),
+                                textAlign = TextAlign.Center,
                                 modifier = Modifier.fillParentMaxSize(),
                                 contentAlignment = Center
-                            ) {
-                                Text(
-                                    text = stringResource(id = R.string.msg_no_username_found),
-                                    style = MaterialTheme.typography.h2.copy(
-                                        fontFamily = appFontFamily
-                                    ),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-
+                            )
                         }
 
                         else -> items(state.userItems) { user ->
@@ -156,7 +145,7 @@ private fun SearchScreen(
                                 actionIcon = {
                                     IconButton(
                                         onClick = {
-                                            viewModel.onEvent(SearchAction.ToggleFollowState(userId = user.userId))
+                                            onEvent(SearchAction.ToggleFollowState(userId = user.userId))
                                         },
                                     ) {
                                         Icon(
