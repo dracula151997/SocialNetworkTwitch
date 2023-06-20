@@ -1,23 +1,15 @@
 package com.dracula.socialnetworktwitch.feature_profile.profile
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.R
-import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
+import com.dracula.socialnetworktwitch.core.presentation.utils.BaseViewModel
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
-import com.dracula.socialnetworktwitch.core.utils.BaseUiEvent
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.DefaultPaginator
-import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.core.utils.ParentType
 import com.dracula.socialnetworktwitch.core.utils.PostLiker
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
-import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.DeletePostUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.ToggleLikeForParentUseCase
@@ -26,10 +18,6 @@ import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetUserPo
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.LogoutUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.ToggleFollowStateForUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -43,23 +31,17 @@ class ProfileViewModel @Inject constructor(
     private val deletePostUseCase: DeletePostUseCase,
     private val toggleFollowStateForUserUseCase: ToggleFollowStateForUserUseCase,
     private val savedStateHandle: SavedStateHandle,
-) : ViewModel() {
+) : BaseViewModel<ProfileState, ProfileScreenEvent>() {
 
-    private val _state = MutableStateFlow(ProfileState())
-    val state = _state.asStateFlow()
-
-    private val _eventFlow = MutableSharedFlow<BaseUiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
-
-    var postsPagingState by mutableStateOf<PagingState<Post>>(PagingState())
-        private set
 
     @Inject
     lateinit var postLiker: PostLiker
 
     private val paginator = DefaultPaginator(
         onLoad = { isLoading, refreshing ->
-            postsPagingState = postsPagingState.copy(isLoading = isLoading, refreshing = refreshing)
+            setState {
+                copy(isLoading = isLoading, refreshing = refreshing)
+            }
         },
         onRequest = { page ->
             getUserPostsUseCase(
@@ -70,67 +52,72 @@ class ProfileViewModel @Inject constructor(
             )
         },
         onSuccess = { result ->
-            postsPagingState = postsPagingState.copy(
-                isLoading = false,
-                items = postsPagingState.items + result,
-                endReached = result.isEmpty()
-            )
+            setState {
+                copy(
+                    isLoading = false,
+                    pagingState = viewState.pagingState.addNewItems(result)
+                )
+            }
         },
         onError = { message ->
-            viewModelScope.launch {
-                _eventFlow.emit(UiEvent.ShowSnackbar(message))
-            }
+            showSnackbar(message)
         }
     )
 
     init {
-        onEvent(ProfileScreenAction.LoadNextPosts)
+        onEvent(ProfileScreenEvent.LoadNextPosts)
     }
 
 
-    fun onEvent(event: ProfileScreenAction) {
+    override fun initialState(): ProfileState {
+        return ProfileState()
+    }
+
+    override fun onEvent(event: ProfileScreenEvent) {
         when (event) {
-            is ProfileScreenAction.GetProfile -> {
+            is ProfileScreenEvent.GetProfile -> {
                 getProfile(event.userId)
             }
 
-            is ProfileScreenAction.LikePost -> {
+            is ProfileScreenEvent.LikePost -> {
                 toggleLikeForPost(
                     event.postId
                 )
             }
 
-            ProfileScreenAction.HideLogoutDialog -> _state.value = state.value.copy(
-                showLogoutDialog = false
-            )
+            ProfileScreenEvent.HideLogoutDialog -> {
+                setState { copy(showLogoutDialog = false) }
+            }
 
-            ProfileScreenAction.ShowLogoutDialog -> _state.value = state.value.copy(
-                showLogoutDialog = true
-            )
+            ProfileScreenEvent.ShowLogoutDialog -> {
+                setState { copy(showLogoutDialog = true) }
+            }
 
-            ProfileScreenAction.ShowMorePopupMenu -> _state.value = state.value.copy(
-                showMorePopupMenu = true
-            )
+            ProfileScreenEvent.ShowMorePopupMenu -> {
+                setState { copy(showMorePopupMenu = true) }
+            }
 
-            ProfileScreenAction.ShowMorePopupMenu -> _state.value = state.value.copy(
-                showMorePopupMenu = false
-            )
+            ProfileScreenEvent.ShowMorePopupMenu -> {
+                setState { copy(showMorePopupMenu = false) }
+            }
 
-            ProfileScreenAction.Logout -> {
-                _state.value = state.value.copy(
-                    showLogoutDialog = false
-                )
+            ProfileScreenEvent.Logout -> {
+                setState {
+                    copy(
+                        showLogoutDialog = false
+                    )
+                }
                 logoutUseCase()
             }
 
-            is ProfileScreenAction.DeletePost -> deletePost(event.postId)
-            is ProfileScreenAction.ToggleFollowStateForUser -> toggleFollowStateForUser(userId = event.userId)
-            is ProfileScreenAction.Refreshing -> {
+            is ProfileScreenEvent.DeletePost -> deletePost(event.postId)
+            is ProfileScreenEvent.ToggleFollowStateForUser -> toggleFollowStateForUser(userId = event.userId)
+            is ProfileScreenEvent.Refreshing -> {
                 getProfile(userId = event.userId, refreshing = true)
                 loadNextPost(refreshing = true)
             }
 
-            ProfileScreenAction.LoadNextPosts -> loadNextPost()
+            ProfileScreenEvent.LoadNextPosts -> loadNextPost()
         }
     }
 
@@ -138,14 +125,18 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = deletePostUseCase(postId)) {
                 is ApiResult.Success -> {
-                    postsPagingState = postsPagingState.copy(
-                        items = postsPagingState.items.filter { it.id != postId }
-                    )
-                    _eventFlow.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.successfully_deleted_post)))
+                    setState {
+                        copy(
+                            pagingState = viewState.pagingState.copy(
+                                items = viewState.pagingState.items.filter { it.id != postId }
+                            )
+                        )
+                    }
+                    showSnackbar(R.string.successfully_deleted_post)
                 }
 
                 is ApiResult.Error -> {
-                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
+                    showSnackbar(result.uiText.orUnknownError())
                 }
             }
         }
@@ -159,26 +150,28 @@ class ProfileViewModel @Inject constructor(
 
     private fun getProfile(userId: String?, refreshing: Boolean = false) {
         viewModelScope.launch {
-            _state.value = state.value.copy(
-                isLoading = !refreshing,
-                refreshing = refreshing,
-            )
-            when (val result = getProfileUseCase(userId ?: getOwnUserIdUseCase())) {
+            setState {
+                copy(
+                    isLoading = !refreshing,
+                    refreshing = refreshing
+                )
+            }
+            val result = getProfileUseCase(userId ?: getOwnUserIdUseCase())
+            setState {
+                copy(
+                    isLoading = false,
+                    refreshing = false,
+                )
+            }
+
+            when (result) {
                 is ApiResult.Success -> {
-                    _state.value = state.value.copy(
-                        isLoading = false,
-                        refreshing = false,
-                        data = result.data
-                    )
+                    setState { copy(data = result.data) }
+
                 }
 
                 is ApiResult.Error -> {
-                    _state.value = state.value.copy(
-                        isLoading = false,
-                        refreshing = false,
-                        data = result.data
-                    )
-                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
+                    showSnackbar(result.uiText.orUnknownError())
                 }
             }
         }
@@ -187,14 +180,18 @@ class ProfileViewModel @Inject constructor(
     private fun toggleLikeForPost(postId: String) {
         viewModelScope.launch {
             postLiker.likePost(
-                posts = postsPagingState.items,
+                posts = viewState.pagingState.items,
                 postId = postId,
                 onRequest = { currentlyLiked ->
                     toggleLikeForParentUseCase(postId, ParentType.Post.type, currentlyLiked)
                 },
                 onError = {},
                 onStateUpdated = { newPosts ->
-                    postsPagingState = postsPagingState.copy(items = newPosts)
+                    setState {
+                        copy(
+                            pagingState = viewState.pagingState.copy(items = newPosts)
+                        )
+                    }
 
                 }
             )
@@ -203,33 +200,40 @@ class ProfileViewModel @Inject constructor(
 
     private fun toggleFollowStateForUser(userId: String) {
         viewModelScope.launch {
-            val isFollowing = state.value.data?.isFollowing ?: false
-            val followerCount = state.value.data?.followerCount ?: 0
-            _state.value = state.value.copy(
-                data = state.value.data?.copy(isFollowing = !isFollowing)
-            )
+            val isFollowing = viewState.data?.isFollowing ?: false
+            val followerCount = viewState.data?.followerCount ?: 0
+            setState {
+                copy(
+                    data = viewState.data?.copy(isFollowing = !isFollowing)
+                )
+            }
+
             val result = toggleFollowStateForUserUseCase(
                 userId = userId, isFollowing = isFollowing
             )
             when (result) {
                 is ApiResult.Success -> {
-                    _state.value = state.value.copy(
-                        data = state.value.data?.copy(
-                            followerCount = if (isFollowing) followerCount.minus(1) else followerCount.plus(
-                                1
-                            ),
+                    setState {
+                        copy(
+                            data = viewState.data?.copy(
+                                followerCount = if (isFollowing) followerCount.minus(1) else followerCount.plus(
+                                    1
+                                )
+                            )
                         )
-                    )
+                    }
                 }
 
                 is ApiResult.Error -> {
-                    _state.value = state.value.copy(
-                        data = state.value.data?.copy(
-                            isFollowing = isFollowing,
-                            followerCount = followerCount
+                    setState {
+                        copy(
+                            data = viewState.data?.copy(
+                                isFollowing = isFollowing,
+                                followerCount = followerCount
+                            )
                         )
-                    )
-                    _eventFlow.emit(UiEvent.ShowSnackbar(uiText = result.uiText.orUnknownError()))
+                    }
+                    showSnackbar(uiText = result.uiText.orUnknownError())
                 }
 
             }

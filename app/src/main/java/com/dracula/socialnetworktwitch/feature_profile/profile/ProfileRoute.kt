@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.model.Post
 import com.dracula.socialnetworktwitch.core.domain.model.User
@@ -37,10 +36,10 @@ import com.dracula.socialnetworktwitch.core.presentation.components.StandardAler
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
+import com.dracula.socialnetworktwitch.core.presentation.utils.CommonUiEffect
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.LoadingState
 import com.dracula.socialnetworktwitch.core.utils.PagingState
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.openUrlInBrowser
 import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
 import com.dracula.socialnetworktwitch.feature_post.presentation.components.PostItem
@@ -59,14 +58,13 @@ fun ProfileRoute(
     navigateToLogin: () -> Unit,
 ) {
     val viewModel: ProfileViewModel = hiltViewModel()
-    val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
-        viewModel.onEvent(ProfileScreenAction.GetProfile(userId))
+        viewModel.onEvent(ProfileScreenEvent.GetProfile(userId))
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
-                is UiEvent.Navigate -> onNavigate(event.route)
+                is CommonUiEffect.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
+                is CommonUiEffect.Navigate -> onNavigate(event.route)
                 else -> Unit
             }
 
@@ -77,9 +75,9 @@ fun ProfileRoute(
         userId = userId,
         onNavigate = onNavigate,
         navigateToLogin = navigateToLogin,
-        state = state,
+        state = viewModel.viewState,
         onEvent = { viewModel.onEvent(it) },
-        userPosts = viewModel.postsPagingState
+        userPosts = viewModel.viewState.pagingState
     )
 }
 
@@ -90,7 +88,7 @@ private fun ProfileScreen(
     userPosts: PagingState<Post>,
     userId: String?,
     modifier: Modifier = Modifier,
-    onEvent: (event: ProfileScreenAction) -> Unit,
+    onEvent: (event: ProfileScreenEvent) -> Unit,
     onNavigate: (route: String) -> Unit,
     navigateToLogin: () -> Unit,
 ) {
@@ -102,7 +100,7 @@ private fun ProfileScreen(
     val pullToRefreshState =
         rememberPullRefreshState(
             refreshing = state.refreshing,
-            onRefresh = { onEvent(ProfileScreenAction.Refreshing(userId = userId)) })
+            onRefresh = { onEvent(ProfileScreenEvent.Refreshing(userId = userId)) })
 
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -138,7 +136,7 @@ private fun ProfileScreen(
                             Text(text = stringResource(id = R.string.edit_your_profile))
                         }
                         DropdownMenuItem(onClick = {
-                            onEvent(ProfileScreenAction.ShowLogoutDialog)
+                            onEvent(ProfileScreenEvent.ShowLogoutDialog)
                             showPopupMenu = false
                         }) {
                             Text(text = stringResource(id = R.string.logout))
@@ -209,7 +207,7 @@ private fun ProfileScreen(
                             isFollowing = profile.isFollowing,
                             onFollowClicked = {
                                 onEvent(
-                                    ProfileScreenAction.ToggleFollowStateForUser(
+                                    ProfileScreenEvent.ToggleFollowStateForUser(
                                         profile.userId,
                                     ),
                                 )
@@ -221,7 +219,7 @@ private fun ProfileScreen(
                 items(userPosts.items.size) { index ->
                     val post = userPosts.items[index]
                     if (index > userPosts.items.size - 1 && !userPosts.endReached && !userPosts.isLoading) {
-                        onEvent(ProfileScreenAction.LoadNextPosts)
+                        onEvent(ProfileScreenEvent.LoadNextPosts)
                     }
                     PostItem(
                         post = post,
@@ -238,14 +236,14 @@ private fun ProfileScreen(
                             )
                         },
                         onLikeClicked = {
-                            onEvent(ProfileScreenAction.LikePost(post.id))
+                            onEvent(ProfileScreenEvent.LikePost(post.id))
                         },
                         onShareClicked = {
                             context.sendSharePostIntent(postId = post.id)
                         },
                         onUsernameClicked = {},
                         onDeleteClicked = { postId ->
-                            onEvent(ProfileScreenAction.DeletePost(postId))
+                            onEvent(ProfileScreenEvent.DeletePost(postId))
                         },
                     )
                 }
@@ -260,13 +258,13 @@ private fun ProfileScreen(
                 negativeButtonText = stringResource(id = R.string.dismiss_btn),
                 title = stringResource(id = R.string.logout),
                 onPositiveButtonClicked = {
-                    onEvent(ProfileScreenAction.Logout)
+                    onEvent(ProfileScreenEvent.Logout)
                     navigateToLogin()
                 },
                 onNegativeButtonClicked = {
-                    onEvent(ProfileScreenAction.HideLogoutDialog)
+                    onEvent(ProfileScreenEvent.HideLogoutDialog)
                 },
-                onDismissed = { onEvent(ProfileScreenAction.HideLogoutDialog) }
+                onDismissed = { onEvent(ProfileScreenEvent.HideLogoutDialog) }
             )
         }
 

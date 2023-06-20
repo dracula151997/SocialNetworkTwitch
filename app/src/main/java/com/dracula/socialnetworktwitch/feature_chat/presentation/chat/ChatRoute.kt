@@ -22,10 +22,10 @@ import com.dracula.socialnetworktwitch.core.presentation.components.PullToRefres
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
+import com.dracula.socialnetworktwitch.core.presentation.utils.CommonUiEffect
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.ErrorState
 import com.dracula.socialnetworktwitch.core.utils.LoadingState
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -40,9 +40,9 @@ fun ChatRoute(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
-                is UiEvent.Navigate -> onNavigate(event.route)
-                UiEvent.NavigateUp -> onNavUp()
+                is CommonUiEffect.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
+                is CommonUiEffect.Navigate -> onNavigate(event.route)
+                CommonUiEffect.NavigateUp -> onNavUp()
 
             }
         }
@@ -51,7 +51,7 @@ fun ChatRoute(
         modifier = modifier,
         onNavigate = onNavigate,
         onEvent = { viewModel.onEvent(it) },
-        state = viewModel.state,
+        state = viewModel.viewState,
     )
 }
 
@@ -60,12 +60,12 @@ fun ChatRoute(
 private fun ChatScreen(
     state: ChatScreenState,
     modifier: Modifier = Modifier,
-    onEvent: (event: ChatScreenAction) -> Unit,
+    onEvent: (event: ChatScreenEvent) -> Unit,
     onNavigate: (route: String) -> Unit,
 ) {
     val pullToRefreshState = rememberPullRefreshState(
         refreshing = state.refreshing,
-        onRefresh = { onEvent(ChatScreenAction.Refreshing) })
+        onRefresh = { onEvent(ChatScreenEvent.Refreshing) })
 
     Column(
         modifier = modifier.fillMaxSize()

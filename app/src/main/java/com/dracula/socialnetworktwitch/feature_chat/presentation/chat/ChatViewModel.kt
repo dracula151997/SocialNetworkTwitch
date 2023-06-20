@@ -1,18 +1,13 @@
 package com.dracula.socialnetworktwitch.feature_chat.presentation.chat
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dracula.socialnetworktwitch.core.presentation.utils.BaseViewModel
+import com.dracula.socialnetworktwitch.core.presentation.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.GetChatsForUserUseCase
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.InitializeRepositoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,53 +15,56 @@ import javax.inject.Inject
 class ChatViewModel @Inject constructor(
     private val getChatsForUserUseCase: GetChatsForUserUseCase,
     initializeRepositoryUseCase: InitializeRepositoryUseCase,
-) : ViewModel() {
-    var state by mutableStateOf(ChatScreenState())
-        private set
+) : BaseViewModel<ChatScreenState, ChatScreenEvent>() {
 
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
-
-    fun onEvent(event: ChatScreenAction) {
+    override fun onEvent(event: ChatScreenEvent) {
         when (event) {
-            ChatScreenAction.Refreshing -> {
+            ChatScreenEvent.Refreshing -> {
                 getChatsForUser(refreshing = true)
             }
         }
     }
+
+    override fun initialState(): ChatScreenState {
+        return ChatScreenState()
+    }
+
 
     init {
         initializeRepositoryUseCase()
         getChatsForUser()
     }
 
-
     private fun getChatsForUser(refreshing: Boolean = false) {
         viewModelScope.launch {
-            state = state.copy(
-                isLoading = !refreshing,
-                refreshing = refreshing
-            )
-            val response = getChatsForUserUseCase()
-            state = state.copy(
-                isLoading = false,
-                refreshing = false
-            )
-            when (response) {
-                is ApiResult.Success -> state = state.copy(
-                    chats = response.data.orEmpty()
+            setState {
+                copy(
+                    isLoading = !refreshing,
+                    refreshing = refreshing
                 )
+            }
+            val response = getChatsForUserUseCase()
+            setState {
+                copy(
+                    isLoading = false,
+                    refreshing = false
+                )
+            }
+            when (response) {
+                is ApiResult.Success -> {
+                    setState {
+                        copy(chats = response.data.orEmpty())
+                    }
+                }
 
                 is ApiResult.Error -> {
-                    _eventFlow.emit(
-                        UiEvent.ShowSnackbar(response.uiText.orUnknownError())
-                    )
+                    showSnackbar(response.uiText.orUnknownError())
                 }
             }
         }
     }
 }
 
-sealed interface ChatScreenAction {
-    object Refreshing : ChatScreenAction
+sealed class ChatScreenEvent : UiEvent() {
+    object Refreshing : ChatScreenEvent()
 }
