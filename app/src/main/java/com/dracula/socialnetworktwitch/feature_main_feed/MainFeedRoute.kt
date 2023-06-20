@@ -24,11 +24,11 @@ import com.dracula.socialnetworktwitch.core.presentation.Semantics
 import com.dracula.socialnetworktwitch.core.presentation.components.PullToRefreshBox
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
+import com.dracula.socialnetworktwitch.core.presentation.utils.CommonUiEffect
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.ErrorState
 import com.dracula.socialnetworktwitch.core.utils.LoadingState
 import com.dracula.socialnetworktwitch.core.utils.PagingState
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
 import com.dracula.socialnetworktwitch.feature_post.presentation.components.PostItem
 import kotlinx.coroutines.flow.collectLatest
@@ -45,16 +45,16 @@ fun MainFeedRoute(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
-                is UiEvent.Navigate -> onNavigate(event.route)
-                UiEvent.NavigateUp -> onNavUp()
+                is CommonUiEffect.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
+                is CommonUiEffect.Navigate -> onNavigate(event.route)
+                CommonUiEffect.NavigateUp -> onNavUp()
             }
         }
     }
     MainFeedScreen(
         modifier = modifier,
         onNavigate = onNavigate,
-        postsPagingState = viewModel.postsPagingState,
+        postsPagingState = viewModel.viewState,
         onEvent = { event ->
             viewModel.onEvent(event)
         }
@@ -68,7 +68,7 @@ fun MainFeedRoute(
 private fun MainFeedScreen(
     modifier: Modifier = Modifier,
     postsPagingState: PagingState<Post>,
-    onEvent: (event: MainFeedAction) -> Unit,
+    onEvent: (event: MainFeedEvent) -> Unit,
     onNavigate: (route: String) -> Unit,
 ) {
     val posts = postsPagingState.items
@@ -76,7 +76,7 @@ private fun MainFeedScreen(
     val pullToRefreshState =
         rememberPullRefreshState(
             refreshing = postsPagingState.refreshing,
-            onRefresh = { onEvent(MainFeedAction.Refresh) })
+            onRefresh = { onEvent(MainFeedEvent.Refresh) })
 
     Column(
         modifier = modifier
@@ -117,7 +117,7 @@ private fun MainFeedScreen(
                     else -> items(posts.size) { index ->
                         val post = posts[index]
                         if (index > posts.size - 1 && !postsPagingState.endReached) {
-                            onEvent(MainFeedAction.LoadNextPosts)
+                            onEvent(MainFeedEvent.LoadNextPosts)
                         }
                         PostItem(
                             post = post,
@@ -136,7 +136,7 @@ private fun MainFeedScreen(
                                 )
                             },
                             onShareClicked = { context.sendSharePostIntent(postId = post.id) },
-                            onLikeClicked = { onEvent(MainFeedAction.LikePost(post.id)) },
+                            onLikeClicked = { onEvent(MainFeedEvent.LikePost(post.id)) },
                             onCommentClicked = {
                                 onNavigate(
                                     Screens.PostDetailsScreen.createRoute(
@@ -146,7 +146,7 @@ private fun MainFeedScreen(
                                 )
                             },
                             onDeleteClicked = { postId ->
-                                onEvent(MainFeedAction.DeletePost(postId))
+                                onEvent(MainFeedEvent.DeletePost(postId))
                             }
                         )
 

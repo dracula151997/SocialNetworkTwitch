@@ -1,7 +1,6 @@
 package com.dracula.socialnetworktwitch.feature_activity.presentation
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -36,11 +34,13 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.StandardElevation
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
+import com.dracula.socialnetworktwitch.core.presentation.utils.CommonUiEffect
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.utils.ActivityType
 import com.dracula.socialnetworktwitch.core.utils.Constants
+import com.dracula.socialnetworktwitch.core.utils.ErrorState
+import com.dracula.socialnetworktwitch.core.utils.LoadingState
 import com.dracula.socialnetworktwitch.core.utils.PagingState
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.feature_activity.domain.model.Activity
 import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
@@ -55,8 +55,8 @@ fun ActivityRoute(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.Navigate -> onNavigate(event.route)
-                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
+                is CommonUiEffect.Navigate -> onNavigate(event.route)
+                is CommonUiEffect.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
                 else -> Unit
             }
         }
@@ -64,7 +64,7 @@ fun ActivityRoute(
 
     ActivityScreen(
         onNavigate = onNavigate,
-        activitiesPagingState = viewModel.activitiesPagingState,
+        activitiesPagingState = viewModel.viewState,
         onEvent = { viewModel.onEvent(it) },
     )
 }
@@ -93,31 +93,29 @@ private fun ActivityScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
-                    horizontal = PaddingMedium, vertical = PaddingMedium
+                    horizontal = PaddingMedium,
+                    vertical = PaddingMedium
                 ),
                 verticalArrangement = Arrangement.spacedBy(SpaceMedium)
             ) {
                 when {
                     activitiesPagingState.isLoading -> item {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center)
+                        LoadingState(
+                            modifier = Modifier.fillParentMaxSize(),
+                            contentAlignment = Alignment.Center,
                         )
                     }
 
                     activities.isEmpty() -> item {
-                        Box(
-                            modifier = Modifier.fillParentMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.msg_no_activities_right_now),
-                                style = MaterialTheme.typography.h6.copy(
-                                    fontFamily = appFontFamily
-                                ),
-                                textAlign = TextAlign.Center
-                            )
-                        }
-
+                        ErrorState(
+                            errorMessage = stringResource(id = R.string.msg_no_activities_right_now),
+                            contentAlignment = Alignment.Center,
+                            textStyle = MaterialTheme.typography.h6.copy(
+                                fontFamily = appFontFamily
+                            ),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillParentMaxSize()
+                        )
                     }
 
                     else -> items(
@@ -136,7 +134,9 @@ private fun ActivityScreen(
 
 @Composable
 fun ActivityItem(
-    activity: Activity, modifier: Modifier = Modifier, onNavigate: (route: String) -> Unit
+    activity: Activity,
+    modifier: Modifier = Modifier,
+    onNavigate: (route: String) -> Unit
 ) {
     Card(
         modifier = modifier,
@@ -191,9 +191,10 @@ fun ActivityItem(
                     append(actionText)
                 }
             }
-            ClickableText(text = activityAnnotatedString,
+            ClickableText(
+                text = activityAnnotatedString,
                 style = MaterialTheme.typography.body2.copy(
-                    fontSize = 12.sp
+                    fontSize = 12.sp,
                 ),
                 onClick = { offset ->
                     activityAnnotatedString.getStringAnnotations(offset, offset).firstOrNull()
@@ -201,16 +202,17 @@ fun ActivityItem(
                             Timber.d(annotation.tag)
                             when (annotation.tag) {
                                 Constants.AnnotatedStringTags.ANNOTATION_TAG_USERNAME -> onNavigate(
-                                    Screens.ProfileScreen.createRoute(userId = activity.userId)
+                                    Screens.ProfileScreen.createRoute(userId = activity.userId),
                                 )
 
                                 Constants.AnnotatedStringTags.ANNOTATION_TAG_PARENT_ID -> onNavigate(
-                                    Screens.PostDetailsScreen.createRoute(postId = activity.parentId)
+                                    Screens.PostDetailsScreen.createRoute(postId = activity.parentId),
                                 )
                             }
 
                         }
-                })
+                },
+            )
             Text(
                 text = activity.formattedTime,
                 color = MaterialTheme.colors.onBackground,

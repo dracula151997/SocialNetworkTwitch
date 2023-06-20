@@ -17,7 +17,10 @@ class DefaultPaginator<T>(
                 onLoad(false, false)
             }
 
-            is ApiResult.Error -> onError(result.uiText.orUnknownError())
+            is ApiResult.Error -> {
+                onError(result.uiText.orUnknownError())
+                onLoad(false, false)
+            }
         }
 
     }
