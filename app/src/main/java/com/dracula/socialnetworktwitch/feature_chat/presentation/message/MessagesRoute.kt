@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
@@ -34,7 +35,6 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ErrorState
-import com.dracula.socialnetworktwitch.core.utils.LoadingState
 import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.feature_chat.domain.model.Message
 import kotlinx.coroutines.flow.collectLatest
@@ -50,20 +50,20 @@ fun MessageRoute(
     onNavUp: () -> Unit
 ) {
     val viewModel: MessageViewModel = hiltViewModel()
-    val pagingState = viewModel.pagingState
+    val pagingState = viewModel.viewState
     val keyboardController = LocalSoftwareKeyboardController.current
     val scrollState = rememberLazyListState()
     LaunchedEffect(key1 = pagingState) {
         viewModel.messageReceived.collectLatest {
             when (it) {
-                MessageScreenEvent.AllMessagesLoaded -> if (pagingState.items.isNotEmpty()) scrollState.animateScrollToItem(
-                    index = pagingState.items.size - 1
+                MessageScreenEvent.AllMessagesLoaded -> if (pagingState.isNotEmpty()) scrollState.animateScrollToItem(
+                    index = pagingState.lastIndex
                 )
 
                 MessageScreenEvent.MessageSent -> keyboardController?.hide()
                 MessageScreenEvent.NewMessageReceived -> {
-                    if (pagingState.items.isNotEmpty() && pagingState.items.size > 1)
-                        scrollState.animateScrollToItem(index = pagingState.items.size - 1)
+                    if (pagingState.isNotEmpty() && pagingState.moreThanOneItem)
+                        scrollState.animateScrollToItem(index = pagingState.lastIndex)
                 }
             }
 
@@ -77,7 +77,7 @@ fun MessageRoute(
         encodedRemoteUserProfilePic = encodedRemoteUserProfilePic,
         messageFieldState = viewModel.messageFieldState,
         onEvent = viewModel::onEvent,
-        pagingState = viewModel.pagingState,
+        pagingState = pagingState,
         scrollState = scrollState
     )
 }
@@ -125,13 +125,6 @@ private fun MessagesScreen(
                 state = scrollState
             ) {
                 when {
-                    pagingState.isLoading -> item {
-                        LoadingState(
-                            modifier = Modifier.fillParentMaxSize(),
-                            contentAlignment = Alignment.Center
-                        )
-                    }
-
                     pagingState.items.isEmpty() -> item {
                         ErrorState(
                             errorMessage = stringResource(id = R.string.msg_no_messages_found),
@@ -143,9 +136,8 @@ private fun MessagesScreen(
                         )
                     }
 
-                    else -> items(pagingState.items.size) { index ->
-                        val message = pagingState.items[index]
-                        if (index >= pagingState.items.size - 1 && !pagingState.endReached) {
+                    else -> itemsIndexed(pagingState.items) { index, message ->
+                        if (index >= pagingState.lastIndex && !pagingState.endReached) {
                             onEvent(MessageScreenAction.GetMessagesForChat)
                         }
 

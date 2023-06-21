@@ -1,6 +1,8 @@
 package com.dracula.socialnetworktwitch.feature_chat.presentation.message
 
-sealed interface MessageScreenAction {
-    object SendMessage : MessageScreenAction
-    object GetMessagesForChat : MessageScreenAction
+import com.dracula.socialnetworktwitch.core.presentation.utils.UiEvent
+
+sealed class MessageScreenAction : UiEvent() {
+    object SendMessage : MessageScreenAction()
+    object GetMessagesForChat : MessageScreenAction()
 }

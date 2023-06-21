@@ -4,14 +4,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dracula.socialnetworktwitch.core.presentation.utils.BaseViewModel
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NonEmptyFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.DefaultPaginator
 import com.dracula.socialnetworktwitch.core.utils.PagingState
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.feature_chat.domain.model.Message
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.GetMessagesForChatUseCase
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,24 +35,18 @@ class MessageViewModel @Inject constructor(
     private val observeMessagesUseCase: ObserveMessagesUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val initializeRepositoryUseCase: InitializeRepositoryUseCase,
-
-    ) : ViewModel() {
+) : BaseViewModel<PagingState<Message>, MessageScreenAction>() {
     var messageFieldState by mutableStateOf(NonEmptyFieldState())
         private set
-
-    var pagingState by mutableStateOf(PagingState<Message>())
-        private set
-
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
 
     private val _messageReceived = MutableSharedFlow<MessageScreenEvent>(replay = 1)
     val messageReceived = _messageReceived.asSharedFlow()
 
     private val paginator = DefaultPaginator(
-        onLoad = { isLoading, _ ->
-            Timber.d("isLoading: $isLoading")
-            pagingState = pagingState.copy(isLoading = isLoading)
+        onLoad = { isLoading, refreshing ->
+            setState {
+                copy(isLoading = isLoading, refreshing = refreshing)
+            }
         },
         onRequest = { nextPage ->
             savedStateHandle.get<String>(Constants.NavArguments.NAV_CHAT_ID)?.let { chatId ->
@@ -63,10 +55,10 @@ class MessageViewModel @Inject constructor(
 
         },
         onSuccess = { messages ->
-            pagingState = pagingState.addNewItems(newItems = messages)
+            setState { addNewItems(newItems = messages) }
         },
         onError = { errorMessage ->
-            _eventFlow.emit(UiEvent.ShowSnackbar(errorMessage))
+            showSnackbar(errorMessage)
         }
     )
 
@@ -77,7 +69,7 @@ class MessageViewModel @Inject constructor(
         observeChatMessages()
     }
 
-    fun onEvent(event: MessageScreenAction) {
+    override fun onEvent(event: MessageScreenAction) {
         when (event) {
             MessageScreenAction.SendMessage -> sendMessage()
             MessageScreenAction.GetMessagesForChat -> loadNextMessages()
@@ -112,9 +104,11 @@ class MessageViewModel @Inject constructor(
     private fun observeChatMessages() {
         observeMessagesUseCase()
             .onEach { newMessage ->
-                pagingState = pagingState.copy(
-                    items = pagingState.items + newMessage
-                )
+                setState {
+                    copy(
+                        items = viewState.items + newMessage
+                    )
+                }
             }.launchIn(viewModelScope)
     }
 
@@ -129,6 +123,10 @@ class MessageViewModel @Inject constructor(
             messageFieldState.clearText()
             _messageReceived.emit(MessageScreenEvent.MessageSent)
         }
+    }
+
+    override fun initialState(): PagingState<Message> {
+        return PagingState()
     }
 }
 

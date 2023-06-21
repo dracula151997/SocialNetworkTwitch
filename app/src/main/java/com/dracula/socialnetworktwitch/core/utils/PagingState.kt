@@ -16,4 +16,10 @@ data class PagingState<T>(
             refreshing = false
         )
     }
+
+    fun isNotEmpty() = items.isNotEmpty()
+
+    val lastIndex get() = items.size - 1
+
+    val moreThanOneItem get() = items.size > 1
 }
