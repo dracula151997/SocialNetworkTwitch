@@ -29,8 +29,8 @@ import com.dracula.socialnetworktwitch.core.presentation.components.UserProfileI
 import com.dracula.socialnetworktwitch.core.presentation.theme.IconSizeMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
+import com.dracula.socialnetworktwitch.core.presentation.utils.CommonUiEffect
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -44,14 +44,14 @@ fun PersonListRoute(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
+                is CommonUiEffect.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
                 else -> Unit
             }
         }
 
     }
     PersonListScreen(
-        state = viewModel.state,
+        state = viewModel.viewState,
         ownUserId = viewModel.ownUserId,
         onEvent = viewModel::onEvent,
         onNavUp = onNavUp,
@@ -64,7 +64,7 @@ fun PersonListRoute(
 private fun PersonListScreen(
     state: PersonListState,
     ownUserId: String?,
-    onEvent: (event: PersonListAction) -> Unit,
+    onEvent: (event: PersonListEvent) -> Unit,
     onNavigate: (String) -> Unit = {},
     onNavUp: () -> Unit,
 ) {
@@ -107,7 +107,7 @@ private fun PersonListScreen(
                                 onNavigate(Screens.ProfileScreen.createRoute(userId = user.userId))
                             },
                             onActionItemClick = {
-                                onEvent(PersonListAction.ToggleFollowStateForUser(user.userId))
+                                onEvent(PersonListEvent.ToggleFollowStateForUser(user.userId))
                             },
                             ownUserId = ownUserId
                         )
