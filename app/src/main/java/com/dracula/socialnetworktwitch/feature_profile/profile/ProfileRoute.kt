@@ -240,7 +240,9 @@ private fun ProfileScreen(
                         onShareClicked = {
                             context.sendSharePostIntent(postId = post.id)
                         },
-                        onUsernameClicked = {},
+                        onUsernameClicked = {
+
+                        },
                         onDeleteClicked = { postId ->
                             onEvent(ProfileScreenEvent.DeletePost(postId))
                         },

@@ -22,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,11 +36,12 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
+import com.dracula.socialnetworktwitch.core.presentation.utils.CommonUiEffect
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ErrorState
 import com.dracula.socialnetworktwitch.core.utils.LoadingState
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.core.utils.ObserveLifecycleEvents
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -50,10 +52,11 @@ fun SearchRoute(
 ) {
     val viewModel: SearchViewModel = hiltViewModel()
     val context = LocalContext.current
+    viewModel.ObserveLifecycleEvents(lifecycle = LocalLifecycleOwner.current.lifecycle)
     LaunchedEffect(key1 = true) {
-        viewModel.event.collectLatest { event ->
+        viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
+                is CommonUiEffect.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
                 else -> Unit
             }
         }
@@ -62,7 +65,7 @@ fun SearchRoute(
         onNavUp = onNavUp,
         onNavigate = onNavigate,
         onEvent = viewModel::onEvent,
-        state = viewModel.state,
+        state = viewModel.viewState,
         searchFieldState = viewModel.searchFieldState
     )
 }
@@ -72,12 +75,12 @@ fun SearchRoute(
 private fun SearchScreen(
     state: SearchState,
     searchFieldState: TextFieldState,
-    onEvent: (event: SearchAction) -> Unit,
+    onEvent: (event: SearchEvent) -> Unit,
     onNavUp: () -> Unit,
     onNavigate: (route: String) -> Unit
 ) {
     val pullRefreshState = rememberPullRefreshState(refreshing = state.refreshing,
-        onRefresh = { onEvent(SearchAction.Refreshing) })
+        onRefresh = { onEvent(SearchEvent.Refreshing) })
 
 
     Column(
@@ -98,7 +101,7 @@ private fun SearchScreen(
                 hint = stringResource(id = R.string.search),
                 leadingIcon = Icons.Default.Search,
                 doOnValueChanged = {
-                    onEvent(SearchAction.OnSearch(it))
+                    onEvent(SearchEvent.OnSearch(it))
                 },
             )
             Spacer(modifier = Modifier.height(SpaceLarge))
@@ -145,7 +148,7 @@ private fun SearchScreen(
                                 actionIcon = {
                                     IconButton(
                                         onClick = {
-                                            onEvent(SearchAction.ToggleFollowState(userId = user.userId))
+                                            onEvent(SearchEvent.ToggleFollowState(userId = user.userId))
                                         },
                                     ) {
                                         Icon(
