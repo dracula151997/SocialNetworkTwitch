@@ -65,6 +65,7 @@ class ProfileViewModel @Inject constructor(
     )
 
     init {
+        onEvent(ProfileScreenEvent.GetProfile(savedStateHandle.get<String>(Constants.NavArguments.NAV_USER_ID)))
         onEvent(ProfileScreenEvent.LoadNextPosts)
     }
 

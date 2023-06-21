@@ -60,7 +60,6 @@ fun ProfileRoute(
     val viewModel: ProfileViewModel = hiltViewModel()
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
-        viewModel.onEvent(ProfileScreenEvent.GetProfile(userId))
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is CommonUiEffect.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
