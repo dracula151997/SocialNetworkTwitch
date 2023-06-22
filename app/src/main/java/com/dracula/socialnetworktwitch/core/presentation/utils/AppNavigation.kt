@@ -134,7 +134,6 @@ fun AppNavigation(
         ) {
             val userId = it.arguments?.getString(Constants.NavArguments.NAV_USER_ID)
             ProfileRoute(
-                modifier = Modifier.padding(bottom = contentPadding.calculateBottomPadding()),
                 userId = userId,
                 onNavigate = navController::navigate,
                 showSnackbar = {

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
@@ -75,7 +76,7 @@ fun ProfileRoute(
         onNavigate = onNavigate,
         navigateToLogin = navigateToLogin,
         state = viewModel.viewState,
-        onEvent = { viewModel.onEvent(it) },
+        onEvent = viewModel::onEvent,
         userPosts = viewModel.viewState.pagingState
     )
 }
@@ -166,10 +167,11 @@ private fun ProfileScreen(
         )
         PullToRefreshBox(
             state = pullToRefreshState,
-            refreshing = state.refreshing
+            refreshing = state.refreshing,
+            modifier = modifier
         ) {
             LazyColumn(
-                Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             ) {
                 when {
                     state.isLoading -> item {
@@ -215,9 +217,8 @@ private fun ProfileScreen(
                     }
 
                 }
-                items(userPosts.items.size) { index ->
-                    val post = userPosts.items[index]
-                    if (index > userPosts.items.size - 1 && !userPosts.endReached && !userPosts.isLoading) {
+                itemsIndexed(userPosts.items) { index, post ->
+                    if (index > userPosts.lastIndex && !userPosts.endReached && !userPosts.isLoading) {
                         onEvent(ProfileScreenEvent.LoadNextPosts)
                     }
                     PostItem(
