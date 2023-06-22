@@ -193,7 +193,6 @@ fun AppNavigation(
                     }
                 },
                 onNavUp = navController::navigateUp,
-                userId = userId
             )
         }
 

@@ -11,4 +11,5 @@ sealed class EditProfileEvent : UiEvent() {
     data class GetProfile(val userId: String?) : EditProfileEvent()
     object GetSkills : EditProfileEvent()
     object UpdateProfile : EditProfileEvent()
+    object Refresh : EditProfileEvent()
 }

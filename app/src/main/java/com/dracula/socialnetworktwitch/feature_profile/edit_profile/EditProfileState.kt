@@ -5,7 +5,8 @@ import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
 import com.dracula.socialnetworktwitch.feature_profile.domain.model.Skill
 
 data class EditProfileState(
-    val isLoading: Boolean = true,
+    val isLoading: Boolean = false,
+    val refreshing: Boolean = false,
     val profile: Profile? = null,
     val skillsState: SkillsState = SkillsState()
 ) : UiState()

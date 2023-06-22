@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -46,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.presentation.components.ClearButton
+import com.dracula.socialnetworktwitch.core.presentation.components.PullToRefreshBox
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyncImage
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTextField
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
@@ -66,7 +69,6 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun EditProfileRoute(
-    userId: String?,
     showSnackbar: (message: String) -> Unit,
     onNavUp: () -> Unit,
 ) {
@@ -84,9 +86,6 @@ fun EditProfileRoute(
 
     }
     EditProfileScreen(
-        userId = userId,
-        onNavUp = onNavUp,
-        onEvent = viewModel::onEvent,
         state = viewModel.viewState,
         usernameState = viewModel.usernameState,
         githubTextFieldState = viewModel.githubTextFieldState,
@@ -95,9 +94,12 @@ fun EditProfileRoute(
         bioTextFieldState = viewModel.bioState,
         bannerImageUri = viewModel.bannerImageUri,
         profileImageUri = viewModel.profileImageUri,
+        onEvent = viewModel::onEvent,
+        onNavUp = onNavUp,
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun EditProfileScreen(
     state: EditProfileState,
@@ -107,7 +109,6 @@ private fun EditProfileScreen(
     instagramTextFieldState: TextFieldState,
     bioTextFieldState: TextFieldState,
     modifier: Modifier = Modifier,
-    userId: String? = null,
     bannerImageUri: Uri? = null,
     profileImageUri: Uri? = null,
     onEvent: (event: EditProfileEvent) -> Unit,
@@ -116,6 +117,9 @@ private fun EditProfileScreen(
 ) {
     val profile = state.profile ?: Profile.empty()
     val skillsState = state.skillsState
+    val pullRefreshState = rememberPullRefreshState(refreshing = state.refreshing, onRefresh = {
+        onEvent(EditProfileEvent.Refresh)
+    })
 
     val cropProfileImageLauncher =
         rememberLauncherForActivityResult(CropActivityResultContract(1f, 1f)) {
@@ -136,146 +140,158 @@ private fun EditProfileScreen(
 
         }
 
-    LaunchedEffect(key1 = true) {
-        onEvent(EditProfileEvent.GetProfile(userId))
-        onEvent(EditProfileEvent.GetSkills)
-    }
-    Column(
-        modifier = modifier.fillMaxSize()
+    PullToRefreshBox(
+        state = pullRefreshState,
+        refreshing = state.refreshing,
+        modifier = modifier
     ) {
-        StandardTopBar(
-            title = stringResource(id = R.string.edit_your_profile),
-            navActions = {
-                IconButton(onClick = { onEvent(EditProfileEvent.UpdateProfile) }) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = stringResource(id = R.string.save_changes),
-                        tint = MaterialTheme.colors.onBackground
-                    )
-                }
-            },
-            showBackButton = true,
-            onBack = onNavUp
-        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            BannerEditSection(
-                bannerImageUrl = bannerImageUri ?: profile.bannerUrl,
-                profileImageUrl = profileImageUri ?: profile.profilePictureUrl,
-                profilePictureSize = profilePictureSize,
-                onBannerClick = {
-                    pickBannerImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            StandardTopBar(
+                title = stringResource(id = R.string.edit_your_profile),
+                navActions = {
+                    IconButton(onClick = { onEvent(EditProfileEvent.UpdateProfile) }) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = stringResource(id = R.string.save_changes),
+                            tint = MaterialTheme.colors.onBackground
+                        )
+                    }
                 },
-                onProfileImageClick = {
-                    pickProfileImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                },
+                showBackButton = true,
+                onBack = onNavUp
             )
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(PaddingLarge)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
-                Spacer(modifier = Modifier.height(PaddingMedium))
-                StandardTextField(
-                    state = usernameState,
-                    hint = stringResource(id = R.string.username),
-                    leadingIcon = Icons.Default.Person,
-                )
-                Spacer(modifier = Modifier.height(SpaceMedium))
-                StandardTextField(
-                    state = githubTextFieldState,
-                    hint = stringResource(id = R.string.github_profile_url),
-                    leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_github_icon_1),
-                    trailingIcon = {
-                        AnimatedVisibility(
-                            visible = !githubTextFieldState.isEmpty(),
-                            enter = scaleIn(),
-                            exit = scaleOut()
-                        ) {
-                            ClearButton(
-                                onClick = {
-                                    githubTextFieldState.clearText()
-                                }
+                BannerEditSection(
+                    bannerImageUrl = bannerImageUri ?: profile.bannerUrl,
+                    profileImageUrl = profileImageUri ?: profile.profilePictureUrl,
+                    profilePictureSize = profilePictureSize,
+                    onBannerClick = {
+                        pickBannerImageLauncher.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
                             )
-                        }
+                        )
                     },
-                    singleLine = false
-                )
-                Spacer(modifier = Modifier.height(SpaceMedium))
-                StandardTextField(
-                    state = instagramTextFieldState,
-                    hint = stringResource(id = R.string.instagram_profile_url),
-                    leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_instagram_glyph_1),
-                    trailingIcon = {
-                        AnimatedVisibility(
-                            visible = !instagramTextFieldState.isEmpty(),
-                            enter = scaleIn(),
-                            exit = scaleOut()
-                        ) {
-                            ClearButton(
-                                onClick = { instagramTextFieldState.clearText() },
+                    onProfileImageClick = {
+                        pickProfileImageLauncher.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
                             )
-                        }
+                        )
+                    },
+                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(PaddingLarge)
+                ) {
+                    Spacer(modifier = Modifier.height(PaddingMedium))
+                    StandardTextField(
+                        state = usernameState,
+                        hint = stringResource(id = R.string.username),
+                        leadingIcon = Icons.Default.Person,
+                    )
+                    Spacer(modifier = Modifier.height(SpaceMedium))
+                    StandardTextField(
+                        state = githubTextFieldState,
+                        hint = stringResource(id = R.string.github_profile_url),
+                        leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_github_icon_1),
+                        trailingIcon = {
+                            AnimatedVisibility(
+                                visible = !githubTextFieldState.isEmpty(),
+                                enter = scaleIn(),
+                                exit = scaleOut()
+                            ) {
+                                ClearButton(
+                                    onClick = {
+                                        githubTextFieldState.clearText()
+                                    }
+                                )
+                            }
+                        },
+                        singleLine = false
+                    )
+                    Spacer(modifier = Modifier.height(SpaceMedium))
+                    StandardTextField(
+                        state = instagramTextFieldState,
+                        hint = stringResource(id = R.string.instagram_profile_url),
+                        leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_instagram_glyph_1),
+                        trailingIcon = {
+                            AnimatedVisibility(
+                                visible = !instagramTextFieldState.isEmpty(),
+                                enter = scaleIn(),
+                                exit = scaleOut()
+                            ) {
+                                ClearButton(
+                                    onClick = { instagramTextFieldState.clearText() },
+                                )
+                            }
 
-                    }
-                )
-                Spacer(modifier = Modifier.height(SpaceMedium))
-                StandardTextField(
-                    state = linkedInTextFieldState,
-                    hint = stringResource(id = R.string.linked_in_profile_url),
-                    leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_linkedin_icon_1),
-                    trailingIcon = {
-                        AnimatedVisibility(
-                            visible = !linkedInTextFieldState.isEmpty(),
-                            enter = scaleIn(),
-                            exit = scaleOut()
-                        ) {
-                            ClearButton(
-                                onClick = { linkedInTextFieldState.clearText() }
-                            )
                         }
+                    )
+                    Spacer(modifier = Modifier.height(SpaceMedium))
+                    StandardTextField(
+                        state = linkedInTextFieldState,
+                        hint = stringResource(id = R.string.linked_in_profile_url),
+                        leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_linkedin_icon_1),
+                        trailingIcon = {
+                            AnimatedVisibility(
+                                visible = !linkedInTextFieldState.isEmpty(),
+                                enter = scaleIn(),
+                                exit = scaleOut()
+                            ) {
+                                ClearButton(
+                                    onClick = { linkedInTextFieldState.clearText() }
+                                )
+                            }
 
-                    },
-                    singleLine = false
-                )
-                Spacer(modifier = Modifier.height(SpaceMedium))
-                StandardTextField(
-                    state = bioTextFieldState,
-                    hint = stringResource(id = R.string.your_bio),
-                    singleLine = false,
-                    maxLines = 3,
-                    leadingIcon = Icons.Default.Description,
-                    trailingIcon = {
-                        AnimatedVisibility(
-                            visible = !bioTextFieldState.isEmpty(),
-                            enter = scaleIn(),
-                            exit = scaleOut()
-                        ) {
-                            ClearButton(
-                                onClick = { bioTextFieldState.clearText() }
-                            )
-                        }
-                    },
-                )
-                Spacer(modifier = Modifier.height(SpaceMedium))
-                Text(
-                    text = stringResource(id = R.string.select_top_3_skills),
-                    style = MaterialTheme.typography.h2,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(CenterHorizontally)
-                )
-                Spacer(modifier = Modifier.height(SpaceLarge))
-                SkillsFlowRow(
-                    skillsState, modifier = Modifier.fillMaxWidth(),
-                    onSkillClicked = {
-                        onEvent(EditProfileEvent.SkillSelected(skill = it))
-                    },
-                )
+                        },
+                        singleLine = false
+                    )
+                    Spacer(modifier = Modifier.height(SpaceMedium))
+                    StandardTextField(
+                        state = bioTextFieldState,
+                        hint = stringResource(id = R.string.your_bio),
+                        singleLine = false,
+                        maxLines = 3,
+                        leadingIcon = Icons.Default.Description,
+                        trailingIcon = {
+                            AnimatedVisibility(
+                                visible = !bioTextFieldState.isEmpty(),
+                                enter = scaleIn(),
+                                exit = scaleOut()
+                            ) {
+                                ClearButton(
+                                    onClick = { bioTextFieldState.clearText() }
+                                )
+                            }
+                        },
+                    )
+                    Spacer(modifier = Modifier.height(SpaceMedium))
+                    Text(
+                        text = stringResource(id = R.string.select_top_3_skills),
+                        style = MaterialTheme.typography.h2,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.align(CenterHorizontally)
+                    )
+                    Spacer(modifier = Modifier.height(SpaceLarge))
+                    SkillsFlowRow(
+                        skillsState, modifier = Modifier.fillMaxWidth(),
+                        onSkillClicked = {
+                            onEvent(EditProfileEvent.SkillSelected(skill = it))
+                        },
+                    )
+                }
+
             }
-
         }
     }
 }

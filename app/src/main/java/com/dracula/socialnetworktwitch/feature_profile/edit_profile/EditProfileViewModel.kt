@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
@@ -14,6 +15,7 @@ import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NonEmptyFieldState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
+import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.dto.request.UpdateProfileRequest
 import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
@@ -33,6 +35,7 @@ class EditProfileViewModel @Inject constructor(
     private val updateProfileUseCase: UpdateProfileUseCase,
     private val setSkillSelectedUseCase: SetSkillSelectedUseCase,
     private val getOwnUserIdUseCase: GetOwnUserIdUseCase,
+    private val savedStateHandle: SavedStateHandle
 ) : BaseViewModel<EditProfileState, EditProfileEvent>() {
 
     var usernameState by mutableStateOf(NonEmptyFieldState())
@@ -56,6 +59,11 @@ class EditProfileViewModel @Inject constructor(
     var profileImageUri: Uri? by mutableStateOf(null)
         private set
 
+    init {
+        onEvent(EditProfileEvent.GetProfile(savedStateHandle.get<String>(Constants.NavArguments.NAV_USER_ID)))
+        onEvent(EditProfileEvent.GetSkills)
+    }
+
     override fun initialState(): EditProfileState {
         return EditProfileState()
     }
@@ -76,10 +84,16 @@ class EditProfileViewModel @Inject constructor(
                 setSkillSelected(viewState.skillsState.selectedSkills, event.skill)
             }
 
-            is EditProfileEvent.GetProfile -> getProfile(event.userId ?: getOwnUserIdUseCase())
+            is EditProfileEvent.GetProfile -> {
+                getProfile(event.userId ?: getOwnUserIdUseCase())
+            }
+
             EditProfileEvent.GetSkills -> getSkills()
             EditProfileEvent.UpdateProfile -> updateProfile()
-
+            EditProfileEvent.Refresh -> getProfile(
+                savedStateHandle.get<String>(Constants.NavArguments.NAV_USER_ID)
+                    ?: getOwnUserIdUseCase()
+            )
         }
     }
 
@@ -112,9 +126,9 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
-    private fun getProfile(userId: String?) {
+    private fun getProfile(userId: String?, refreshing: Boolean = false) {
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
+            setState { copy(isLoading = !refreshing, refreshing = refreshing) }
             when (val apiResult = getProfileUseCase(userId ?: getOwnUserIdUseCase())) {
                 is ApiResult.Success -> {
                     val profile = apiResult.data ?: kotlin.run {
@@ -125,6 +139,7 @@ class EditProfileViewModel @Inject constructor(
                     setState {
                         copy(
                             isLoading = false,
+                            refreshing = false,
                             profile = profile
                         )
                     }
@@ -132,6 +147,7 @@ class EditProfileViewModel @Inject constructor(
                 }
 
                 is ApiResult.Error -> {
+                    setState { copy(isLoading = false, refreshing = false) }
                     showSnackbar(apiResult.uiText.orUnknownError())
                 }
             }

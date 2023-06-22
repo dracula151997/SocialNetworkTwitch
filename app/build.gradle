@@ -150,5 +150,7 @@ dependencies {
     implementation "com.tinder.scarlet:message-adapter-gson:$scarletVersion"
     implementation "com.tinder.scarlet:stream-adapter-coroutines:$scarletVersion"
 
+    implementation 'com.webtoonscorp.android:readmore-material:1.4.1'
+
 
 }
