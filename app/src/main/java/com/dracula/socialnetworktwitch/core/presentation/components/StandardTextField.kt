@@ -129,8 +129,8 @@ fun StandardTextField(
 @Composable
 fun StandardTextField(
     state: TextFieldState,
-    hint: String = "",
     modifier: Modifier = Modifier,
+    hint: String = "",
     doOnValueChanged: (newValue: String) -> Unit = {},
     maxLength: Int = Int.MAX_VALUE,
     maxLines: Int = Int.MAX_VALUE,
@@ -263,7 +263,7 @@ fun PasswordTextField(
 }
 
 @Composable
-fun TextFieldError(textError: String) {
+private fun TextFieldError(textError: String) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Spacer(modifier = Modifier.width(16.dp))
         Text(

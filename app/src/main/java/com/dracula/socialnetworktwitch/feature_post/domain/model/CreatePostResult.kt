@@ -8,6 +8,5 @@ data class CreatePostResult(
     val imageError: CreatePostValidationError? = null,
     val result: UnitApiResult? = null
 ) {
-    val hasDescriptionError get() = descriptionError != null
     val hasImageError get() = imageError != null
 }

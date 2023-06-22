@@ -4,24 +4,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.CommentFieldState
+import com.dracula.socialnetworktwitch.core.presentation.utils.BaseViewModel
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NonEmptyFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.Constants
 import com.dracula.socialnetworktwitch.core.utils.ParentType
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
-import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.CreateCommentUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.GetCommentsForPostUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.GetPostDetailsUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.ToggleLikeForParentUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,17 +29,9 @@ class PostDetailsViewModel @Inject constructor(
     private val toggleLikeForParentUseCase: ToggleLikeForParentUseCase,
     private val getOwnUserIdUseCase: GetOwnUserIdUseCase,
     private val savedStateHandle: SavedStateHandle
-) : ViewModel() {
-    var state by mutableStateOf(PostDetailsState())
-        private set
+) : BaseViewModel<PostDetailsState, PostDetailsEvent>() {
 
-    var commentState by mutableStateOf(CommentState())
-        private set
-
-    private val _event = MutableSharedFlow<UiEvent>()
-    val event = _event.asSharedFlow()
-
-    var commentFieldState by mutableStateOf(CommentFieldState())
+    var commentFieldState by mutableStateOf(NonEmptyFieldState())
         private set
 
     var ownUserId: String = ""
@@ -58,7 +46,7 @@ class PostDetailsViewModel @Inject constructor(
 
     }
 
-    fun onEvent(event: PostDetailsEvent) {
+    override fun onEvent(event: PostDetailsEvent) {
         when (event) {
             PostDetailsEvent.Comment -> createComment(
                 postId = savedStateHandle.postIdArgs.orEmpty(),
@@ -66,7 +54,7 @@ class PostDetailsViewModel @Inject constructor(
             )
 
             is PostDetailsEvent.LikeComment -> {
-                val isLiked = state.comments.find { it.id == event.commentId }?.isLiked == true
+                val isLiked = viewState.comments.find { it.id == event.commentId }?.isLiked == true
                 toggleLikeForParent(
                     parentId = event.commentId,
                     parentType = ParentType.Comment.type,
@@ -75,9 +63,9 @@ class PostDetailsViewModel @Inject constructor(
             }
 
             PostDetailsEvent.LikePost -> {
-                val isLiked = state.post?.isLiked == true
+                val isLiked = viewState.post?.isLiked == true
                 toggleLikeForParent(
-                    parentId = state.post?.id ?: return,
+                    parentId = viewState.post?.id ?: return,
                     parentType = ParentType.Post.type,
                     isLiked = isLiked
                 )
@@ -89,20 +77,24 @@ class PostDetailsViewModel @Inject constructor(
 
     private fun createComment(postId: String, comment: String) {
         viewModelScope.launch {
-            commentState = CommentState(isLoading = true)
+            setState {
+                copy(commentState = viewState.commentState.copy(isLoading = true))
+            }
             val result = createCommentUseCase(
                 postId = postId, comment = comment
             )
 
-            commentState = commentState.copy(isLoading = false)
+            setState {
+                copy(commentState = viewState.commentState.copy(isLoading = false))
+            }
             when (val result = result) {
                 is ApiResult.Success -> {
-                    _event.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.comment_posted_successfully)))
+                    showSnackbar(R.string.comment_posted_successfully)
                     getCommentsForPost(postId)
                 }
 
                 is ApiResult.Error -> {
-                    _event.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
+                    showSnackbar(result.uiText.orUnknownError())
                 }
             }
         }
@@ -110,26 +102,19 @@ class PostDetailsViewModel @Inject constructor(
 
     private fun getPostDetails(postId: String) {
         viewModelScope.launch {
-            state = state.copy(
-                isPostLoading = true,
-            )
+            setState {
+                copy(isPostLoading = true)
+            }
+
             when (val result = getPostDetailsUseCase(postId)) {
                 is ApiResult.Success -> {
-                    state = state.copy(
-                        isPostLoading = false,
-                        post = result.data,
-                    )
+                    setState { copy(isPostLoading = false, post = result.data) }
+
                 }
 
                 is ApiResult.Error -> {
-                    state = state.copy(
-                        isPostLoading = false,
-                    )
-                    _event.emit(
-                        UiEvent.ShowSnackbar(
-                            result.uiText.orUnknownError()
-                        )
-                    )
+                    setState { copy(isPostLoading = false) }
+                    showSnackbar(result.uiText.orUnknownError())
                 }
             }
         }
@@ -137,25 +122,17 @@ class PostDetailsViewModel @Inject constructor(
 
     private fun getCommentsForPost(postId: String) {
         viewModelScope.launch {
-            state = state.copy(
-                isLoadingComments = true,
-            )
+            setState { copy(isLoadingComments = true) }
+
             when (val result = getCommentsForPostUseCase(postId)) {
                 is ApiResult.Success -> {
-                    state = state.copy(
-                        isLoadingComments = false, comments = result.data.orEmpty()
-                    )
+                    setState { copy(isLoadingComments = false, comments = result.data.orEmpty()) }
+
                 }
 
                 is ApiResult.Error -> {
-                    state = state.copy(
-                        isLoadingComments = false,
-                    )
-                    _event.emit(
-                        UiEvent.ShowSnackbar(
-                            result.uiText.orUnknownError()
-                        )
-                    )
+                    setState { copy(isLoadingComments = false) }
+                    showSnackbar(result.uiText.orUnknownError())
                 }
             }
         }
@@ -164,15 +141,19 @@ class PostDetailsViewModel @Inject constructor(
     private fun toggleLikeForParent(parentId: String, parentType: Int, isLiked: Boolean) {
         viewModelScope.launch {
             when (ParentType.fromType(type = parentType)) {
-                ParentType.Post -> state = state.copy(
-                    post = state.post?.copy(isLiked = !isLiked)
-                )
+                ParentType.Post -> {
+                    setState {
+                        copy(post = viewState.post?.copy(isLiked = !isLiked))
+                    }
+                }
 
                 ParentType.Comment -> {
-                    state = state.copy(comments = state.comments.map {
-                        if (it.id == parentId) it.copy(isLiked = !isLiked)
-                        else it
-                    })
+                    setState {
+                        copy(comments = viewState.comments.map {
+                            if (it.id == parentId) it.copy(isLiked = !isLiked) else it
+                        })
+                    }
+
                 }
 
                 else -> Unit
@@ -182,27 +163,31 @@ class PostDetailsViewModel @Inject constructor(
                 is ApiResult.Error -> {
                     when (ParentType.fromType(type = parentType)) {
                         ParentType.Post -> {
-                            val post = state.post
-                            state = state.copy(
-                                post = state.post?.copy(
-                                    isLiked = isLiked,
-                                    likeCount = if (isLiked) post?.likeCount?.minus(1)
-                                        ?: 0 else post?.likeCount?.plus(1) ?: 0
+                            val post = viewState.post
+                            setState {
+                                copy(
+                                    post = viewState.post?.copy(
+                                        isLiked = isLiked,
+                                        likeCount = if (isLiked) post?.likeCount?.minus(1)
+                                            ?: 0 else post?.likeCount?.plus(1) ?: 0
+                                    )
                                 )
-                            )
+                            }
                         }
 
                         ParentType.Comment -> {
-                            state = state.copy(comments = state.comments.map {
-                                if (it.id == parentId) it.copy(
-                                    isLiked = isLiked,
-                                    likeCount = if (it.isLiked) it.likeCount.minus(1)
-                                    else it.likeCount.plus(
-                                        1
-                                    )
+                            setState {
+                                copy(
+                                    comments = viewState.comments.map {
+                                        if (it.id == parentId) it.copy(
+                                            isLiked = isLiked,
+                                            likeCount = if (it.isLiked) it.likeCount.minus(1) else it.likeCount.plus(
+                                                1
+                                            )
+                                        ) else it
+                                    }
                                 )
-                                else it
-                            })
+                            }
                         }
 
                         else -> Unit
@@ -210,6 +195,10 @@ class PostDetailsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    override fun initialState(): PostDetailsState {
+        return PostDetailsState()
     }
 
     private val SavedStateHandle.postIdArgs

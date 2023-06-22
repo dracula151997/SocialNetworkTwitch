@@ -2,7 +2,6 @@ package com.dracula.socialnetworktwitch.feature_post.presentation.create_post
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
-
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -46,9 +45,9 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
+import com.dracula.socialnetworktwitch.core.presentation.utils.CommonUiEffect
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import com.dracula.socialnetworktwitch.core.utils.CropActivityResultContract
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -61,8 +60,8 @@ fun CreatePostRoute(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
-                UiEvent.NavigateUp -> onNavUp()
+                is CommonUiEffect.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
+                CommonUiEffect.NavigateUp -> onNavUp()
                 else -> Unit
             }
         }
@@ -70,7 +69,7 @@ fun CreatePostRoute(
 
     CreatePostScreen(
         descriptionFieldState = viewModel.description,
-        state = viewModel.state,
+        state = viewModel.viewState,
         enablePostButton = viewModel.enablePostButton,
         imageUri = viewModel.chosenImageUri,
         onEvent = viewModel::onEvent,
@@ -84,7 +83,7 @@ private fun CreatePostScreen(
     descriptionFieldState: TextFieldState,
     enablePostButton: Boolean,
     imageUri: Uri?,
-    onEvent: (event: CreatePostAction) -> Unit,
+    onEvent: (event: CreatePostEvent) -> Unit,
     onNavUp: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
@@ -92,7 +91,7 @@ private fun CreatePostScreen(
     val cropActivityLauncher = rememberLauncherForActivityResult(
         contract = CropActivityResultContract(16f, 9f),
     ) {
-        onEvent(CreatePostAction.CropImage(it))
+        onEvent(CreatePostEvent.CropImage(it))
     }
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -149,19 +148,20 @@ private fun CreatePostScreen(
 
                 }
                 Spacer(modifier = Modifier.height(SpaceMedium))
-                StandardTextField(state = descriptionFieldState,
+                StandardTextField(
+                    state = descriptionFieldState,
                     hint = stringResource(id = R.string.description),
                     singleLine = false,
                     imeAction = ImeAction.Done,
                     keyboardActions = KeyboardActions(onDone = {
-                        onEvent(CreatePostAction.CreatePost)
+                        onEvent(CreatePostEvent.CreatePost)
                         focusManager.clearFocus()
                     })
                 )
                 Spacer(modifier = Modifier.height(SpaceLarge))
                 Button(
                     onClick = {
-                        onEvent(CreatePostAction.CreatePost)
+                        onEvent(CreatePostEvent.CreatePost)
                         focusManager.clearFocus()
                     }, modifier = Modifier.align(Alignment.End), enabled = enablePostButton
                 ) {

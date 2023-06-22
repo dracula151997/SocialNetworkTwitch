@@ -98,10 +98,7 @@ private fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(
-                start = PaddingMedium,
-                end = PaddingMedium,
-                top = PaddingLarge,
-                bottom = 50.dp
+                start = PaddingMedium, end = PaddingMedium, top = PaddingLarge, bottom = 50.dp
             )
     ) {
         Column(
@@ -114,11 +111,9 @@ private fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardTextField(
-                state = emailFieldState,
-                hint = stringResource(
+                state = emailFieldState, hint = stringResource(
                     id = R.string.username_or_email_hint
-                ),
-                keyboardType = KeyboardType.Email
+                ), keyboardType = KeyboardType.Email
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             PasswordTextField(
@@ -134,13 +129,10 @@ private fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardButton(
-                text = stringResource(id = R.string.login),
-                onClick = {
+                text = stringResource(id = R.string.login), onClick = {
                     focusManager.clearFocus()
                     onEvent(LoginEvent.Login)
-                },
-                modifier = Modifier.align(Alignment.End),
-                enabled = enableLoginButton
+                }, modifier = Modifier.align(Alignment.End), enabled = enableLoginButton
             )
             if (state.isLoading) CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -154,10 +146,9 @@ private fun LoginScreen(
                 textAlign = TextAlign.Center
             ),
             onClick = { offset ->
-                signUpAnnotatedString.getStringAnnotations(offset, offset).firstOrNull()
-                    ?.let { _ ->
-                        onNavigate(Screens.RegisterScreen.route)
-                    }
+                signUpAnnotatedString.getStringAnnotations(offset, offset).firstOrNull()?.let { _ ->
+                    onNavigate(Screens.RegisterScreen.route)
+                }
             })
 
 

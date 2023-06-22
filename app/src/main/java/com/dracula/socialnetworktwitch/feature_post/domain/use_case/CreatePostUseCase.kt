@@ -9,15 +9,11 @@ class CreatePostUseCase(
     private val repository: PostRepository
 ) {
     suspend operator fun invoke(description: String, imageUri: Uri?): CreatePostResult {
-        val trimmedDescription = description.trim()
-        val descriptionError =
-            if (trimmedDescription.isBlank()) CreatePostValidationError.FieldEmpty else null
         val imageUriError = if (imageUri == null) CreatePostValidationError.NoImagePicked else null
 
-        if (descriptionError != null || imageUriError != null)
-            return CreatePostResult(descriptionError = descriptionError, imageError = imageUriError)
-        val result = repository.createPost(trimmedDescription, imageUri!!)
-
+        if (imageUriError != null)
+            return CreatePostResult(imageError = imageUriError)
+        val result = repository.createPost(description.trim(), imageUri!!)
 
         return CreatePostResult(result = result)
     }

@@ -49,9 +49,9 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingSmall
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceSmall
+import com.dracula.socialnetworktwitch.core.presentation.utils.CommonUiEffect
 import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
-import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.CommentFieldState
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import com.dracula.socialnetworktwitch.core.utils.sendSharePostIntent
 import com.dracula.socialnetworktwitch.feature_post.presentation.comment.CommentItem
 import kotlinx.coroutines.flow.collectLatest
@@ -66,9 +66,9 @@ fun PostDetailsRoute(
     val viewModel: PostDetailsViewModel = hiltViewModel()
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
-        viewModel.event.collectLatest { event ->
+        viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
+                is CommonUiEffect.ShowSnackbar -> showSnackbar(event.uiText.asString(context))
                 else -> Unit
             }
         }
@@ -79,10 +79,8 @@ fun PostDetailsRoute(
         onNavUp = onNavUp,
         showKeyboard = showKeyboard(),
         commentFieldState = viewModel.commentFieldState,
-        screenState = viewModel.state,
-        onEvent = {
-            viewModel.onEvent(it)
-        },
+        screenState = viewModel.viewState,
+        onEvent = viewModel::onEvent,
         ownUserID = viewModel.ownUserId
     )
 
@@ -91,7 +89,7 @@ fun PostDetailsRoute(
 @Composable
 private fun PostDetailsScreen(
     screenState: PostDetailsState,
-    commentFieldState: CommentFieldState,
+    commentFieldState: TextFieldState,
     onEvent: (event: PostDetailsEvent) -> Unit,
     onNavigate: (route: String) -> Unit,
     onNavUp: () -> Unit,
@@ -159,7 +157,7 @@ private fun PostDetailsScreen(
                                         PostActionRow(
                                             username = screenState.post?.username.orEmpty(),
                                             modifier = Modifier.fillMaxWidth(),
-                                            onLikeClicked = { isLiked ->
+                                            onLikeClicked = { _ ->
                                                 onEvent(PostDetailsEvent.LikePost)
                                             },
                                             onShareClicked = {
@@ -168,7 +166,7 @@ private fun PostDetailsScreen(
                                             onCommentClicked = {
                                                 focusRequester.requestFocus()
                                             },
-                                            onUsernameClicked = { username ->
+                                            onUsernameClicked = { _ ->
                                                 onNavigate(
                                                     Screens.ProfileScreen.createRoute(
                                                         userId = post?.userId,
@@ -227,7 +225,10 @@ private fun PostDetailsScreen(
                     }
                 }
 
-                items(comments, key = { it.id }) { comment ->
+                items(
+                    comments,
+                    key = { it.id }
+                ) { comment ->
                     CommentItem(
                         comment = comment,
                         modifier = Modifier
@@ -250,6 +251,7 @@ private fun PostDetailsScreen(
                     focusManager.clearFocus()
                 },
                 focusRequester = focusRequester,
+                enabled = commentFieldState.isValid
             )
         }
         if (screenState.isPostLoading)

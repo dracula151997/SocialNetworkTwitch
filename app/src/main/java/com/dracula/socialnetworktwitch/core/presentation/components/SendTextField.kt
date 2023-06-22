@@ -26,59 +26,6 @@ import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.
 
 @Composable
 fun SendTextField(
-    text: String,
-    hint: String,
-    onValueChange: (text: String) -> Unit,
-    onSend: () -> Unit,
-    enabled: Boolean = true,
-    error: String? = null,
-    focusRequester: FocusRequester = remember {
-        FocusRequester()
-    },
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .imePadding()
-            .padding(PaddingMedium)
-            .background(color = MaterialTheme.colors.surface),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        StandardTextField(
-            text = text,
-            onValueChanged = onValueChange,
-            hint = hint,
-            modifier = Modifier
-                .weight(1f)
-                .focusRequester(focusRequester)
-                .clearFocusOnKeyboardDismiss(),
-            imeAction = ImeAction.Send,
-            keyboardActions = KeyboardActions(
-                onSend = {
-                    onSend()
-                }
-            ),
-            error = error.orEmpty()
-
-        )
-
-        IconButton(
-            onClick = onSend,
-            enabled = enabled
-        ) {
-            Icon(
-                imageVector = Icons.Default.Send,
-                contentDescription = Semantics.ContentDescriptions.POST_PHOTO,
-                modifier = Modifier.autoMirror(),
-                tint = if (!enabled) MaterialTheme.colors.background else MaterialTheme.colors.primary
-            )
-        }
-    }
-
-}
-
-@Composable
-fun SendTextField(
     state: TextFieldState,
     hint: String,
     onSend: () -> Unit,
