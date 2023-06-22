@@ -114,7 +114,8 @@ fun AppNavigation(
                 encodedRemoteUserProfilePic = remoteUserProfilePic,
                 onNavUp = navController::navigateUp,
                 remoteUserId = remoteUserId,
-                remoteUsername = remoteUserName
+                remoteUsername = remoteUserName,
+                onNavigate = navController::navigate,
             )
         }
 
@@ -147,7 +148,8 @@ fun AppNavigation(
                             inclusive = true
                         }
                     }
-                }
+                },
+                onNavUp = navController::navigateUp
             )
         }
         composable(route = Screens.CreatePostScreen.route) {

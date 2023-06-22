@@ -57,6 +57,7 @@ fun ProfileRoute(
     showSnackbar: (message: String) -> Unit,
     onNavigate: (route: String) -> Unit,
     navigateToLogin: () -> Unit,
+    onNavUp: () -> Unit
 ) {
     val viewModel: ProfileViewModel = hiltViewModel()
     val context = LocalContext.current
@@ -77,7 +78,9 @@ fun ProfileRoute(
         navigateToLogin = navigateToLogin,
         state = viewModel.viewState,
         onEvent = viewModel::onEvent,
-        userPosts = viewModel.viewState.pagingState
+        userPosts = viewModel.viewState.pagingState,
+        isOwnProfile = viewModel.viewState.data?.isOwnProfile ?: false,
+        onNavUp = onNavUp,
     )
 }
 
@@ -89,8 +92,10 @@ private fun ProfileScreen(
     userId: String?,
     modifier: Modifier = Modifier,
     onEvent: (event: ProfileScreenEvent) -> Unit,
+    isOwnProfile: Boolean = false,
     onNavigate: (route: String) -> Unit,
     navigateToLogin: () -> Unit,
+    onNavUp: () -> Unit,
 ) {
     val profile = state.data ?: Profile.empty()
     val context = LocalContext.current
@@ -109,6 +114,8 @@ private fun ProfileScreen(
                 id = R.string.x_profile,
                 profile.username.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() },
             ),
+            showBackButton = !isOwnProfile,
+            onBack = onNavUp,
             navActions = {
                 IconButton(onClick = { showPopupMenu = !showPopupMenu }) {
                     Icon(

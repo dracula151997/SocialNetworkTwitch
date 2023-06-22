@@ -7,9 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.model.UserItem
 import com.dracula.socialnetworktwitch.core.presentation.theme.IconSizeMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeSmall
@@ -46,7 +48,9 @@ fun UserProfileItem(
                 contentDescription = null,
                 modifier = Modifier
                     .size(ProfilePictureSizeSmall)
-                    .clip(CircleShape)
+                    .clip(CircleShape),
+                placeholder = painterResource(id = R.drawable.avatar_placeholder),
+                errorPlaceholder = painterResource(id = R.drawable.avatar_placeholder),
             )
             Column(
                 modifier = Modifier
