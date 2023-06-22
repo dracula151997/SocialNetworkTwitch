@@ -4,18 +4,16 @@ import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dracula.socialnetworktwitch.R
 import com.dracula.socialnetworktwitch.core.domain.use_cases.GetOwnUserIdUseCase
+import com.dracula.socialnetworktwitch.core.presentation.utils.BaseViewModel
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.GithubFieldState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.InstagramFieldState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.LinkedinFieldState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.NonEmptyFieldState
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
-import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_profile.data.data_source.remote.dto.request.UpdateProfileRequest
 import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
@@ -25,8 +23,6 @@ import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetProfil
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.SetSkillSelectedUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.UpdateProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,10 +33,7 @@ class EditProfileViewModel @Inject constructor(
     private val updateProfileUseCase: UpdateProfileUseCase,
     private val setSkillSelectedUseCase: SetSkillSelectedUseCase,
     private val getOwnUserIdUseCase: GetOwnUserIdUseCase,
-) : ViewModel() {
-
-    var state by mutableStateOf(EditProfileState())
-        private set
+) : BaseViewModel<EditProfileState, EditProfileEvent>() {
 
     var usernameState by mutableStateOf(NonEmptyFieldState())
         private set
@@ -57,38 +50,36 @@ class EditProfileViewModel @Inject constructor(
     var bioState by mutableStateOf(TextFieldState())
         private set
 
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
-
     var bannerImageUri: Uri? by mutableStateOf(null)
         private set
+
     var profileImageUri: Uri? by mutableStateOf(null)
         private set
 
-    var skillsState: SkillsState by mutableStateOf(SkillsState())
-        private set
+    override fun initialState(): EditProfileState {
+        return EditProfileState()
+    }
 
-    fun onEvent(event: EditProfileAction) {
+    override fun onEvent(event: EditProfileEvent) {
         when (event) {
 
-            is EditProfileAction.CropBannerImage -> {
+            is EditProfileEvent.CropBannerImage -> {
                 bannerImageUri = event.uri
             }
 
-            is EditProfileAction.CropProfileImage -> {
+            is EditProfileEvent.CropProfileImage -> {
                 profileImageUri = event.uri
             }
 
 
-            is EditProfileAction.SkillSelected -> {
-                setSkillSelected(skillsState.selectedSkills, event.skill)
+            is EditProfileEvent.SkillSelected -> {
+                setSkillSelected(viewState.skillsState.selectedSkills, event.skill)
             }
 
-            is EditProfileAction.GetProfile -> getProfile(event.userId ?: getOwnUserIdUseCase())
-            EditProfileAction.GetSkills -> getSkills()
-            EditProfileAction.UpdateProfile -> updateProfile()
+            is EditProfileEvent.GetProfile -> getProfile(event.userId ?: getOwnUserIdUseCase())
+            EditProfileEvent.GetSkills -> getSkills()
+            EditProfileEvent.UpdateProfile -> updateProfile()
 
-            else -> {}
         }
     }
 
@@ -99,7 +90,7 @@ class EditProfileViewModel @Inject constructor(
             gitHubUrl = githubTextFieldState.text,
             instagramUrl = instagramTextFieldState.text,
             linkedInUrl = linkedInTextFieldState.text,
-            skills = skillsState.selectedSkills,
+            skills = viewState.skillsState.selectedSkills,
 
             )
         viewModelScope.launch {
@@ -110,12 +101,12 @@ class EditProfileViewModel @Inject constructor(
             )
             when (uiResult) {
                 is ApiResult.Success -> {
-                    _eventFlow.emit(UiEvent.ShowSnackbar(UiText.StringResource(R.string.profile_updated_success)))
-                    _eventFlow.emit(UiEvent.NavigateUp)
+                    showSnackbar(R.string.profile_updated_success)
+                    navigateUp()
                 }
 
                 is ApiResult.Error -> {
-                    _eventFlow.emit(UiEvent.ShowSnackbar(uiResult.uiText.orUnknownError()))
+                    showSnackbar(uiResult.uiText.orUnknownError())
                 }
             }
         }
@@ -123,22 +114,25 @@ class EditProfileViewModel @Inject constructor(
 
     private fun getProfile(userId: String?) {
         viewModelScope.launch {
-            state = EditProfileState.loading()
+            setState { copy(isLoading = true) }
             when (val apiResult = getProfileUseCase(userId ?: getOwnUserIdUseCase())) {
                 is ApiResult.Success -> {
                     val profile = apiResult.data ?: kotlin.run {
-                        _eventFlow.emit(
-                            UiEvent.ShowSnackbar(UiText.StringResource(R.string.error_could_not_load_profile))
-                        )
+                        showSnackbar(R.string.error_could_not_load_profile)
                         return@launch
                     }
                     fillProfileData(profile)
-                    state = EditProfileState.success(apiResult.data)
+                    setState {
+                        copy(
+                            isLoading = false,
+                            profile = profile
+                        )
+                    }
 
                 }
 
                 is ApiResult.Error -> {
-                    _eventFlow.emit(UiEvent.ShowSnackbar(apiResult.uiText.orUnknownError()))
+                    showSnackbar(apiResult.uiText.orUnknownError())
                 }
             }
         }
@@ -149,18 +143,14 @@ class EditProfileViewModel @Inject constructor(
             when (val result = getSkillsUseCase()) {
                 is ApiResult.Success -> {
                     val skills = result.data ?: kotlin.run {
-                        _eventFlow.emit(
-                            UiEvent.ShowSnackbar(UiText.StringResource(R.string.error_could_not_load_skills))
-                        )
+                        showSnackbar(R.string.error_could_not_load_skills)
                         return@launch
                     }
-                    skillsState = skillsState.copy(
-                        skills = skills
-                    )
+                    setState { copy(skillsState = viewState.skillsState.copy(skills = skills)) }
                 }
 
                 is ApiResult.Error -> {
-                    _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
+                    showSnackbar(result.uiText.orUnknownError())
                     return@launch
                 }
             }
@@ -170,16 +160,19 @@ class EditProfileViewModel @Inject constructor(
     private fun setSkillSelected(selectedSkills: List<Skill>, skill: Skill) {
         viewModelScope.launch {
             when (val result = setSkillSelectedUseCase(selectedSkills, skill)) {
-                is ApiResult.Success -> skillsState = skillsState.copy(
-                    selectedSkills = result.data ?: kotlin.run {
-                        _eventFlow.emit(
-                            UiEvent.ShowSnackbar(UiText.unknownError())
+                is ApiResult.Success -> {
+                    setState {
+                        copy(
+                            skillsState = viewState.skillsState.copy(
+                                selectedSkills = result.data ?: emptyList()
+                            )
                         )
-                        return@launch
                     }
-                )
+                }
 
-                is ApiResult.Error -> _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText.orUnknownError()))
+                is ApiResult.Error -> {
+                    showSnackbar(result.uiText.orUnknownError())
+                }
             }
         }
     }
@@ -190,6 +183,12 @@ class EditProfileViewModel @Inject constructor(
         instagramTextFieldState.text = profile.instagramUrl.orEmpty()
         linkedInTextFieldState.text = profile.linkedinUrl.orEmpty()
         bioState.text = profile.bio
-        skillsState = skillsState.copy(selectedSkills = profile.topSkills)
+        setState {
+            copy(
+                skillsState = viewState.skillsState.copy(
+                    selectedSkills = profile.topSkills,
+                )
+            )
+        }
     }
 }

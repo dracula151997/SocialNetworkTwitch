@@ -1,5 +1,6 @@
 package com.dracula.socialnetworktwitch.feature_profile.edit_profile
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -53,8 +54,9 @@ import com.dracula.socialnetworktwitch.core.presentation.theme.PaddingMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.ProfilePictureSizeLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceLarge
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
+import com.dracula.socialnetworktwitch.core.presentation.utils.CommonUiEffect
+import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import com.dracula.socialnetworktwitch.core.utils.CropActivityResultContract
-import com.dracula.socialnetworktwitch.core.utils.UiEvent
 import com.dracula.socialnetworktwitch.feature_profile.domain.model.Profile
 import com.dracula.socialnetworktwitch.feature_profile.domain.model.Skill
 import com.dracula.socialnetworktwitch.feature_profile.edit_profile.components.Chip
@@ -69,34 +71,59 @@ fun EditProfileRoute(
     onNavUp: () -> Unit,
 ) {
     val viewModel: EditProfileViewModel = hiltViewModel()
+    val context = LocalContext.current
+    LaunchedEffect(key1 = Unit) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is CommonUiEffect.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
+                is CommonUiEffect.NavigateUp -> onNavUp()
+
+                else -> Unit
+            }
+        }
+
+    }
     EditProfileScreen(
         userId = userId,
-        showSnackbar = showSnackbar,
         onNavUp = onNavUp,
-        viewModel = viewModel
+        onEvent = viewModel::onEvent,
+        state = viewModel.viewState,
+        usernameState = viewModel.usernameState,
+        githubTextFieldState = viewModel.githubTextFieldState,
+        linkedInTextFieldState = viewModel.linkedInTextFieldState,
+        instagramTextFieldState = viewModel.instagramTextFieldState,
+        bioTextFieldState = viewModel.bioState,
+        bannerImageUri = viewModel.bannerImageUri,
+        profileImageUri = viewModel.profileImageUri,
     )
 }
 
 @Composable
 private fun EditProfileScreen(
-    viewModel: EditProfileViewModel,
+    state: EditProfileState,
+    usernameState: TextFieldState,
+    githubTextFieldState: TextFieldState,
+    linkedInTextFieldState: TextFieldState,
+    instagramTextFieldState: TextFieldState,
+    bioTextFieldState: TextFieldState,
+    modifier: Modifier = Modifier,
     userId: String? = null,
+    bannerImageUri: Uri? = null,
+    profileImageUri: Uri? = null,
+    onEvent: (event: EditProfileEvent) -> Unit,
     profilePictureSize: Dp = ProfilePictureSizeLarge,
-    showSnackbar: (message: String) -> Unit,
     onNavUp: () -> Unit
 ) {
-    val context = LocalContext.current
-    val state = viewModel.state
     val profile = state.profile ?: Profile.empty()
-    val skillsState = viewModel.skillsState
+    val skillsState = state.skillsState
 
     val cropProfileImageLauncher =
         rememberLauncherForActivityResult(CropActivityResultContract(1f, 1f)) {
-            viewModel.onEvent(EditProfileAction.CropProfileImage(it))
+            onEvent(EditProfileEvent.CropProfileImage(it))
         }
     val cropBannerImageLauncher =
         rememberLauncherForActivityResult(CropActivityResultContract(4f, 1f)) {
-            viewModel.onEvent(EditProfileAction.CropBannerImage(it))
+            onEvent(EditProfileEvent.CropBannerImage(it))
         }
 
     val pickProfileImageLauncher =
@@ -110,25 +137,16 @@ private fun EditProfileScreen(
         }
 
     LaunchedEffect(key1 = true) {
-        viewModel.onEvent(EditProfileAction.GetProfile(userId))
-        viewModel.onEvent(EditProfileAction.GetSkills)
-        viewModel.eventFlow.collectLatest { event ->
-            when (event) {
-                is UiEvent.ShowSnackbar -> showSnackbar(event.uiText.asString(context = context))
-
-                is UiEvent.NavigateUp -> onNavUp()
-
-                else -> Unit
-            }
-        }
+        onEvent(EditProfileEvent.GetProfile(userId))
+        onEvent(EditProfileEvent.GetSkills)
     }
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         StandardTopBar(
             title = stringResource(id = R.string.edit_your_profile),
             navActions = {
-                IconButton(onClick = { viewModel.onEvent(EditProfileAction.UpdateProfile) }) {
+                IconButton(onClick = { onEvent(EditProfileEvent.UpdateProfile) }) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = stringResource(id = R.string.save_changes),
@@ -145,8 +163,8 @@ private fun EditProfileScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             BannerEditSection(
-                bannerImageUrl = if (viewModel.bannerImageUri == null) profile.bannerUrl else viewModel.bannerImageUri,
-                profileImageUrl = if (viewModel.profileImageUri == null) profile.profilePictureUrl else viewModel.profileImageUri,
+                bannerImageUrl = bannerImageUri ?: profile.bannerUrl,
+                profileImageUrl = profileImageUri ?: profile.profilePictureUrl,
                 profilePictureSize = profilePictureSize,
                 onBannerClick = {
                     pickBannerImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
@@ -162,24 +180,24 @@ private fun EditProfileScreen(
             ) {
                 Spacer(modifier = Modifier.height(PaddingMedium))
                 StandardTextField(
-                    state = viewModel.usernameState,
+                    state = usernameState,
                     hint = stringResource(id = R.string.username),
                     leadingIcon = Icons.Default.Person,
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    state = viewModel.githubTextFieldState,
+                    state = githubTextFieldState,
                     hint = stringResource(id = R.string.github_profile_url),
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_github_icon_1),
                     trailingIcon = {
                         AnimatedVisibility(
-                            visible = !viewModel.githubTextFieldState.isEmpty(),
+                            visible = !githubTextFieldState.isEmpty(),
                             enter = scaleIn(),
                             exit = scaleOut()
                         ) {
                             ClearButton(
                                 onClick = {
-                                    viewModel.githubTextFieldState.clearText()
+                                    githubTextFieldState.clearText()
                                 }
                             )
                         }
@@ -188,17 +206,17 @@ private fun EditProfileScreen(
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    state = viewModel.instagramTextFieldState,
+                    state = instagramTextFieldState,
                     hint = stringResource(id = R.string.instagram_profile_url),
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_instagram_glyph_1),
                     trailingIcon = {
                         AnimatedVisibility(
-                            visible = !viewModel.instagramTextFieldState.isEmpty(),
+                            visible = !instagramTextFieldState.isEmpty(),
                             enter = scaleIn(),
                             exit = scaleOut()
                         ) {
                             ClearButton(
-                                onClick = { viewModel.instagramTextFieldState.clearText() },
+                                onClick = { instagramTextFieldState.clearText() },
                             )
                         }
 
@@ -206,17 +224,17 @@ private fun EditProfileScreen(
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    state = viewModel.linkedInTextFieldState,
+                    state = linkedInTextFieldState,
                     hint = stringResource(id = R.string.linked_in_profile_url),
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_linkedin_icon_1),
                     trailingIcon = {
                         AnimatedVisibility(
-                            visible = !viewModel.linkedInTextFieldState.isEmpty(),
+                            visible = !linkedInTextFieldState.isEmpty(),
                             enter = scaleIn(),
                             exit = scaleOut()
                         ) {
                             ClearButton(
-                                onClick = { viewModel.linkedInTextFieldState.clearText() }
+                                onClick = { linkedInTextFieldState.clearText() }
                             )
                         }
 
@@ -225,19 +243,19 @@ private fun EditProfileScreen(
                 )
                 Spacer(modifier = Modifier.height(SpaceMedium))
                 StandardTextField(
-                    state = viewModel.bioState,
+                    state = bioTextFieldState,
                     hint = stringResource(id = R.string.your_bio),
                     singleLine = false,
                     maxLines = 3,
                     leadingIcon = Icons.Default.Description,
                     trailingIcon = {
                         AnimatedVisibility(
-                            visible = !viewModel.bioState.isEmpty(),
+                            visible = !bioTextFieldState.isEmpty(),
                             enter = scaleIn(),
                             exit = scaleOut()
                         ) {
                             ClearButton(
-                                onClick = { viewModel.bioState.clearText() }
+                                onClick = { bioTextFieldState.clearText() }
                             )
                         }
                     },
@@ -253,7 +271,7 @@ private fun EditProfileScreen(
                 SkillsFlowRow(
                     skillsState, modifier = Modifier.fillMaxWidth(),
                     onSkillClicked = {
-                        viewModel.onEvent(EditProfileAction.SkillSelected(skill = it))
+                        onEvent(EditProfileEvent.SkillSelected(skill = it))
                     },
                 )
             }
