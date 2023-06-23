@@ -6,7 +6,6 @@ import com.dracula.socialnetworktwitch.core.presentation.utils.UiEvent
 import com.dracula.socialnetworktwitch.core.utils.ApiResult
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.GetChatsForUserUseCase
-import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.InitializeRepositoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -14,7 +13,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val getChatsForUserUseCase: GetChatsForUserUseCase,
-    initializeRepositoryUseCase: InitializeRepositoryUseCase,
 ) : BaseViewModel<ChatScreenState, ChatScreenEvent>() {
 
     override fun onEvent(event: ChatScreenEvent) {
@@ -31,7 +29,6 @@ class ChatViewModel @Inject constructor(
 
 
     init {
-        initializeRepositoryUseCase()
         getChatsForUser()
     }
 

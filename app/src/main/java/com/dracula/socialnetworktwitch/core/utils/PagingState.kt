@@ -17,6 +17,16 @@ data class PagingState<T>(
         )
     }
 
+    fun addItem(newItem: T): PagingState<T> {
+        if (items.contains(newItem)) return this
+        return this.copy(
+            isLoading = false,
+            items = items + newItem,
+            endReached = false,
+            refreshing = false
+        )
+    }
+
     fun isNotEmpty() = items.isNotEmpty()
 
     val lastIndex get() = items.size - 1

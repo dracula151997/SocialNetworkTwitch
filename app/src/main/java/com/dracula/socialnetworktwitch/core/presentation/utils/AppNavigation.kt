@@ -53,7 +53,13 @@ fun AppNavigation(
             route = Screens.LoginScreen.route
         ) {
             LoginRoute(
-                onNavigate = navController::navigate,
+                onNavigate = {
+                    navController.navigate(it) {
+                        popUpTo(Screens.LoginScreen.route) {
+                            inclusive = true
+                        }
+                    }
+                },
                 onNavigateUp = navController::navigateUp,
                 showSnackbar = { message ->
                     scope.launch {

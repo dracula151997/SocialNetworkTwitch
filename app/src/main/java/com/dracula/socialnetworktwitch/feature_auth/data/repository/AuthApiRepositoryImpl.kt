@@ -13,6 +13,7 @@ import com.dracula.socialnetworktwitch.feature_auth.data.data_source.remote.dto.
 import com.dracula.socialnetworktwitch.feature_auth.domain.repository.AuthRepository
 import okio.IOException
 import retrofit2.HttpException
+import timber.log.Timber
 
 class AuthApiRepositoryImpl(
     private val api: AuthApi,
@@ -52,6 +53,7 @@ class AuthApiRepositoryImpl(
                     sharedPreferences.edit {
                         putString(Constants.SharedPrefKeys.KEY_TOKEN, authResponse.token)
                         putString(Constants.SharedPrefKeys.KEY_USER_ID, authResponse.userId)
+                        Timber.d("loginApi: ${authResponse.userId}")
                     }
                 }
 

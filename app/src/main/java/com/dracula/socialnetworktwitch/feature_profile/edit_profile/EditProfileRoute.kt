@@ -148,7 +148,6 @@ private fun EditProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
         ) {
             StandardTopBar(
                 title = stringResource(id = R.string.edit_your_profile),

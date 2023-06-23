@@ -12,25 +12,18 @@ import com.dracula.socialnetworktwitch.feature_chat.domain.model.Message
 import com.dracula.socialnetworktwitch.feature_chat.domain.repository.ChatRepository
 import com.tinder.scarlet.WebSocket
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
-import okhttp3.OkHttpClient
 import okio.IOException
 import retrofit2.HttpException
-import timber.log.Timber
 
 class ChatRepositoryImpl(
-    private val chatApi: ChatApi,
-    private val okHttpClient: OkHttpClient
+    private val chatApi: ChatApi
 ) : ChatRepository {
 
-    private lateinit var chatService: ChatWebSocketService
+    private var chatService: ChatWebSocketService? = ScarletInstance.instance
     override fun initialize() {
-        if (!::chatService.isInitialized) {
-            chatService = ScarletInstance.getInstance(client = okHttpClient)
-            Timber.d("$chatService")
-        }
-
     }
 
     override suspend fun getChatsForUser(): ApiResult<List<Chat>> {
@@ -60,17 +53,17 @@ class ChatRepositoryImpl(
     }
 
     override fun observeChatEvents(): Flow<WebSocket.Event> {
-        return chatService.observeEvents().receiveAsFlow()
+        return chatService?.observeEvents()?.receiveAsFlow() ?: emptyFlow()
     }
 
     override fun observeMessages(): Flow<Message> {
-        return chatService.observeMessages()
-            .receiveAsFlow()
-            .map { it.toMessage() }
+        return chatService?.observeMessages()
+            ?.receiveAsFlow()
+            ?.map { it.toMessage() } ?: emptyFlow()
     }
 
     override fun sendMessage(toId: String, text: String, chatId: String?) {
-        chatService.sendMessage(WsClientMessage(toId, text, chatId))
+        chatService?.sendMessage(WsClientMessage(toId, text, chatId))
     }
 
 }

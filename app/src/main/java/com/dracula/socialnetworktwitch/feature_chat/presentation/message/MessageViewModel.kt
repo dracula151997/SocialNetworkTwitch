@@ -14,7 +14,6 @@ import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.feature_chat.domain.model.Message
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.GetMessagesForChatUseCase
-import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.InitializeRepositoryUseCase
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.ObserveChatEventUseCase
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.ObserveMessagesUseCase
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.SendMessageUseCase
@@ -34,7 +33,6 @@ class MessageViewModel @Inject constructor(
     private val observeChatEventUseCase: ObserveChatEventUseCase,
     private val observeMessagesUseCase: ObserveMessagesUseCase,
     private val savedStateHandle: SavedStateHandle,
-    private val initializeRepositoryUseCase: InitializeRepositoryUseCase,
 ) : BaseViewModel<PagingState<Message>, MessageScreenAction>() {
     var messageFieldState by mutableStateOf(NonEmptyFieldState())
         private set
@@ -63,7 +61,6 @@ class MessageViewModel @Inject constructor(
     )
 
     init {
-        initializeRepositoryUseCase()
         loadNextMessages()
         observeChatEvents()
         observeChatMessages()
@@ -105,9 +102,7 @@ class MessageViewModel @Inject constructor(
         observeMessagesUseCase()
             .onEach { newMessage ->
                 setState {
-                    copy(
-                        items = viewState.items + newMessage
-                    )
+                    addItem(newMessage)
                 }
             }.launchIn(viewModelScope)
     }

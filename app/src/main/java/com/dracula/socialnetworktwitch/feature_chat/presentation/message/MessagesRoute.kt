@@ -41,6 +41,7 @@ import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.feature_chat.domain.model.Message
 import kotlinx.coroutines.flow.collectLatest
 import okio.ByteString.Companion.decodeBase64
+import timber.log.Timber
 import java.nio.charset.Charset
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -52,6 +53,7 @@ fun MessageRoute(
     onNavUp: () -> Unit,
     onNavigate: (route: String) -> Unit,
 ) {
+    Timber.d("MessageRoute: remoteUserId: $remoteUserId")
     val viewModel: MessageViewModel = hiltViewModel()
     val pagingState = viewModel.viewState
     val keyboardController = LocalSoftwareKeyboardController.current

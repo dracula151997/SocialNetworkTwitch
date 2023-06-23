@@ -9,7 +9,6 @@ class SendMessageUseCase @Inject constructor(
     private val chatRepository: ChatRepository
 ) {
     operator fun invoke(text: String, toId: String, chatId: String?) {
-        if (text.isEmpty()) return
         chatRepository.sendMessage(
             text = text,
             toId = toId,
