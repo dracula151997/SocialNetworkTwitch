@@ -55,8 +55,10 @@ fun AppNavigation(
             LoginRoute(
                 onNavigate = {
                     navController.navigate(it) {
-                        popUpTo(Screens.LoginScreen.route) {
-                            inclusive = true
+                        if (it == Screens.MainFeedScreen.route) {
+                            popUpTo(Screens.LoginScreen.route) {
+                                inclusive = true
+                            }
                         }
                     }
                 },

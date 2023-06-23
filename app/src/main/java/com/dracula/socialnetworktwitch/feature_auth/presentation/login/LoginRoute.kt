@@ -129,10 +129,13 @@ private fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(SpaceMedium))
             StandardButton(
-                text = stringResource(id = R.string.login), onClick = {
+                text = stringResource(id = R.string.login),
+                onClick = {
                     focusManager.clearFocus()
                     onEvent(LoginEvent.Login)
-                }, modifier = Modifier.align(Alignment.End), enabled = enableLoginButton
+                },
+                modifier = Modifier.align(Alignment.End),
+                enabled = enableLoginButton
             )
             if (state.isLoading) CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
