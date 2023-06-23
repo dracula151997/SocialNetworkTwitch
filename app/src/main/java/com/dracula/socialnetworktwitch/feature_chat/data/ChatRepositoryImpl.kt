@@ -15,15 +15,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import okhttp3.OkHttpClient
 import okio.IOException
 import retrofit2.HttpException
 
 class ChatRepositoryImpl(
-    private val chatApi: ChatApi
+    private val chatApi: ChatApi,
+    private val okHttpClient: OkHttpClient,
 ) : ChatRepository {
 
-    private var chatService: ChatWebSocketService? = ScarletInstance.instance
+    private var chatService: ChatWebSocketService? = null
     override fun initialize() {
+        chatService = ScarletInstance.init(okHttpClient)
+    }
+
+    override fun cleanup() {
+        ScarletInstance.cleanup()
+        chatService = null
     }
 
     override suspend fun getChatsForUser(): ApiResult<List<Chat>> {

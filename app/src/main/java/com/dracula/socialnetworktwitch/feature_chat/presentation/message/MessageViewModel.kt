@@ -14,6 +14,7 @@ import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.core.utils.UiText
 import com.dracula.socialnetworktwitch.feature_chat.domain.model.Message
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.GetMessagesForChatUseCase
+import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.InitializeScarletUseCase
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.ObserveChatEventUseCase
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.ObserveMessagesUseCase
 import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.SendMessageUseCase
@@ -33,6 +34,7 @@ class MessageViewModel @Inject constructor(
     private val observeChatEventUseCase: ObserveChatEventUseCase,
     private val observeMessagesUseCase: ObserveMessagesUseCase,
     private val savedStateHandle: SavedStateHandle,
+    initializeScarletUseCase: InitializeScarletUseCase,
 ) : BaseViewModel<PagingState<Message>, MessageScreenAction>() {
     var messageFieldState by mutableStateOf(NonEmptyFieldState())
         private set
@@ -61,6 +63,7 @@ class MessageViewModel @Inject constructor(
     )
 
     init {
+        initializeScarletUseCase()
         loadNextMessages()
         observeChatEvents()
         observeChatMessages()

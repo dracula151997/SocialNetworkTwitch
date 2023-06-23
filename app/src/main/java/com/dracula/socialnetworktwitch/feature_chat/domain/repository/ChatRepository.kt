@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.Flow
 interface ChatRepository {
 
     fun initialize()
+
+    fun cleanup()
     suspend fun getChatsForUser(): ApiResult<List<Chat>>
 
     suspend fun getMessagesForChat(

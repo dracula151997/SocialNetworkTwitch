@@ -39,11 +39,12 @@ object ChatModule {
     @Provides
     @Singleton
     fun provideChatRepository(
-        chatApi: ChatApi
+        chatApi: ChatApi,
+        okHttpClient: OkHttpClient
     ): ChatRepository {
         return ChatRepositoryImpl(
-            chatApi = chatApi
-
+            chatApi = chatApi,
+            okHttpClient = okHttpClient,
         )
     }
 }

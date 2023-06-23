@@ -11,6 +11,7 @@ import com.dracula.socialnetworktwitch.core.utils.DefaultPaginator
 import com.dracula.socialnetworktwitch.core.utils.ParentType
 import com.dracula.socialnetworktwitch.core.utils.PostLiker
 import com.dracula.socialnetworktwitch.core.utils.orUnknownError
+import com.dracula.socialnetworktwitch.feature_chat.domain.use_case.CleanupScarletUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.DeletePostUseCase
 import com.dracula.socialnetworktwitch.feature_post.domain.use_case.ToggleLikeForParentUseCase
 import com.dracula.socialnetworktwitch.feature_profile.domain.use_case.GetProfileUseCase
@@ -31,6 +32,7 @@ class ProfileViewModel @Inject constructor(
     private val deletePostUseCase: DeletePostUseCase,
     private val toggleFollowStateForUserUseCase: ToggleFollowStateForUserUseCase,
     private val savedStateHandle: SavedStateHandle,
+    private val cleanupScarletUseCase: CleanupScarletUseCase
 ) : BaseViewModel<ProfileState, ProfileScreenEvent>() {
 
 
@@ -109,6 +111,7 @@ class ProfileViewModel @Inject constructor(
                     )
                 }
                 logoutUseCase()
+                cleanupScarletUseCase()
             }
 
             is ProfileScreenEvent.DeletePost -> deletePost(event.postId)

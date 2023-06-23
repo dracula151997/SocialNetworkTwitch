@@ -1,6 +1,5 @@
 package com.dracula.socialnetworktwitch.feature_chat.presentation.message
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,14 +33,12 @@ import com.dracula.socialnetworktwitch.core.presentation.components.StandardAsyn
 import com.dracula.socialnetworktwitch.core.presentation.components.StandardTopBar
 import com.dracula.socialnetworktwitch.core.presentation.theme.SpaceMedium
 import com.dracula.socialnetworktwitch.core.presentation.theme.appFontFamily
-import com.dracula.socialnetworktwitch.core.presentation.utils.Screens
 import com.dracula.socialnetworktwitch.core.presentation.utils.states.validator.TextFieldState
 import com.dracula.socialnetworktwitch.core.utils.ErrorState
 import com.dracula.socialnetworktwitch.core.utils.PagingState
 import com.dracula.socialnetworktwitch.feature_chat.domain.model.Message
 import kotlinx.coroutines.flow.collectLatest
 import okio.ByteString.Companion.decodeBase64
-import timber.log.Timber
 import java.nio.charset.Charset
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -51,9 +48,7 @@ fun MessageRoute(
     remoteUsername: String,
     encodedRemoteUserProfilePic: String?,
     onNavUp: () -> Unit,
-    onNavigate: (route: String) -> Unit,
 ) {
-    Timber.d("MessageRoute: remoteUserId: $remoteUserId")
     val viewModel: MessageViewModel = hiltViewModel()
     val pagingState = viewModel.viewState
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -76,15 +71,14 @@ fun MessageRoute(
     }
 
     MessagesScreen(
+        messageFieldState = viewModel.messageFieldState,
+        scrollState = scrollState,
+        pagingState = pagingState,
         remoteUserId = remoteUserId,
         remoteUserName = remoteUsername,
-        onNavUp = onNavUp,
         encodedRemoteUserProfilePic = encodedRemoteUserProfilePic,
-        messageFieldState = viewModel.messageFieldState,
         onEvent = viewModel::onEvent,
-        pagingState = pagingState,
-        scrollState = scrollState,
-        onNavigate = onNavigate
+        onNavUp = onNavUp
     )
 }
 
@@ -97,7 +91,6 @@ private fun MessagesScreen(
     remoteUserName: String,
     encodedRemoteUserProfilePic: String? = null,
     onEvent: (event: MessageScreenAction) -> Unit,
-    onNavigate: (route: String) -> Unit,
     onNavUp: () -> Unit,
 ) {
     val remoteUserProfilePic = remember {
@@ -121,12 +114,8 @@ private fun MessagesScreen(
                 Spacer(modifier = Modifier.width(SpaceMedium))
                 Text(
                     text = remoteUserName,
-                    style = MaterialTheme.typography.body1,
-                    modifier = Modifier.clickable {
-                        onNavigate(
-                            Screens.ProfileScreen.createRoute(userId = remoteUserId)
-                        )
-                    })
+                    style = MaterialTheme.typography.body1
+                )
             },
             showBackButton = true,
             onBack = onNavUp

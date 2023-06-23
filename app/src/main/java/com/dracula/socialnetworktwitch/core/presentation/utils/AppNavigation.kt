@@ -117,11 +117,10 @@ fun AppNavigation(
             val remoteUserName =
                 it.arguments?.getString(Constants.NavArguments.NAV_REMOTE_USER_NAME).orEmpty()
             MessageRoute(
-                encodedRemoteUserProfilePic = remoteUserProfilePic,
-                onNavUp = navController::navigateUp,
                 remoteUserId = remoteUserId,
                 remoteUsername = remoteUserName,
-                onNavigate = navController::navigate,
+                encodedRemoteUserProfilePic = remoteUserProfilePic,
+                onNavUp = navController::navigateUp,
             )
         }
 
