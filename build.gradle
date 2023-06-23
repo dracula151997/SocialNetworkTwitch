@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 buildscript {
     ext {
         compose_ui_version = '1.4.3'
@@ -12,23 +10,4 @@ plugins {
     id 'com.google.dagger.hilt.android' version '2.44' apply false
     id 'org.jetbrains.kotlin.kapt' version '1.8.10' apply false
 
-}
-
-subprojects {
-    tasks.withType(KotlinCompile).configureEach {
-        kotlinOptions {
-            if (project.findProperty("myapp.enableComposeCompilerMetrics") == "true") {
-                freeCompilerArgs += [
-                        "-P",
-                        "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" +
-                                project.buildDir.absolutePath + "/compose_metrics"
-                ]
-                freeCompilerArgs += [
-                        "-P",
-                        "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" +
-                                project.buildDir.absolutePath + "/compose_metrics"
-                ]
-            }
-        }
-    }
 }
